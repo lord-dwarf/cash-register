@@ -3,6 +3,7 @@ package com.polinakulyk.cashregister.config;
 import com.polinakulyk.cashregister.controller.filter.JwtAuthFilter;
 import com.polinakulyk.cashregister.service.api.UserService;
 import com.polinakulyk.cashregister.util.CashRegisterSecurityUtil;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -56,6 +57,7 @@ public class CashRegisterWebSecurityConfig extends WebSecurityConfigurerAdapter 
                 .authorizeRequests()
                     .antMatchers("/api/auth/**").permitAll()
                     .anyRequest().authenticated();
+
         http.addFilterBefore(
                 authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
     }

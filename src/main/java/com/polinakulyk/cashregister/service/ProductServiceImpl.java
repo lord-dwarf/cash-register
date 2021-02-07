@@ -13,6 +13,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.quote;
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Service
@@ -24,6 +25,17 @@ public class ProductServiceImpl implements ProductService {
 
     public ProductServiceImpl(ProductRepository productRepository) {
         this.productRepository = productRepository;
+    }
+
+    @Override
+    @Transactional
+    public Product create(Product product) {
+        if (null != product.getId()) {
+            throw new CashRegisterException(
+                    BAD_REQUEST,
+                    quote("Product id must not be set", product.getId()));
+        }
+        return productRepository.save(product);
     }
 
     @Override

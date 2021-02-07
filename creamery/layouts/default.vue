@@ -8,18 +8,77 @@
       app
     >
       <v-list>
-        <v-list-item
-          v-for="(item, i) in items"
-          :key="i"
-          :to="item.to"
-          router
-          exact
-        >
+        <v-list-item to="/" router exact>
           <v-list-item-action>
-            <v-icon>{{ item.icon }}</v-icon>
+            <v-icon>mdi-apps</v-icon>
           </v-list-item-action>
           <v-list-item-content>
-            <v-list-item-title v-text="item.title" />
+            <v-list-item-title v-text="'Home'" />
+          </v-list-item-content>
+        </v-list-item>
+        <v-list-item to="/products" router exact>
+          <v-list-item-action>
+            <v-icon>mdi-apps</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title v-text="'Products'" />
+          </v-list-item-content>
+        </v-list-item>
+        <v-list-item
+          to="/products/one"
+          router
+          exact
+          v-if="this.$store.state.productsOne.visible"
+        >
+          <v-list-item-action>
+            <v-icon>mdi-apps</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title
+              v-text="this.$store.state.productsOne.navMenuTitle"
+            />
+          </v-list-item-content>
+        </v-list-item>
+        <v-list-item to="/receipts" router exact>
+          <v-list-item-action>
+            <v-icon>mdi-apps</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title v-text="'Receipts'" />
+          </v-list-item-content>
+        </v-list-item>
+        <v-list-item to="/reports" router exact>
+          <v-list-item-action>
+            <v-icon>mdi-apps</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title v-text="'Reports'" />
+          </v-list-item-content>
+        </v-list-item>
+        <v-list-item
+          to="/login"
+          router
+          exact
+          v-if="this.$store.state.userRole === null"
+        >
+          <v-list-item-action>
+            <v-icon>mdi-apps</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title v-text="'Login'" />
+          </v-list-item-content>
+        </v-list-item>
+        <v-list-item
+          to="/logout"
+          router
+          exact
+          v-if="this.$store.state.userRole !== null"
+        >
+          <v-list-item-action>
+            <v-icon>mdi-apps</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title v-text="'Logout'" />
           </v-list-item-content>
         </v-list-item>
       </v-list>
@@ -29,34 +88,21 @@
       <v-btn icon @click.stop="miniVariant = !miniVariant">
         <v-icon>mdi-{{ `chevron-${miniVariant ? 'right' : 'left'}` }}</v-icon>
       </v-btn>
-      <v-btn icon @click.stop="clipped = !clipped">
-        <v-icon>mdi-application</v-icon>
-      </v-btn>
-      <v-btn icon @click.stop="fixed = !fixed">
-        <v-icon>mdi-minus</v-icon>
-      </v-btn>
       <v-toolbar-title v-text="title" />
-      <v-spacer />
-      <v-btn icon @click.stop="rightDrawer = !rightDrawer">
-        <v-icon>mdi-menu</v-icon>
-      </v-btn>
+      <v-spacer></v-spacer>
+      <v-chip id="avatar-name" class="ma-3 pa-4" color="yellow lighten">
+        {{ getUserRoleFriendlyName() }}
+      </v-chip>
+      <v-avatar size="85">
+        <img :src="getUserRoleImage()" />
+      </v-avatar>
     </v-app-bar>
     <v-main>
       <v-container>
         <nuxt />
       </v-container>
     </v-main>
-    <v-navigation-drawer v-model="rightDrawer" :right="right" temporary fixed>
-      <v-list>
-        <v-list-item @click.native="right = !right">
-          <v-list-item-action>
-            <v-icon light> mdi-repeat </v-icon>
-          </v-list-item-action>
-          <v-list-item-title>Switch drawer (click me)</v-list-item-title>
-        </v-list-item>
-      </v-list>
-    </v-navigation-drawer>
-    <v-footer :absolute="!fixed" app>
+    <v-footer :absolute="false" app>
       <span>&copy; {{ new Date().getFullYear() }}</span>
     </v-footer>
   </v-app>
@@ -68,24 +114,44 @@ export default {
     return {
       clipped: false,
       drawer: false,
-      fixed: false,
-      items: [
-        {
-          icon: 'mdi-apps',
-          title: 'Welcome',
-          to: '/',
-        },
-        {
-          icon: 'mdi-chart-bubble',
-          title: 'Inspire',
-          to: '/inspire',
-        },
-      ],
       miniVariant: false,
-      right: true,
-      rightDrawer: false,
-      title: 'Vuetify.js',
+      title: 'Creamery',
     }
+  },
+  methods: {
+    getUserRoleImage() {
+      switch (this.$store.state.userRole) {
+        case 'teller':
+          return this.getStaticRootUrl() + '/avatar-teller.png'
+        case 'sr_teller':
+          return this.getStaticRootUrl() + '/avatar-sr_teller.png'
+        case 'merch':
+          return this.getStaticRootUrl() + '/avatar-merch.png'
+        default:
+          return this.getStaticRootUrl() + '/avatar-guest.png'
+      }
+    },
+    getStaticRootUrl() {
+      return window.location.protocol + '//' + window.location.host
+    },
+    getUserRoleFriendlyName() {
+      switch (this.$store.state.userRole) {
+        case 'teller':
+          return 'Teller'
+        case 'sr_teller':
+          return 'Sr. Teller'
+        case 'merch':
+          return 'Merchandiser'
+        default:
+          return 'Guest'
+      }
+    },
   },
 }
 </script>
+<style>
+#avatar-name {
+  color: black;
+  font-size: large;
+}
+</style>

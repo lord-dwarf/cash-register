@@ -2,6 +2,7 @@ package com.polinakulyk.cashregister.service;
 
 import com.polinakulyk.cashregister.controller.dto.UpdateReceiptItemDto;
 import com.polinakulyk.cashregister.db.entity.Product;
+import com.polinakulyk.cashregister.db.entity.ProductAmountUnit;
 import com.polinakulyk.cashregister.db.entity.Receipt;
 import com.polinakulyk.cashregister.db.entity.ReceiptItem;
 import com.polinakulyk.cashregister.db.repository.ProductRepository;
@@ -19,6 +20,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static com.polinakulyk.cashregister.db.entity.ProductAmountUnit.*;
+import static com.polinakulyk.cashregister.db.entity.ProductAmountUnit.Value.*;
+import static com.polinakulyk.cashregister.db.entity.ProductAmountUnit.Value.GRAM;
+import static com.polinakulyk.cashregister.db.entity.ProductAmountUnit.Value.GRAM;
+import static com.polinakulyk.cashregister.db.entity.ProductAmountUnit.Value.GRAM;
+import static com.polinakulyk.cashregister.db.entity.ProductAmountUnit.Value.UNIT;
+import static com.polinakulyk.cashregister.db.entity.ProductAmountUnit.Value.UNIT;
+import static com.polinakulyk.cashregister.db.entity.ProductAmountUnit.Value.UNIT;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.now;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.quote;
 
@@ -192,11 +201,11 @@ public class ReceiptServiceImpl implements ReceiptService {
         // increase receipt price total
         int priceTotalIncrease;
         switch (receiptItem.getAmountUnit()) {
-            case "GRAM": {
+            case GRAM: {
                 priceTotalIncrease = receiptItemAmountAdded * receiptItem.getPrice() / 1000;
                 break;
             }
-            case "UNIT": {
+            case UNIT: {
                 priceTotalIncrease = receiptItemAmountAdded * receiptItem.getPrice();
                 break;
             }
@@ -238,11 +247,11 @@ public class ReceiptServiceImpl implements ReceiptService {
             // decrease receipt price total
             int priceTotalDecrease;
             switch (receiptItem.getAmountUnit()) {
-                case "GRAM": {
+                case GRAM: {
                     priceTotalDecrease = receiptItem.getAmount() * receiptItem.getPrice() / 1000;
                     break;
                 }
-                case "UNIT": {
+                case UNIT: {
                     priceTotalDecrease = receiptItem.getAmount() * receiptItem.getPrice();
                     break;
                 }
@@ -306,11 +315,11 @@ public class ReceiptServiceImpl implements ReceiptService {
         // change receipt price total
         int priceTotalDiff;
         switch (receiptItem.getAmountUnit()) {
-            case "GRAM": {
+            case GRAM: {
                 priceTotalDiff = amountDiff * receiptItem.getPrice() / 1000;
                 break;
             }
-            case "UNIT": {
+            case UNIT: {
                 priceTotalDiff = amountDiff * receiptItem.getPrice();
                 break;
             }

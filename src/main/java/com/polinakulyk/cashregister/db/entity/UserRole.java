@@ -1,14 +1,14 @@
 package com.polinakulyk.cashregister.db.entity;
 
-public enum Role {
+public enum UserRole {
 
-    MERCH(Code.MERCH),
-    TELLER(Code.TELLER),
-    SR_TELLER(Code.SR_TELLER);
+    MERCH(Value.MERCH),
+    TELLER(Value.TELLER),
+    SR_TELLER(Value.SR_TELLER);
 
     private final String value;
 
-    Role(String value) {
+    UserRole(String value) {
         this.value = value;
     }
 
@@ -16,13 +16,13 @@ public enum Role {
         return value;
     }
 
-    public static class Code {
+    public static class Value {
 
         public static final String MERCH = "merch";
         public static final String TELLER = "teller";
         public static final String SR_TELLER = "sr_teller";
 
-        private Code() {
+        private Value() {
             throw new UnsupportedOperationException();
         }
     }

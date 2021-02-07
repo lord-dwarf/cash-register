@@ -37,6 +37,7 @@ public class CashRegisterSecurityUtil {
     private static final String JWT_CLAIM_ROLE = "role";
     private static final String JWT_AUTH_HEADER = "Authorization";
     private static final String JWT_BEARER_PREFIX = "Bearer ";
+    private static final String SPRING_ROLE_PREFIX = "ROLE_";
 
     @Value("${cashregister.jwt.secret}")
     private String jwtSecret;
@@ -105,10 +106,11 @@ public class CashRegisterSecurityUtil {
     }
 
     public List<GrantedAuthority> getAuthRolesFromUserRole(String userRole) {
-        return List.of(new SimpleGrantedAuthority("ROLE_" + userRole));
+        return List.of(new SimpleGrantedAuthority(SPRING_ROLE_PREFIX + userRole));
     }
 
     public String getUserRoleFromAuthRoles(Collection<? extends GrantedAuthority> authRoles) {
-        return new ArrayList<>(authRoles).get(0).getAuthority();
+        return new ArrayList<>(authRoles).get(0)
+                .getAuthority().replaceFirst(SPRING_ROLE_PREFIX, "");
     }
 }

@@ -2,7 +2,6 @@ package com.polinakulyk.cashregister.controller;
 
 import com.polinakulyk.cashregister.controller.dto.FindProductsDto;
 import com.polinakulyk.cashregister.db.entity.Product;
-import com.polinakulyk.cashregister.db.entity.Role;
 import com.polinakulyk.cashregister.db.repository.ProductRepository;
 import com.polinakulyk.cashregister.exception.CashRegisterException;
 import com.polinakulyk.cashregister.service.api.ProductService;
@@ -10,8 +9,8 @@ import com.polinakulyk.cashregister.util.CashRegisterUtil;
 import java.util.List;
 import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletResponse;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,9 +19,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import static com.polinakulyk.cashregister.db.entity.Role.Code.MERCH;
-import static com.polinakulyk.cashregister.db.entity.Role.Code.SR_TELLER;
-import static com.polinakulyk.cashregister.db.entity.Role.Code.TELLER;
+import static com.polinakulyk.cashregister.db.entity.UserRole.Value.MERCH;
+import static com.polinakulyk.cashregister.db.entity.UserRole.Value.SR_TELLER;
+import static com.polinakulyk.cashregister.db.entity.UserRole.Value.TELLER;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.quote;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.strip;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -31,6 +30,8 @@ import static org.springframework.http.HttpStatus.NO_CONTENT;
 
 @Controller
 @RequestMapping("/api/products")
+// TODO configure CORS
+@CrossOrigin
 public class ProductController {
     private final ProductService productService;
     private final ProductRepository productRepository;
@@ -51,12 +52,7 @@ public class ProductController {
     @PostMapping
     @RolesAllowed({MERCH})
     public @ResponseBody Product createProduct(@RequestBody Product product) {
-        if (null != product.getId()) {
-            throw new CashRegisterException(
-                    BAD_REQUEST,
-                    quote("Product id must not be set", product.getId()));
-        }
-        return productRepository.save(product);
+        return productService.create(product);
     }
 
     @GetMapping("/{id}")

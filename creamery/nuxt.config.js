@@ -38,12 +38,15 @@ export default {
 
   // Modules: https://go.nuxtjs.dev/config-modules
   modules: [
-    // https://go.nuxtjs.dev/axios
-    '@nuxtjs/axios',
+    '@nuxt/http'
   ],
 
-  // Axios module configuration: https://go.nuxtjs.dev/config-axios
-  axios: {},
+  // Http module configuration: https://http.nuxtjs.org/options
+  // TODO base URL must be dependent on env
+  http: {
+    browserBaseURL: 'http://localhost:8080/api',
+    clientTimeout: 5000,
+  },
 
   // Vuetify module configuration: https://go.nuxtjs.dev/config-vuetify
   vuetify: {

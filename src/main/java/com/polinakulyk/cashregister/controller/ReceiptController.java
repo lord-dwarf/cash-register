@@ -1,22 +1,18 @@
 package com.polinakulyk.cashregister.controller;
 
 import com.polinakulyk.cashregister.controller.dto.UpdateReceiptItemDto;
-import com.polinakulyk.cashregister.db.entity.Product;
 import com.polinakulyk.cashregister.db.entity.Receipt;
 import com.polinakulyk.cashregister.db.entity.ReceiptItem;
-import com.polinakulyk.cashregister.db.repository.ProductRepository;
 import com.polinakulyk.cashregister.db.repository.ReceiptRepository;
 import com.polinakulyk.cashregister.exception.CashRegisterException;
-import com.polinakulyk.cashregister.service.api.ProductService;
 import com.polinakulyk.cashregister.service.api.ReceiptService;
 import com.polinakulyk.cashregister.util.CashRegisterUtil;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -26,17 +22,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import static com.polinakulyk.cashregister.db.entity.Role.Code.MERCH;
-import static com.polinakulyk.cashregister.db.entity.Role.Code.SR_TELLER;
-import static com.polinakulyk.cashregister.db.entity.Role.Code.TELLER;
+import static com.polinakulyk.cashregister.db.entity.UserRole.Value.SR_TELLER;
+import static com.polinakulyk.cashregister.db.entity.UserRole.Value.TELLER;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.*;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.quote;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
-import static org.springframework.http.HttpStatus.NO_CONTENT;
 
 @Controller
 @RequestMapping("/api/receipts")
+// TODO configure CORS
+@CrossOrigin
 public class ReceiptController {
     private final ReceiptRepository receiptRepository;
     private final ReceiptService receiptService;

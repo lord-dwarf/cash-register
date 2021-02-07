@@ -2,6 +2,7 @@ package com.polinakulyk.cashregister.service;
 
 import com.polinakulyk.cashregister.controller.dto.ProductSoldResponseDto;
 import com.polinakulyk.cashregister.db.entity.Product;
+import com.polinakulyk.cashregister.db.entity.ProductAmountUnit;
 import com.polinakulyk.cashregister.db.entity.Receipt;
 import com.polinakulyk.cashregister.db.entity.ReceiptItem;
 import com.polinakulyk.cashregister.db.repository.ProductRepository;
@@ -19,6 +20,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static com.polinakulyk.cashregister.db.entity.ProductAmountUnit.Value.GRAM;
+import static com.polinakulyk.cashregister.db.entity.ProductAmountUnit.Value.UNIT;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.*;
 
 @Service
@@ -67,11 +70,11 @@ public class ReportServiceImpl implements ReportService {
             for (ReceiptItem receiptItem : receipt.getItems()) {
                 int receiptItemCost;
                 switch (receiptItem.getAmountUnit()) {
-                    case "GRAM": {
+                    case GRAM: {
                         receiptItemCost = receiptItem.getAmount() * receiptItem.getPrice() / 1000;
                         break;
                     }
-                    case "UNIT": {
+                    case UNIT: {
                         receiptItemCost = receiptItem.getAmount() * receiptItem.getPrice();
                         break;
                     }

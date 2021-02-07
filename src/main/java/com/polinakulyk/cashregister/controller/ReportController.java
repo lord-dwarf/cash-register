@@ -3,23 +3,23 @@ package com.polinakulyk.cashregister.controller;
 import com.polinakulyk.cashregister.controller.dto.DateRangeDto;
 import com.polinakulyk.cashregister.controller.dto.ProductSoldResponseDto;
 import com.polinakulyk.cashregister.db.entity.Product;
-import com.polinakulyk.cashregister.db.entity.Receipt;
 import com.polinakulyk.cashregister.service.api.ReportService;
 import com.polinakulyk.cashregister.util.CashRegisterUtil;
 import java.util.List;
 import javax.annotation.security.RolesAllowed;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import static com.polinakulyk.cashregister.db.entity.Role.Code.MERCH;
-import static com.polinakulyk.cashregister.db.entity.Role.Code.SR_TELLER;
-import static com.polinakulyk.cashregister.db.entity.Role.Code.TELLER;
+import static com.polinakulyk.cashregister.db.entity.UserRole.Value.MERCH;
 
 @Controller
 @RequestMapping("/api/reports")
+// TODO configure CORS
+@CrossOrigin
 public class ReportController {
     private final ReportService reportService;
 
