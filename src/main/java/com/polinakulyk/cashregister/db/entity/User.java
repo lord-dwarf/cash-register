@@ -7,10 +7,16 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import org.hibernate.annotations.GenericGenerator;
 
+import static com.polinakulyk.cashregister.db.entity.User.*;
+
 @Entity
+@Table(name = TABLE_USERS)
 public class User {
+
+    static final String TABLE_USERS = "users";
 
     @Id
     @GeneratedValue(generator = "UUID")

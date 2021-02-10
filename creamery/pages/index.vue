@@ -1,15 +1,21 @@
 <template>
   <div>
-    <v-btn v-if="this.$store.state.userRole === 'teller'" @click="onTeller()">
+    <v-btn
+      @click="onTeller()"
+      v-if="this.$store.state.localStorage.userRole === 'teller'"
+    >
       role teller
     </v-btn>
     <v-btn
-      v-if="this.$store.state.userRole === 'sr_teller'"
+      v-if="this.$store.state.localStorage.userRole === 'sr_teller'"
       @click="onSrTeller()"
     >
       role sr_teller
     </v-btn>
-    <v-btn v-if="this.$store.state.userRole === 'merch'" @click="onMerch()">
+    <v-btn
+      @click="onMerch()"
+      v-if="this.$store.state.localStorage.userRole === 'merch'"
+    >
       role merch
     </v-btn>
   </div>

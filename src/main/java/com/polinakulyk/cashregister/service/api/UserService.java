@@ -10,4 +10,6 @@ public interface UserService extends UserDetailsService {
     Optional<User> findById(String userId);
     UserDetails loadUserByUsername(String username) throws UsernameNotFoundException;
     User create(String username, String password, String role, boolean isPasswordEncoded);
+    void createWithId(
+            String id, String username, String password, String role, boolean isPasswordEncoded);
 }

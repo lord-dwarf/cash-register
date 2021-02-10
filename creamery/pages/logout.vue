@@ -11,9 +11,10 @@ export default {
   }),
   async created() {
     await this.$http.$post('/auth/logout').finally(() => {
-      this.$http.setHeader('Authorization', null)
-      this.$store.commit('setUserRole', null)
+      this.$store.commit('localStorage/setAuthJwt', null)
+      this.$store.commit('localStorage/setUserRole', null)
       this.$router.push('/')
+      this.$store.commit('localStorage/closeProductsOne')
     })
   },
 }

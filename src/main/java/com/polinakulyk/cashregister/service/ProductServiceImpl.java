@@ -7,6 +7,7 @@ import com.polinakulyk.cashregister.exception.CashRegisterException;
 import com.polinakulyk.cashregister.service.api.ProductService;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -44,6 +45,12 @@ public class ProductServiceImpl implements ProductService {
         List<Product> products = new ArrayList<>();
         productRepository.findAll().forEach(products::add);
         return products;
+    }
+
+    @Override
+    @Transactional
+    public Optional<Product> findById(String id) {
+        return productRepository.findById(id);
     }
 
     @Override

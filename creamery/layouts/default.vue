@@ -10,15 +10,20 @@
       <v-list>
         <v-list-item to="/" router exact>
           <v-list-item-action>
-            <v-icon>mdi-apps</v-icon>
+            <v-icon>mdi-home</v-icon>
           </v-list-item-action>
           <v-list-item-content>
             <v-list-item-title v-text="'Home'" />
           </v-list-item-content>
         </v-list-item>
-        <v-list-item to="/products" router exact>
+        <v-list-item
+          to="/products"
+          router
+          exact
+          v-if="this.$store.state.localStorage.userRole !== null"
+        >
           <v-list-item-action>
-            <v-icon>mdi-apps</v-icon>
+            <v-icon>mdi-cheese</v-icon>
           </v-list-item-action>
           <v-list-item-content>
             <v-list-item-title v-text="'Products'" />
@@ -28,28 +33,61 @@
           to="/products/one"
           router
           exact
-          v-if="this.$store.state.productsOne.visible"
+          v-if="isProductsOneVisible()"
         >
           <v-list-item-action>
-            <v-icon>mdi-apps</v-icon>
+            <v-icon>mdi-cheese</v-icon>
           </v-list-item-action>
           <v-list-item-content>
             <v-list-item-title
-              v-text="this.$store.state.productsOne.navMenuTitle"
+              v-text="
+                this.$store.state.localStorage.productsOne.mode + ' Product'
+              "
             />
           </v-list-item-content>
         </v-list-item>
-        <v-list-item to="/receipts" router exact>
+        <v-list-item
+          to="/receipts"
+          router
+          exact
+          v-if="
+            ['teller', 'sr_teller'].indexOf(
+              this.$store.state.localStorage.userRole
+            ) > -1
+          "
+        >
           <v-list-item-action>
-            <v-icon>mdi-apps</v-icon>
+            <v-icon>mdi-paper-roll-outline</v-icon>
           </v-list-item-action>
           <v-list-item-content>
             <v-list-item-title v-text="'Receipts'" />
           </v-list-item-content>
         </v-list-item>
-        <v-list-item to="/reports" router exact>
+        <v-list-item
+          to="/receipts/one"
+          router
+          exact
+          v-if="isReceiptsOneVisible()"
+        >
           <v-list-item-action>
-            <v-icon>mdi-apps</v-icon>
+            <v-icon>mdi-paper-roll-outline</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title
+              v-text="
+                this.$store.state.localStorage.receiptsOne.mode + ' Receipt'
+              "
+            />
+          </v-list-item-content>
+        </v-list-item>
+        <v-list-item
+          to="/reports"
+          router
+          exact
+          v-if="this.$store.state.localStorage.userRole === 'merch'"
+        >
+          <v-list-item-action>
+            <v-icon>mdi-file-pdf-box-outline</v-icon>
           </v-list-item-action>
           <v-list-item-content>
             <v-list-item-title v-text="'Reports'" />
@@ -59,10 +97,10 @@
           to="/login"
           router
           exact
-          v-if="this.$store.state.userRole === null"
+          v-if="this.$store.state.localStorage.userRole === null"
         >
           <v-list-item-action>
-            <v-icon>mdi-apps</v-icon>
+            <v-icon>mdi-login</v-icon>
           </v-list-item-action>
           <v-list-item-content>
             <v-list-item-title v-text="'Login'" />
@@ -72,10 +110,10 @@
           to="/logout"
           router
           exact
-          v-if="this.$store.state.userRole !== null"
+          v-if="this.$store.state.localStorage.userRole !== null"
         >
           <v-list-item-action>
-            <v-icon>mdi-apps</v-icon>
+            <v-icon>mdi-logout</v-icon>
           </v-list-item-action>
           <v-list-item-content>
             <v-list-item-title v-text="'Logout'" />
@@ -120,7 +158,7 @@ export default {
   },
   methods: {
     getUserRoleImage() {
-      switch (this.$store.state.userRole) {
+      switch (this.$store.state.localStorage.userRole) {
         case 'teller':
           return this.getStaticRootUrl() + '/avatar-teller.png'
         case 'sr_teller':
@@ -135,7 +173,7 @@ export default {
       return window.location.protocol + '//' + window.location.host
     },
     getUserRoleFriendlyName() {
-      switch (this.$store.state.userRole) {
+      switch (this.$store.state.localStorage.userRole) {
         case 'teller':
           return 'Teller'
         case 'sr_teller':
@@ -145,6 +183,23 @@ export default {
         default:
           return 'Guest'
       }
+    },
+    isProductsOneVisible() {
+      const role = this.$store.state.localStorage.userRole
+      const mode = this.$store.state.localStorage.productsOne.mode
+      return (
+        (((role === 'teller' || role === 'sr_teller' || role === 'merch') &&
+          mode === 'VIEW') ||
+          (role === 'merch' && (mode === 'EDIT' || mode === 'ADD'))) &&
+        this.$store.state.localStorage.productsOne.visible
+      )
+    },
+    isReceiptsOneVisible() {
+      const role = this.$store.state.localStorage.userRole
+      return (
+        role === 'sr_teller' &&
+        this.$store.state.localStorage.receiptsOne.visible
+      )
     },
   },
 }

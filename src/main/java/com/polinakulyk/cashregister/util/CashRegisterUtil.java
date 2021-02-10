@@ -3,7 +3,7 @@ package com.polinakulyk.cashregister.util;
 import com.polinakulyk.cashregister.db.entity.Product;
 import com.polinakulyk.cashregister.db.entity.Receipt;
 import com.polinakulyk.cashregister.db.entity.ReceiptItem;
-import com.polinakulyk.cashregister.exception.CashRegisterException;
+import com.polinakulyk.cashregister.db.entity.User;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -13,7 +13,7 @@ import java.util.Date;
 public class CashRegisterUtil {
 
     private CashRegisterUtil() {
-        throw new CashRegisterException("Cannot instantiate");
+        throw new UnsupportedOperationException("Cannot instantiate");
     }
 
     public static String nonEmpty(String s) {
@@ -41,14 +41,16 @@ public class CashRegisterUtil {
         return date.toInstant().atZone(ZoneId.of("Z")).toLocalDateTime();
     }
 
+    // TODO replace all strip methods usage, with explicit loading of related entities
     public static Product strip(Product product) {
-        return product.setItems(null);
+        return product.setReceiptItems(null);
     }
 
     public static Receipt strip(Receipt receipt) {
-        for (ReceiptItem receiptItem : receipt.getItems()) {
+        for (ReceiptItem receiptItem : receipt.getReceiptItems()) {
             strip(receiptItem);
         }
+        strip(receipt.getUser());
         return receipt;
     }
 
@@ -56,6 +58,10 @@ public class CashRegisterUtil {
         receiptItem.setReceipt(null);
         strip(receiptItem.getProduct());
         return receiptItem;
+    }
+
+    public static User strip(User user) {
+        return user.setReceipts(null);
     }
 
 }

@@ -23,7 +23,7 @@ public class Product {
     private String amountUnit;
     private int amountAvailable;
     @OneToMany(mappedBy = "product")
-    private Set<ReceiptItem> items = new HashSet<>();
+    private Set<ReceiptItem> receiptItems = new HashSet<>();
 
     public String getId() {
         return id;
@@ -97,12 +97,12 @@ public class Product {
         return this;
     }
 
-    public Set<ReceiptItem> getItems() {
-        return items;
+    public Set<ReceiptItem> getReceiptItems() {
+        return receiptItems;
     }
 
-    public Product setItems(Set<ReceiptItem> items) {
-        this.items = items;
+    public Product setReceiptItems(Set<ReceiptItem> items) {
+        this.receiptItems = items;
         return this;
     }
 
@@ -132,7 +132,7 @@ public class Product {
                 .add("price=" + price)
                 .add("amountUnit=" + amountUnit)
                 .add("amountAvailable=" + amountAvailable)
-                .add("items=" + items)
+                .add("receiptItems=" + receiptItems)
                 .toString();
     }
 }

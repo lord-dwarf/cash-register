@@ -1,0 +1,111 @@
+export const state = () => ({
+  authJwt: null,
+  userRole: null,
+  productsOne: {
+    visible: false,
+    initialized: false,
+    mode: null,
+    product: null,
+  },
+  receiptsOne: {
+    visible: false,
+    initialized: false,
+    mode: null,
+    receiptId: null,
+  },
+})
+
+export const mutations = {
+  // Auth state
+  setAuthJwt(state, authJwt) {
+    state.authJwt = authJwt
+  },
+  setUserRole(state, userRole) {
+    state.userRole = userRole
+  },
+
+  // ProductsOne page state
+  viewProductsOne(state, product) {
+    state.productsOne.visible = true
+    state.productsOne.initialized = false
+    state.productsOne.mode = 'VIEW'
+    state.productsOne.product = product
+  },
+  editProductsOne(state, product) {
+    state.productsOne.visible = true
+    state.productsOne.initialized = false
+    state.productsOne.mode = 'EDIT'
+    state.productsOne.product = product
+  },
+  addProductsOne(state) {
+    state.productsOne.visible = true
+    state.productsOne.initialized = false
+    state.productsOne.mode = 'ADD'
+    state.productsOne.product = {
+      id: null,
+      code: null,
+      category: null,
+      name: null,
+      details: null,
+      price: null,
+      amountAvailable: null,
+      amountUnit: null,
+    }
+  },
+  closeProductsOne(state) {
+    state.productsOne.visible = false
+    state.productsOne.initialized = false
+    state.productsOne.mode = null
+    state.productsOne.product = null
+  },
+  setProductsOneInitialized(state) {
+    state.productsOne.initialized = true
+  },
+  setProductsOneCode(state, productCode) {
+    state.productsOne.product.code = productCode
+  },
+  setProductsOneCategory(state, productCategory) {
+    state.productsOne.product.category = productCategory
+  },
+  setProductsOneName(state, productName) {
+    state.productsOne.product.name = productName
+  },
+  setProductsOneDetails(state, productDetails) {
+    state.productsOne.product.details = productDetails
+  },
+  setProductsOnePrice(state, productPrice) {
+    state.productsOne.product.price = productPrice
+  },
+  setProductsOneAmountAvailable(state, productAmountAvailable) {
+    state.productsOne.product.amountAvailable = productAmountAvailable
+  },
+  setProductsOneAmountUnit(state, productAmountUnit) {
+    state.productsOne.product.amountUnit = productAmountUnit
+  },
+
+  // ReceiptsOne page state
+  viewReceiptsOne(state, receiptId) {
+    state.receiptsOne.visible = true
+    state.receiptsOne.initialized = false
+    state.receiptsOne.mode = 'VIEW'
+    state.receiptsOne.receiptId = receiptId
+  },
+  editReceiptsOne(state, receiptId) {
+    state.receiptsOne.visible = true
+    state.receiptsOne.initialized = false
+    state.receiptsOne.mode = 'EDIT'
+    state.receiptsOne.receiptId = receiptId
+  },
+  newReceiptsOne(state) {
+    state.receiptsOne.visible = true
+    state.receiptsOne.initialized = false
+    state.receiptsOne.mode = 'NEW'
+    state.receiptsOne.receiptId = null
+  },
+  closeReceiptsOne(state) {
+    state.receiptsOne.visible = false
+    state.receiptsOne.initialized = false
+    state.receiptsOne.mode = null
+    state.receiptsOne.receiptId = null
+  },
+}

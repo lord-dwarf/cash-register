@@ -23,7 +23,7 @@ public class Receipt {
     private String status;
     private int sumTotal;
     @OneToMany(mappedBy = "receipt", cascade = CascadeType.ALL)
-    private List<ReceiptItem> items = new ArrayList<>();
+    private List<ReceiptItem> receiptItems = new ArrayList<>();
     @ManyToOne
     private User user;
 
@@ -72,12 +72,12 @@ public class Receipt {
         return this;
     }
 
-    public List<ReceiptItem> getItems() {
-        return items;
+    public List<ReceiptItem> getReceiptItems() {
+        return receiptItems;
     }
 
-    public Receipt setItems(List<ReceiptItem> items) {
-        this.items = items;
+    public Receipt setReceiptItems(List<ReceiptItem> items) {
+        this.receiptItems = items;
         return this;
     }
 
@@ -114,7 +114,7 @@ public class Receipt {
                 .add("checkoutTime=" + checkoutTime)
                 .add("status='" + status + "'")
                 .add("sumTotal=" + sumTotal)
-                .add("items=" + items)
+                .add("receiptItems=" + receiptItems)
                 .add("user.id=" + user.getId())
                 .toString();
     }

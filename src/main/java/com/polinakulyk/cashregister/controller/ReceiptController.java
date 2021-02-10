@@ -5,6 +5,7 @@ import com.polinakulyk.cashregister.db.entity.Receipt;
 import com.polinakulyk.cashregister.db.entity.ReceiptItem;
 import com.polinakulyk.cashregister.db.repository.ReceiptRepository;
 import com.polinakulyk.cashregister.exception.CashRegisterException;
+import com.polinakulyk.cashregister.security.api.AuthHelper;
 import com.polinakulyk.cashregister.service.api.ReceiptService;
 import com.polinakulyk.cashregister.util.CashRegisterUtil;
 import java.util.List;
@@ -34,12 +35,12 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 // TODO configure CORS
 @CrossOrigin
 public class ReceiptController {
-    private final ReceiptRepository receiptRepository;
     private final ReceiptService receiptService;
+    private final AuthHelper authHelper;
 
-    public ReceiptController(ReceiptRepository receiptRepository, ReceiptService receiptService) {
-        this.receiptRepository = receiptRepository;
+    public ReceiptController(ReceiptService receiptService, AuthHelper authHelper) {
         this.receiptService = receiptService;
+        this.authHelper = authHelper;
     }
 
     @GetMapping
@@ -56,13 +57,14 @@ public class ReceiptController {
         if (!emptyRequestBody.isEmpty()) {
             throw new CashRegisterException(BAD_REQUEST, "Request body must be empty");
         }
-        return receiptService.createReceipt();
+        String userId = authHelper.getAuthentication().getCredentials().toString();
+        return receiptService.createReceipt(userId);
     }
 
     @GetMapping("/{id}")
     @RolesAllowed({TELLER, SR_TELLER})
     public @ResponseBody Receipt getReceipt(@PathVariable String id) {
-        return strip(receiptRepository.findById(id).orElseThrow(() ->
+        return strip(receiptService.findById(id).orElseThrow(() ->
                 new CashRegisterException(NOT_FOUND, quote("Receipt does not exist", id))));
     }
 

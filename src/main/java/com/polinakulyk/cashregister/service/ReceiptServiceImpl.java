@@ -2,16 +2,16 @@ package com.polinakulyk.cashregister.service;
 
 import com.polinakulyk.cashregister.controller.dto.UpdateReceiptItemDto;
 import com.polinakulyk.cashregister.db.entity.Product;
-import com.polinakulyk.cashregister.db.entity.ProductAmountUnit;
 import com.polinakulyk.cashregister.db.entity.Receipt;
 import com.polinakulyk.cashregister.db.entity.ReceiptItem;
-import com.polinakulyk.cashregister.db.repository.ProductRepository;
+import com.polinakulyk.cashregister.db.entity.User;
 import com.polinakulyk.cashregister.db.repository.ReceiptItemRepository;
 import com.polinakulyk.cashregister.db.repository.ReceiptRepository;
 import com.polinakulyk.cashregister.exception.CashRegisterException;
+import com.polinakulyk.cashregister.security.api.AuthHelper;
+import com.polinakulyk.cashregister.service.api.ProductService;
 import com.polinakulyk.cashregister.service.api.ReceiptService;
-import java.time.Clock;
-import java.time.LocalDateTime;
+import com.polinakulyk.cashregister.service.api.UserService;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -20,14 +20,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.polinakulyk.cashregister.db.entity.ProductAmountUnit.*;
-import static com.polinakulyk.cashregister.db.entity.ProductAmountUnit.Value.*;
-import static com.polinakulyk.cashregister.db.entity.ProductAmountUnit.Value.GRAM;
-import static com.polinakulyk.cashregister.db.entity.ProductAmountUnit.Value.GRAM;
-import static com.polinakulyk.cashregister.db.entity.ProductAmountUnit.Value.GRAM;
-import static com.polinakulyk.cashregister.db.entity.ProductAmountUnit.Value.UNIT;
-import static com.polinakulyk.cashregister.db.entity.ProductAmountUnit.Value.UNIT;
-import static com.polinakulyk.cashregister.db.entity.ProductAmountUnit.Value.UNIT;
+import static com.polinakulyk.cashregister.service.ServiceHelper.calcCost;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.now;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.quote;
 
@@ -35,16 +28,22 @@ import static com.polinakulyk.cashregister.util.CashRegisterUtil.quote;
 public class ReceiptServiceImpl implements ReceiptService {
     private final ReceiptRepository receiptRepository;
     private final ReceiptItemRepository receiptItemRepository;
-    private final ProductRepository productRepository;
+    private final ProductService productService;
+    private final AuthHelper authHelper;
+    private final UserService userService;
 
     public ReceiptServiceImpl(
             ReceiptRepository receiptRepository,
             ReceiptItemRepository receiptItemRepository,
-            ProductRepository productRepository
+            ProductService productService,
+            AuthHelper authHelper,
+            UserService userService
     ) {
         this.receiptRepository = receiptRepository;
         this.receiptItemRepository = receiptItemRepository;
-        this.productRepository = productRepository;
+        this.productService = productService;
+        this.authHelper = authHelper;
+        this.userService = userService;
     }
 
     @Override
@@ -57,10 +56,20 @@ public class ReceiptServiceImpl implements ReceiptService {
 
     @Override
     @Transactional
-    public Receipt createReceipt() {
-        Receipt receipt = new Receipt();
-        receipt.setStatus("CREATED");
-        receipt.setCreatedTime(now());
+    public Optional<Receipt> findById(String id) {
+        return receiptRepository.findById(id);
+    }
+
+    @Override
+    @Transactional
+    public Receipt createReceipt(String userId) {
+        User user = userService.findById(userId).orElseThrow(() ->
+                new CashRegisterException(
+                        HttpStatus.FORBIDDEN, quote("User not found", userId)));
+        Receipt receipt = new Receipt()
+                .setStatus("CREATED")
+                .setCreatedTime(now())
+                .setUser(user);
         return receiptRepository.save(receipt);
     }
 
@@ -87,7 +96,7 @@ public class ReceiptServiceImpl implements ReceiptService {
         receipt.setCheckoutTime(now());
 
         // decrease amount available for products in receipt
-        for (ReceiptItem receiptItem : receipt.getItems()) {
+        for (ReceiptItem receiptItem : receipt.getReceiptItems()) {
 
             Product receiptItemProduct = receiptItem.getProduct();
             int productAmountAvailable = receiptItemProduct.getAmountAvailable();
@@ -101,7 +110,7 @@ public class ReceiptServiceImpl implements ReceiptService {
 
             // decrease amount available for product
             receiptItemProduct.setAmountAvailable(productAmountAvailable - receiptItem.getAmount());
-            productRepository.save(receiptItemProduct);
+            productService.update(receiptItemProduct);
         }
 
         return receiptRepository.save(receipt);
@@ -127,13 +136,13 @@ public class ReceiptServiceImpl implements ReceiptService {
         receipt.setCheckoutTime(now());
 
         // increase amount available for products in receipt
-        for (ReceiptItem receiptItem : receipt.getItems()) {
+        for (ReceiptItem receiptItem : receipt.getReceiptItems()) {
 
             // increase amount available for product
             Product receiptItemProduct = receiptItem.getProduct();
             receiptItemProduct.setAmountAvailable(
                     receiptItemProduct.getAmountAvailable() + receiptItem.getAmount());
-            productRepository.save(receiptItemProduct);
+            productService.update(receiptItemProduct);
         }
 
         return receiptRepository.save(receipt);
@@ -151,7 +160,7 @@ public class ReceiptServiceImpl implements ReceiptService {
                     quote("Receipt not found", receiptId));
         }
         Receipt receipt = receiptOpt.get();
-        Optional<Product> productOpt = productRepository.findById(receiptItem.getProduct().getId());
+        Optional<Product> productOpt = productService.findById(receiptItem.getProduct().getId());
         if (productOpt.isEmpty()) {
             throw new CashRegisterException(
                     quote("Product not found", receiptItem.getProduct().getId()));
@@ -168,7 +177,7 @@ public class ReceiptServiceImpl implements ReceiptService {
         int receiptItemAmountAdded = receiptItem.getAmount();
 
         // find an existing receipt item
-        Optional<ReceiptItem> existingReceiptItemOpt = receipt.getItems().stream()
+        Optional<ReceiptItem> existingReceiptItemOpt = receipt.getReceiptItems().stream()
                 .filter((existingReceiptItem) ->
                         product.getId().equals(existingReceiptItem.getProduct().getId())
                 ).findFirst();
@@ -183,7 +192,7 @@ public class ReceiptServiceImpl implements ReceiptService {
                     .setName(product.getName())
                     .setAmountUnit(product.getAmountUnit())
                     .setPrice(product.getPrice());
-            receipt.getItems().add(receiptItem);
+            receipt.getReceiptItems().add(receiptItem);
         } else {
 
             // init via merging into existing receipt item
@@ -199,20 +208,8 @@ public class ReceiptServiceImpl implements ReceiptService {
         }
 
         // increase receipt price total
-        int priceTotalIncrease;
-        switch (receiptItem.getAmountUnit()) {
-            case GRAM: {
-                priceTotalIncrease = receiptItemAmountAdded * receiptItem.getPrice() / 1000;
-                break;
-            }
-            case UNIT: {
-                priceTotalIncrease = receiptItemAmountAdded * receiptItem.getPrice();
-                break;
-            }
-            default: throw new CashRegisterException(quote(
-                    "Receipt item amount unit not supported",
-                    receiptItem.getAmountUnit()));
-        }
+        int priceTotalIncrease = calcCost(
+                receiptItem.getPrice(), receiptItemAmountAdded, receiptItem.getAmountUnit());
         receipt.setSumTotal(receipt.getSumTotal() + priceTotalIncrease);
 
         // save receipt and associated receipt item
@@ -238,33 +235,21 @@ public class ReceiptServiceImpl implements ReceiptService {
         }
 
         // find receipt item
-        Optional<ReceiptItem> receiptItemOpt = receipt.getItems().stream().filter((receiptItem) ->
+        Optional<ReceiptItem> receiptItemOpt = receipt.getReceiptItems().stream().filter((receiptItem) ->
                 receiptItemId.equals(receiptItem.getId())).findFirst();
 
         if (receiptItemOpt.isPresent()) {
             ReceiptItem receiptItem = receiptItemOpt.get();
 
             // decrease receipt price total
-            int priceTotalDecrease;
-            switch (receiptItem.getAmountUnit()) {
-                case GRAM: {
-                    priceTotalDecrease = receiptItem.getAmount() * receiptItem.getPrice() / 1000;
-                    break;
-                }
-                case UNIT: {
-                    priceTotalDecrease = receiptItem.getAmount() * receiptItem.getPrice();
-                    break;
-                }
-                default: throw new CashRegisterException(quote(
-                        "Receipt item amount unit not supported",
-                        receiptItem.getAmountUnit()));
-            }
+            int priceTotalDecrease = calcCost(
+                    receiptItem.getPrice(), receiptItem.getAmount(), receiptItem.getAmountUnit());
             receipt.setSumTotal(receipt.getSumTotal() - priceTotalDecrease);
             receipt = receiptRepository.save(receipt);
 
             // delete receipt item
             receiptItemRepository.delete(receiptItem);
-            receipt.setItems(receipt.getItems().stream().filter((item) ->
+            receipt.setReceiptItems(receipt.getReceiptItems().stream().filter((item) ->
                     !receiptItemId.equals(item.getId())).collect(Collectors.toList()));
         }
         return receipt;
@@ -290,7 +275,7 @@ public class ReceiptServiceImpl implements ReceiptService {
         }
 
         // find receipt item
-        Optional<ReceiptItem> receiptItemOpt = receipt.getItems().stream().filter((receiptItem) ->
+        Optional<ReceiptItem> receiptItemOpt = receipt.getReceiptItems().stream().filter((receiptItem) ->
                 receiptItemId.equals(receiptItem.getId())).findFirst();
         if (!receiptItemOpt.isPresent()) {
             throw new CashRegisterException(
@@ -313,21 +298,8 @@ public class ReceiptServiceImpl implements ReceiptService {
         }
 
         // change receipt price total
-        int priceTotalDiff;
-        switch (receiptItem.getAmountUnit()) {
-            case GRAM: {
-                priceTotalDiff = amountDiff * receiptItem.getPrice() / 1000;
-                break;
-            }
-            case UNIT: {
-                priceTotalDiff = amountDiff * receiptItem.getPrice();
-                break;
-            }
-            default:
-                throw new CashRegisterException(quote(
-                        "Receipt item amount unit not supported",
-                        receiptItem.getAmountUnit()));
-        }
+        int priceTotalDiff = calcCost(
+                receiptItem.getPrice(), amountDiff, receiptItem.getAmountUnit());
         receipt.setSumTotal(receipt.getSumTotal() + priceTotalDiff);
 
         // modify receipt item

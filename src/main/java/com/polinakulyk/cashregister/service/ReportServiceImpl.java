@@ -2,15 +2,12 @@ package com.polinakulyk.cashregister.service;
 
 import com.polinakulyk.cashregister.controller.dto.ProductSoldResponseDto;
 import com.polinakulyk.cashregister.db.entity.Product;
-import com.polinakulyk.cashregister.db.entity.ProductAmountUnit;
 import com.polinakulyk.cashregister.db.entity.Receipt;
 import com.polinakulyk.cashregister.db.entity.ReceiptItem;
 import com.polinakulyk.cashregister.db.repository.ProductRepository;
 import com.polinakulyk.cashregister.db.repository.ReceiptRepository;
 import com.polinakulyk.cashregister.exception.CashRegisterException;
 import com.polinakulyk.cashregister.service.api.ReportService;
-import com.polinakulyk.cashregister.util.CashRegisterUtil;
-import java.time.Clock;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -20,12 +17,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import static com.polinakulyk.cashregister.db.entity.ProductAmountUnit.Value.GRAM;
-import static com.polinakulyk.cashregister.db.entity.ProductAmountUnit.Value.UNIT;
+import static com.polinakulyk.cashregister.service.ServiceHelper.calcCost;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.*;
 
 @Service
 public class ReportServiceImpl implements ReportService {
+    // we use repos, because we need an iterator that may potentially be lazy,
+    // while services provide eager lists, instead of iterator
     private final ReceiptRepository receiptRepository;
     private final ProductRepository productRepository;
 
@@ -67,21 +65,11 @@ public class ReportServiceImpl implements ReportService {
         // collect products sold, calculate total cost of each product sold
         Map<String, ProductSoldResponseDto> productIdToProductSold = new HashMap<>();
         for (Receipt receipt : receipts) {
-            for (ReceiptItem receiptItem : receipt.getItems()) {
-                int receiptItemCost;
-                switch (receiptItem.getAmountUnit()) {
-                    case GRAM: {
-                        receiptItemCost = receiptItem.getAmount() * receiptItem.getPrice() / 1000;
-                        break;
-                    }
-                    case UNIT: {
-                        receiptItemCost = receiptItem.getAmount() * receiptItem.getPrice();
-                        break;
-                    }
-                    default: throw new CashRegisterException(quote(
-                            "Receipt item amount unit not supported",
-                            receiptItem.getAmountUnit()));
-                }
+            for (ReceiptItem receiptItem : receipt.getReceiptItems()) {
+                int receiptItemCost = calcCost(
+                        receiptItem.getPrice(),
+                        receiptItem.getAmount(),
+                        receiptItem.getAmountUnit());
                 Product product = receiptItem.getProduct();
                 String productId = product.getId();
                 ProductSoldResponseDto productSold = productIdToProductSold.get(productId);
@@ -123,7 +111,7 @@ public class ReportServiceImpl implements ReportService {
         List<Product> products = new ArrayList<>();
         outer:
         for (Product product : productRepository.findAll()) {
-            for (ReceiptItem receiptItem : product.getItems()) {
+            for (ReceiptItem receiptItem : product.getReceiptItems()) {
                 Receipt receipt = receiptItem.getReceipt();
                 if ("COMPLETED".equals(receipt.getStatus())) {
                     LocalDate receiptDate = receipt.getCheckoutTime().toLocalDate();

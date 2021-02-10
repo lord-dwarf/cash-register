@@ -64,13 +64,24 @@ export default {
   }),
   methods: {
     async onLogin(event) {
-      const loginResponse = await this.$http.$post('/auth/login', {
-        login: this.$data.username,
-        password: this.$data.password,
-      })
-      this.$http.setHeader('Authorization', loginResponse.jwt)
-      this.$store.commit('setUserRole', loginResponse.user.role)
-      await this.$router.push('/')
+      await this.$http
+        .$post('/auth/login', {
+          login: this.username,
+          password: this.password,
+        })
+        .then((loginResponse) => {
+          this.$store.commit('localStorage/setAuthJwt', loginResponse.jwt)
+          this.$store.commit(
+            'localStorage/setUserRole',
+            loginResponse.user.role
+          )
+          this.$router.push('/')
+        })
+        .catch((error) => {
+          // TODO display the exact error for user, when needed
+          console.log(error)
+          this.password = null
+        })
     },
   },
 }

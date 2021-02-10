@@ -3,11 +3,9 @@ package com.polinakulyk.cashregister.controller;
 import com.polinakulyk.cashregister.controller.dto.LoginRequestDto;
 import com.polinakulyk.cashregister.controller.dto.LoginResponseDto;
 import com.polinakulyk.cashregister.db.entity.User;
+import com.polinakulyk.cashregister.security.api.AuthHelper;
 import com.polinakulyk.cashregister.service.vo.UserDetailsVo;
-import com.polinakulyk.cashregister.util.CashRegisterSecurityUtil;
-import java.net.http.HttpResponse;
 import javax.servlet.http.HttpServletResponse;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -28,12 +26,12 @@ import static org.springframework.http.HttpStatus.NO_CONTENT;
 public class AuthController {
 
     private final AuthenticationManager authenticationManager;
-    private final CashRegisterSecurityUtil securityUtil;
+    private final AuthHelper authHelper;
 
     public AuthController(
-            AuthenticationManager authenticationManager, CashRegisterSecurityUtil securityUtil) {
+            AuthenticationManager authenticationManager, AuthHelper authHelper) {
         this.authenticationManager = authenticationManager;
-        this.securityUtil = securityUtil;
+        this.authHelper = authHelper;
     }
 
     @PostMapping("/login")
@@ -43,12 +41,12 @@ public class AuthController {
         Authentication auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginRequest.getLogin(), loginRequest.getPassword()));
-        SecurityContextHolder.getContext().setAuthentication(auth);
+        authHelper.setAuthentication(auth);
 
         // TODO ensure that after auth manager really clears the password
         String userId = ((UserDetailsVo) auth.getPrincipal()).getUsername();
-        String userRole = securityUtil.getUserRoleFromAuthRoles(auth.getAuthorities());
-        String jwt = securityUtil.createJwt(userId, userRole);
+        String userRole = authHelper.getUserRoleFromAuthRoles(auth.getAuthorities());
+        String jwt = authHelper.createJwt(userId, userRole);
 
         return new LoginResponseDto()
                 .setJwt(jwt)

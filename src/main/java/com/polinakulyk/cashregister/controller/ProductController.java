@@ -34,11 +34,9 @@ import static org.springframework.http.HttpStatus.NO_CONTENT;
 @CrossOrigin
 public class ProductController {
     private final ProductService productService;
-    private final ProductRepository productRepository;
 
-    public ProductController(ProductService productService, ProductRepository productRepository) {
+    public ProductController(ProductService productService) {
         this.productService = productService;
-        this.productRepository = productRepository;
     }
 
     @GetMapping
@@ -58,7 +56,7 @@ public class ProductController {
     @GetMapping("/{id}")
     @RolesAllowed({MERCH, TELLER, SR_TELLER})
     public @ResponseBody Product getProduct(@PathVariable String id) {
-        return strip(productRepository.findById(id).orElseThrow(() ->
+        return strip(productService.findById(id).orElseThrow(() ->
                 new CashRegisterException(NOT_FOUND, quote("Product does not exist", id))));
     }
 
