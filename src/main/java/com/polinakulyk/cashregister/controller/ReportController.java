@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import static com.polinakulyk.cashregister.db.entity.UserRole.Value.MERCH;
+import static com.polinakulyk.cashregister.db.entity.UserRole.Value.SR_TELLER;
 
 @Controller
 @RequestMapping("/api/reports")
@@ -28,7 +29,7 @@ public class ReportController {
     }
 
     @GetMapping("/products-sold")
-    @RolesAllowed({MERCH})
+    @RolesAllowed({SR_TELLER})
     public @ResponseBody List<ProductSoldResponseDto> listProductsSold(
             @RequestBody DateRangeDto dateRangeDto) {
         return reportService.listProductsSold(
@@ -36,7 +37,7 @@ public class ReportController {
     }
 
     @GetMapping("/products-not-sold")
-    @RolesAllowed({MERCH})
+    @RolesAllowed({SR_TELLER})
     public @ResponseBody List<Product> listProductsNotSold(
             @RequestBody DateRangeDto dateRangeDto) {
         List<Product> products = reportService.listProductsNotSold(

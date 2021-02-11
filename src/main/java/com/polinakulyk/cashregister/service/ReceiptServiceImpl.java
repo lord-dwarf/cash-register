@@ -55,6 +55,25 @@ public class ReceiptServiceImpl implements ReceiptService {
     }
 
     @Override
+    public List<Receipt> findAllByTellerId(String tellerId) {
+
+        // validate tellerId
+        userService.findById(tellerId).orElseThrow(() ->
+                new CashRegisterException(
+                        HttpStatus.FORBIDDEN,
+                        quote("User not found", tellerId)));
+
+        // filter teller's receipts
+        List<Receipt> receipts = new ArrayList<>();
+        receiptRepository.findAll().forEach((receipt) -> {
+            if (tellerId.equals(receipt.getUser().getId())) {
+                receipts.add(receipt);
+            }
+        });
+        return receipts;
+    }
+
+    @Override
     @Transactional
     public Optional<Receipt> findById(String id) {
         return receiptRepository.findById(id);
@@ -86,6 +105,11 @@ public class ReceiptServiceImpl implements ReceiptService {
         if (!("CREATED".equals(receipt.getStatus()) || "COMPLETED".equals(receipt.getStatus()))) {
             throw new CashRegisterException(
                     quote("Receipt status transition not allowed", receipt.getStatus()));
+        }
+        // empty receipt can only be canceled
+        if (receipt.getReceiptItems().isEmpty()) {
+            throw new CashRegisterException(quote(
+                    "Receipt without items cannot be completed", receipt.getStatus()));
         }
         if ("COMPLETED".equals(receipt.getStatus())) {
             return receipt;

@@ -14,6 +14,19 @@
               <v-divider class="mx-4" inset vertical></v-divider>
               <v-spacer></v-spacer>
               <v-btn
+                id="complete-button"
+                color="green accent-4"
+                dark
+                @click="completeReceipt()"
+                v-if="
+                  status === 'CREATED' &&
+                  mode === 'EDIT' &&
+                  tableItems.length > 0
+                "
+              >
+                Complete
+              </v-btn>
+              <v-btn
                 id="cancel-button"
                 color="red darken-1"
                 dark
@@ -82,6 +95,54 @@
               <v-spacer></v-spacer>
             </v-row>
           </template>
+          <template v-slot:[`item.code`]="{ item }">
+            <div v-if="item.isSaved">{{ item.code }}</div>
+            <div v-if="!item.isSaved">
+              <v-autocomplete
+                v-model="productSelectedByCode"
+                :loading="isSearchProductByCodeLoading"
+                :items="productsByCode"
+                :search-input.sync="searchedProductCode"
+                flat
+                hide-no-data
+                hide-details
+                label="find by code"
+                solo-inverted
+                dense
+                item-text="code"
+                item-value="code"
+                return-object
+              >
+                <template slot="selection" slot-scope="data">
+                  {{ data.item.code }}
+                </template>
+              </v-autocomplete>
+            </div>
+          </template>
+          <template v-slot:[`item.name`]="{ item }">
+            <div v-if="item.isSaved">{{ item.name }}</div>
+            <div v-if="!item.isSaved">
+              <v-autocomplete
+                v-model="productSelectedByName"
+                :loading="isSearchProductByNameLoading"
+                :items="productsByName"
+                :search-input.sync="searchedProductName"
+                flat
+                hide-no-data
+                hide-details
+                label="find by name"
+                solo-inverted
+                dense
+                item-text="name"
+                item-value="name"
+                return-object
+              >
+                <template slot="selection" slot-scope="data">
+                  {{ data.item.name }}
+                </template>
+              </v-autocomplete>
+            </div>
+          </template>
           <template v-slot:[`item.actions`]="{ item }">
             <v-icon
               class="ma-1 mr-2"
@@ -92,6 +153,7 @@
                 status === 'COMPLETED' ||
                 mode === 'VIEW'
               "
+              v-if="isCancelReceiptItemActionVisible()"
             >
               mdi-trash-can-outline
             </v-icon>
@@ -103,6 +165,14 @@
           Back to Receipts
         </v-btn>
         <v-spacer></v-spacer>
+        <v-btn
+          id="add-item-button"
+          class="mr-2"
+          color="primary"
+          @click="onAddReceiptItem()"
+        >
+          Add Item
+        </v-btn>
       </v-card-actions>
     </v-card>
     <v-spacer></v-spacer>
@@ -156,18 +226,28 @@ export default {
       },
     ],
     tableItems: [],
+    // new item - search product by product code
+    searchedProductCode: null,
+    isSearchProductByCodeLoading: false,
+    productsByCode: [],
+    productSelectedByCode: {},
+    // new item - search product by name
+    searchedProductName: null,
+    isSearchProductByNameLoading: false,
+    productsByName: [],
+    productSelectedByName: {},
   }),
 
   computed: {
     // ProductsOne page properties
     receiptId: {
       get() {
-        return this.$store.state.localStorage.receiptsOne.receiptId
+        return this.$store.state.localStorage.myReceiptsOne.receiptId
       },
     },
     mode: {
       get() {
-        return this.$store.state.localStorage.receiptsOne.mode
+        return this.$store.state.localStorage.myReceiptsOne.mode
       },
     },
     // computed properties
@@ -178,7 +258,38 @@ export default {
     },
   },
 
+  watch: {
+    searchedProductCode(searchedCode) {
+      if (searchedCode) {
+        this.queryProductsByCode(searchedCode)
+      }
+    },
+    productSelectedByCode(selectedProduct) {
+      if (selectedProduct) {
+        this.productsByName = this.productsByCode
+        this.productSelectedByName = selectedProduct
+      }
+    },
+    searchedProductName(searchedName) {
+      if (searchedName) {
+        this.queryProductsByName(searchedName)
+      }
+    },
+    productSelectedByName(selectedProduct) {
+      if (selectedProduct) {
+        this.productsByCode = this.productsByName
+        this.productSelectedByCode = selectedProduct
+      }
+    },
+  },
+
   async created() {
+    if (this.mode === 'NEW') {
+      this.status = 'CREATED'
+      this.tellerName = this.$store.state.localStorage.userName
+      this.sumTotal = '0.00'
+      return
+    }
     await this.loadReceipt(this.receiptId)
   },
 
@@ -186,7 +297,7 @@ export default {
     async loadReceipt(receiptId) {
       await this.$http
         .$get('/receipts' + '/' + receiptId)
-        .then(this.applyReceipt)
+        .then(this.setReceiptDataIntoPage)
         .catch((error) => {
           // nothing - just show data table without data loaded
           // TODO notify user on errors that might require user action
@@ -240,7 +351,7 @@ export default {
         amountUnit === 'UNIT' ? amount * price : (amount * price) / 1000
       return (cost / 100).toFixed(2)
     },
-    applyReceipt(receipt) {
+    setReceiptDataIntoPage(receipt) {
       this.createdTime = this.formatDateTime(receipt.createdTime)
       this.checkoutTime = this.formatDateTime(receipt.checkoutTime)
       this.status = receipt.status
@@ -255,6 +366,7 @@ export default {
           price: this.formatPrice(ri.price, ri.amountUnit),
           cost: this.calcCost(ri.amount, ri.amountUnit, ri.price),
           actions: [],
+          isSaved: true,
         }
       })
     },
@@ -265,13 +377,23 @@ export default {
       return this.getStaticRootUrl() + '/receipt-jerry.gif'
     },
     onBack() {
-      this.$store.commit('localStorage/closeReceiptsOne')
-      this.$router.push('/receipts')
+      this.$store.commit('localStorage/closeMyReceiptsOne')
+      this.$router.push('/my-receipts')
+    },
+    async completeReceipt() {
+      await this.$http
+        .$patch('/receipts' + '/' + this.receiptId + '/complete')
+        .then(this.setReceiptDataIntoPage)
+        .catch((error) => {
+          // nothing - just show data table without data loaded
+          // TODO notify user on errors that might require user action
+          console.error(error)
+        })
     },
     async cancelReceipt() {
       await this.$http
         .$patch('/receipts' + '/' + this.receiptId + '/cancel')
-        .then(this.applyReceipt)
+        .then(this.setReceiptDataIntoPage)
         .catch((error) => {
           // nothing - just show data table without data loaded
           // TODO notify user on errors that might require user action
@@ -303,6 +425,66 @@ export default {
           console.error(error)
         })
     },
+    isCancelReceiptItemActionVisible() {
+      return this.$store.state.localStorage.userRole === 'sr_teller'
+    },
+    onAddReceiptItem() {
+      this.tableItems.push({
+        code: null,
+        name: null,
+        amount: 0,
+        price: null,
+        cost: 0,
+        actions: [],
+        isSaved: false,
+      })
+    },
+    async queryProductsByCode(searchedCode) {
+      this.isSearchProductByCodeLoading = true
+      await this.$http
+        .$post('/products/find', {
+          codeFilter: searchedCode,
+        })
+        .then((products) => {
+          this.productsByCode = products.map((p) => {
+            return {
+              code: p.code,
+              name: p.name,
+              codeAndName: p.code + ' (' + p.name + ')',
+            }
+          })
+          this.isSearchProductByCodeLoading = false
+        })
+        .catch((error) => {
+          // nothing - just show data table without data loaded
+          // TODO notify user on errors that might require user action
+          console.error(error)
+          this.isSearchProductByCodeLoading = false
+        })
+    },
+    async queryProductsByName(searchedName) {
+      this.isSearchProductByNameLoading = true
+      await this.$http
+        .$post('/products/find', {
+          nameFilter: searchedName,
+        })
+        .then((products) => {
+          this.productsByName = products.map((p) => {
+            return {
+              code: p.code,
+              name: p.name,
+              codeAndName: p.code + ' (' + p.name + ')',
+            }
+          })
+          this.isSearchProductByNameLoading = false
+        })
+        .catch((error) => {
+          // nothing - just show data table without data loaded
+          // TODO notify user on errors that might require user action
+          console.error(error)
+          this.isSearchProductByNameLoading = false
+        })
+    },
   },
 }
 </script>
@@ -317,7 +499,13 @@ export default {
 #back-button {
   width: 14em;
 }
+#complete-button {
+  width: 8em;
+}
 #cancel-button {
+  width: 8em;
+}
+#add-item-button {
   width: 8em;
 }
 </style>

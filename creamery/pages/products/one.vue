@@ -48,22 +48,18 @@
         </v-form>
       </v-card-text>
       <v-card-actions>
+        <v-btn id="back-button" class="ml-2" color="primary" @click="onBack()">
+          Back to Products
+        </v-btn>
         <v-spacer></v-spacer>
         <v-btn
           id="save-button"
+          class="mr-2"
           color="primary"
           @click="onSave()"
           v-if="isSaveButtonVisible()"
         >
           Save
-        </v-btn>
-        <v-btn
-          id="back-button"
-          class="ml-3 mr-2"
-          color="primary"
-          @click="onBack()"
-        >
-          Back to Products
         </v-btn>
       </v-card-actions>
     </v-card>
@@ -205,8 +201,8 @@ export default {
       this.closePage()
     },
     closePage() {
-      this.$router.push('/products')
       this.$store.commit('localStorage/closeProductsOne')
+      this.$router.push('/products')
     },
   },
 }

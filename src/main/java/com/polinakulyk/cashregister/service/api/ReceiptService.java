@@ -10,6 +10,7 @@ import java.util.Optional;
 
 public interface ReceiptService {
     List<Receipt> findAll();
+    List<Receipt> findAllByTellerId(String tellerId);
     Optional<Receipt> findById(String id);
     Receipt createReceipt(String userId);
     Receipt complete(String receiptId);

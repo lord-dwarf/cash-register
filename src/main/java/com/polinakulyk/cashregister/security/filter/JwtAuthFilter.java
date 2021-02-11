@@ -4,6 +4,7 @@ import com.polinakulyk.cashregister.security.api.AuthHelper;
 import com.polinakulyk.cashregister.security.dto.JwtDto;
 import com.polinakulyk.cashregister.db.entity.User;
 import com.polinakulyk.cashregister.exception.CashRegisterException;
+import com.polinakulyk.cashregister.security.dto.UserDetailsDto;
 import com.polinakulyk.cashregister.service.api.UserService;
 import java.io.IOException;
 import java.util.Optional;
@@ -49,16 +50,19 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     public Authentication getAuthenticationFromDbByJwt(JwtDto jwt) {
 
-        // TODO move this method + dependency on a service, into filter
         // TODO cache retrieval of user from DB, because currently it happens on each request
         User user = userService.findById(jwt.getUserId()).orElseThrow(() ->
                 new CashRegisterException(
                         HttpStatus.UNAUTHORIZED,
                         quote("User not found", jwt.getUserId())));
 
+        UserDetailsDto principal = new UserDetailsDto()
+                .setUsername(user.getId())
+                .setPassword("")
+                .setPrincipalName(user.getUsername())
+                .setGrantedAuthorities(authHelper.getAuthRolesFromUserRole(user.getRole()));
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
-                user.getId(), "", authHelper.getAuthRolesFromUserRole(user.getRole()));
-        // TODO include user name into Authentication object
+                principal, "", authHelper.getAuthRolesFromUserRole(user.getRole()));
         auth.setDetails("");
         return auth;
     }

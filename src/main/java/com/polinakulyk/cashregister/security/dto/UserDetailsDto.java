@@ -1,4 +1,4 @@
-package com.polinakulyk.cashregister.service.vo;
+package com.polinakulyk.cashregister.security.dto;
 
 import java.util.Collection;
 import java.util.List;
@@ -6,8 +6,11 @@ import java.util.StringJoiner;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-public class UserDetailsVo implements UserDetails {
+public class UserDetailsDto implements UserDetails {
+    // username field is needed by authentication manager, but the real value is user id
     private String username;
+    // actual username
+    private String principalName;
     private String password;
     private List<GrantedAuthority> grantedAuthorities;
 
@@ -16,8 +19,17 @@ public class UserDetailsVo implements UserDetails {
         return username;
     }
 
-    public UserDetailsVo setUsername(String username) {
+    public UserDetailsDto setUsername(String username) {
         this.username = username;
+        return this;
+    }
+
+    public String getPrincipalName() {
+        return principalName;
+    }
+
+    public UserDetailsDto setPrincipalName(String principalName) {
+        this.principalName = principalName;
         return this;
     }
 
@@ -26,7 +38,7 @@ public class UserDetailsVo implements UserDetails {
         return password;
     }
 
-    public UserDetailsVo setPassword(String password) {
+    public UserDetailsDto setPassword(String password) {
         this.password = password;
         return this;
     }
@@ -36,7 +48,7 @@ public class UserDetailsVo implements UserDetails {
         return grantedAuthorities;
     }
 
-    public UserDetailsVo setGrantedAuthorities(List<GrantedAuthority> grantedAuthorities) {
+    public UserDetailsDto setGrantedAuthorities(List<GrantedAuthority> grantedAuthorities) {
         this.grantedAuthorities = grantedAuthorities;
         return this;
     }
@@ -66,9 +78,10 @@ public class UserDetailsVo implements UserDetails {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        UserDetailsVo that = (UserDetailsVo) o;
+        UserDetailsDto that = (UserDetailsDto) o;
 
         if (!username.equals(that.username)) return false;
+        if (!principalName.equals(that.principalName)) return false;
         if (!password.equals(that.password)) return false;
         return grantedAuthorities.equals(that.grantedAuthorities);
     }
@@ -76,6 +89,7 @@ public class UserDetailsVo implements UserDetails {
     @Override
     public int hashCode() {
         int result = username.hashCode();
+        result = 31 * result + principalName.hashCode();
         result = 31 * result + password.hashCode();
         result = 31 * result + grantedAuthorities.hashCode();
         return result;
@@ -83,9 +97,9 @@ public class UserDetailsVo implements UserDetails {
 
     @Override
     public String toString() {
-        return new StringJoiner(
-                ", ", UserDetailsVo.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", UserDetailsDto.class.getSimpleName() + "[", "]")
                 .add("username='" + username + "'")
+                .add("principalName='" + principalName + "'")
                 .add("password='" + password + "'")
                 .add("grantedAuthorities=" + grantedAuthorities)
                 .toString();

@@ -81,10 +81,41 @@
           </v-list-item-content>
         </v-list-item>
         <v-list-item
+          to="/my-receipts"
+          router
+          exact
+          v-if="'sr_teller' === this.$store.state.localStorage.userRole"
+        >
+          <v-list-item-action>
+            <v-icon>mdi-account-cash-outline</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title v-text="'My Receipts'" />
+          </v-list-item-content>
+        </v-list-item>
+        <v-list-item
+          to="/my-receipts/one"
+          router
+          exact
+          v-if="isMyReceiptsOneVisible()"
+        >
+          <v-list-item-action>
+            <v-icon>mdi-account-cash-outline</v-icon>
+          </v-list-item-action>
+          <v-list-item-content>
+            <v-list-item-title
+              v-text="
+                this.$store.state.localStorage.myReceiptsOne.mode +
+                ' My Receipt'
+              "
+            />
+          </v-list-item-content>
+        </v-list-item>
+        <v-list-item
           to="/reports"
           router
           exact
-          v-if="this.$store.state.localStorage.userRole === 'merch'"
+          v-if="this.$store.state.localStorage.userRole === 'sr_teller'"
         >
           <v-list-item-action>
             <v-icon>mdi-file-pdf-box-outline</v-icon>
@@ -128,10 +159,10 @@
       </v-btn>
       <v-toolbar-title v-text="title" />
       <v-spacer></v-spacer>
-      <v-chip id="avatar-name" class="ma-3 pa-4" color="yellow lighten">
+      <v-chip id="avatar-name" class="ma-3 pa-4" color="yellow accent-3">
         {{ getUserRoleFriendlyName() }}
       </v-chip>
-      <v-avatar size="85">
+      <v-avatar size="90">
         <img :src="getUserRoleImage()" />
       </v-avatar>
     </v-app-bar>
@@ -201,6 +232,13 @@ export default {
         this.$store.state.localStorage.receiptsOne.visible
       )
     },
+    isMyReceiptsOneVisible() {
+      const role = this.$store.state.localStorage.userRole
+      return (
+        role === 'sr_teller' &&
+        this.$store.state.localStorage.myReceiptsOne.visible
+      )
+    },
   },
 }
 </script>
@@ -208,5 +246,6 @@ export default {
 #avatar-name {
   color: black;
   font-size: large;
+  font-weight: bold;
 }
 </style>

@@ -2,10 +2,20 @@
   <v-data-table :headers="tableHeaders" :items="tableItems" class="elevation-1">
     <template v-slot:top>
       <v-toolbar flat>
-        <v-toolbar-title>Receipts</v-toolbar-title>
+        <v-toolbar-title>My Receipts</v-toolbar-title>
         <v-divider class="mx-4" inset vertical></v-divider>
-        <div id="toolbar-receipts-all">All</div>
+        <div id="toolbar-receipts-username">
+          {{ userName }}
+        </div>
         <v-spacer></v-spacer>
+        <v-btn
+          id="new-receipt-button"
+          color="primary"
+          dark
+          @click="newReceipt()"
+        >
+          New Receipt
+        </v-btn>
       </v-toolbar>
     </template>
     <template v-slot:no-data>
@@ -77,6 +87,14 @@ export default {
     tableItems: [],
   }),
 
+  computed: {
+    userName: {
+      get() {
+        return this.$store.state.localStorage.userName
+      },
+    },
+  },
+
   async created() {
     await this.loadReceipts()
   },
@@ -84,7 +102,7 @@ export default {
   methods: {
     async loadReceipts() {
       await this.$http
-        .$get('/receipts')
+        .$get('/receipts/by-teller')
         .then((receipts) => {
           this.tableItems = receipts.map((r) => {
             return {
@@ -133,19 +151,23 @@ export default {
       return year + '-' + month + '-' + day + ' ' + hour + ':' + minute
     },
     async viewReceipt(item) {
-      this.$store.commit('localStorage/viewReceiptsOne', item.receiptId)
-      await this.$router.push('/receipts/one')
+      this.$store.commit('localStorage/viewMyReceiptsOne', item.receiptId)
+      await this.$router.push('/my-receipts/one')
     },
     async editReceipt(item) {
-      this.$store.commit('localStorage/editReceiptsOne', item.receiptId)
-      await this.$router.push('/receipts/one')
+      this.$store.commit('localStorage/editMyReceiptsOne', item.receiptId)
+      await this.$router.push('/my-receipts/one')
+    },
+    async newReceipt() {
+      this.$store.commit('localStorage/newMyReceiptsOne')
+      await this.$router.push('/my-receipts/one')
     },
   },
 }
 </script>
 
 <style>
-#toolbar-receipts-all {
+#toolbar-receipts-username {
   font-size: large;
 }
 </style>

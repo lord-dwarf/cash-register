@@ -7,7 +7,7 @@ import com.polinakulyk.cashregister.db.repository.UserWithIdRepository;
 import com.polinakulyk.cashregister.exception.CashRegisterException;
 import com.polinakulyk.cashregister.security.api.AuthHelper;
 import com.polinakulyk.cashregister.service.api.UserService;
-import com.polinakulyk.cashregister.service.vo.UserDetailsVo;
+import com.polinakulyk.cashregister.security.dto.UserDetailsDto;
 import java.util.Optional;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -50,10 +50,10 @@ public class UserServiceImpl implements UserService {
                 .orElseThrow(() -> new UsernameNotFoundException(
                         quote("User not found", username)));
 
-        // TODO include user name into Authentication object
-        return new UserDetailsVo()
+        return new UserDetailsDto()
                 .setUsername(user.getId())
                 .setPassword(user.getPassword())
+                .setPrincipalName(user.getUsername())
                 .setGrantedAuthorities(authHelper.getAuthRolesFromUserRole(user.getRole()));
     }
 

@@ -1,6 +1,7 @@
 export const state = () => ({
   authJwt: null,
   userRole: null,
+  userName: null,
   productsOne: {
     visible: false,
     initialized: false,
@@ -9,7 +10,11 @@ export const state = () => ({
   },
   receiptsOne: {
     visible: false,
-    initialized: false,
+    mode: null,
+    receiptId: null,
+  },
+  myReceiptsOne: {
+    visible: false,
     mode: null,
     receiptId: null,
   },
@@ -22,6 +27,9 @@ export const mutations = {
   },
   setUserRole(state, userRole) {
     state.userRole = userRole
+  },
+  setUserName(state, userName) {
+    state.userName = userName
   },
 
   // ProductsOne page state
@@ -86,26 +94,39 @@ export const mutations = {
   // ReceiptsOne page state
   viewReceiptsOne(state, receiptId) {
     state.receiptsOne.visible = true
-    state.receiptsOne.initialized = false
     state.receiptsOne.mode = 'VIEW'
     state.receiptsOne.receiptId = receiptId
   },
   editReceiptsOne(state, receiptId) {
     state.receiptsOne.visible = true
-    state.receiptsOne.initialized = false
     state.receiptsOne.mode = 'EDIT'
     state.receiptsOne.receiptId = receiptId
   },
-  newReceiptsOne(state) {
-    state.receiptsOne.visible = true
-    state.receiptsOne.initialized = false
-    state.receiptsOne.mode = 'NEW'
-    state.receiptsOne.receiptId = null
-  },
   closeReceiptsOne(state) {
     state.receiptsOne.visible = false
-    state.receiptsOne.initialized = false
     state.receiptsOne.mode = null
     state.receiptsOne.receiptId = null
+  },
+
+  // MyReceiptsOne page state
+  viewMyReceiptsOne(state, receiptId) {
+    state.myReceiptsOne.visible = true
+    state.myReceiptsOne.mode = 'VIEW'
+    state.myReceiptsOne.receiptId = receiptId
+  },
+  editMyReceiptsOne(state, receiptId) {
+    state.myReceiptsOne.visible = true
+    state.myReceiptsOne.mode = 'EDIT'
+    state.myReceiptsOne.receiptId = receiptId
+  },
+  newMyReceiptsOne(state) {
+    state.myReceiptsOne.visible = true
+    state.myReceiptsOne.mode = 'NEW'
+    state.myReceiptsOne.receiptId = null
+  },
+  closeMyReceiptsOne(state) {
+    state.myReceiptsOne.visible = false
+    state.myReceiptsOne.mode = null
+    state.myReceiptsOne.receiptId = null
   },
 }

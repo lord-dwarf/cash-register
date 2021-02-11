@@ -20,10 +20,12 @@
       <v-btn color="primary" @click="loadProducts">Reload</v-btn>
     </template>
     <template v-slot:[`item.actions`]="{ item }">
-      <v-icon class="ma-1" small @click="viewProduct(item)">mdi-eye</v-icon>
+      <v-icon class="ma-1" color="blue accent-1" @click="viewProduct(item)">
+        mdi-eye
+      </v-icon>
       <v-icon
         class="ma-1 mr-2"
-        small
+        color="yellow accent-3"
         @click="editProduct(item)"
         v-if="isEditProductActionVisible()"
       >

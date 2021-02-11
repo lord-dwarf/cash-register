@@ -1,7 +1,9 @@
 package com.polinakulyk.cashregister.security;
 
+import com.polinakulyk.cashregister.db.entity.User;
 import com.polinakulyk.cashregister.security.dto.JwtDto;
 import com.polinakulyk.cashregister.security.api.AuthHelper;
+import com.polinakulyk.cashregister.security.dto.UserDetailsDto;
 import com.polinakulyk.cashregister.util.CashRegisterUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
@@ -126,5 +128,17 @@ public class AuthHelperImpl implements AuthHelper {
     @Override
     public void setAuthentication(Authentication authentication) {
         SecurityContextHolder.getContext().setAuthentication(authentication);
+    }
+
+    @Override
+    public String getUserId() {
+        Authentication auth = getAuthentication();
+        return ((UserDetailsDto)auth.getPrincipal()).getUsername();
+    }
+
+    @Override
+    public String getUsername() {
+        Authentication auth = getAuthentication();
+        return ((UserDetailsDto)auth.getPrincipal()).getPrincipalName();
     }
 }

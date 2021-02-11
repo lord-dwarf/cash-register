@@ -60,7 +60,7 @@ public class ProductController {
                 new CashRegisterException(NOT_FOUND, quote("Product does not exist", id))));
     }
 
-    @GetMapping("/find")
+    @PostMapping("/find")
     @RolesAllowed({MERCH, TELLER, SR_TELLER})
     public @ResponseBody List<Product> findProducts(
             @RequestBody FindProductsDto findProductsDto) {

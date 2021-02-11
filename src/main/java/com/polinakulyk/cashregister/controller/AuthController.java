@@ -4,12 +4,11 @@ import com.polinakulyk.cashregister.controller.dto.LoginRequestDto;
 import com.polinakulyk.cashregister.controller.dto.LoginResponseDto;
 import com.polinakulyk.cashregister.db.entity.User;
 import com.polinakulyk.cashregister.security.api.AuthHelper;
-import com.polinakulyk.cashregister.service.vo.UserDetailsVo;
+import com.polinakulyk.cashregister.security.dto.UserDetailsDto;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -41,18 +40,22 @@ public class AuthController {
         Authentication auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginRequest.getLogin(), loginRequest.getPassword()));
+        // clear principal password after we've authenticated
+        ((UserDetailsDto) auth.getPrincipal()).setPassword("");
         authHelper.setAuthentication(auth);
 
         // TODO ensure that after auth manager really clears the password
-        String userId = ((UserDetailsVo) auth.getPrincipal()).getUsername();
+        String userId = ((UserDetailsDto) auth.getPrincipal()).getUsername();
         String userRole = authHelper.getUserRoleFromAuthRoles(auth.getAuthorities());
         String jwt = authHelper.createJwt(userId, userRole);
+        String userName = ((UserDetailsDto) auth.getPrincipal()).getPrincipalName();
 
         return new LoginResponseDto()
                 .setJwt(jwt)
                 .setUser(new User()
                         .setId(userId)
                         .setRole(userRole)
+                        .setUsername(userName)
                         .setReceipts(null));
     }
 

@@ -1,48 +1,24 @@
 <template>
-  <div>
-    <v-btn
-      @click="onTeller()"
-      v-if="this.$store.state.localStorage.userRole === 'teller'"
-    >
-      role teller
-    </v-btn>
-    <v-btn
-      v-if="this.$store.state.localStorage.userRole === 'sr_teller'"
-      @click="onSrTeller()"
-    >
-      role sr_teller
-    </v-btn>
-    <v-btn
-      @click="onMerch()"
-      v-if="this.$store.state.localStorage.userRole === 'merch'"
-    >
-      role merch
-    </v-btn>
-  </div>
+  <v-col>
+    <v-spacer></v-spacer>
+    <v-img
+      :src="getReceiptImageUrl()"
+      max-width="480"
+      max-height="350"
+      class="mt-6"
+    ></v-img>
+    <v-spacer></v-spacer>
+  </v-col>
 </template>
 <script>
 export default {
   data: () => ({}),
   methods: {
-    async onTeller(event) {
-      await this.$http.$post('/receipts', {})
+    getStaticRootUrl() {
+      return window.location.protocol + '//' + window.location.host
     },
-    async onSrTeller(event) {
-      const createReceiptResponse = await this.$http.$post('/receipts', {})
-      await this.$http.$patch(
-        '/receipts' + '/' + createReceiptResponse.id + '/cancel'
-      )
-    },
-    async onMerch(event) {
-      await this.$http.$post('/products', {
-        code: '123',
-        category: 'goat',
-        name: 'blue cheese',
-        details: '12 months',
-        price: 10000,
-        amountUnit: 'GRAM',
-        amountAvailable: 50000,
-      })
+    getReceiptImageUrl() {
+      return this.getStaticRootUrl() + '/product-guy.gif'
     },
   },
 }

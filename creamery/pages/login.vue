@@ -75,6 +75,10 @@ export default {
             'localStorage/setUserRole',
             loginResponse.user.role
           )
+          this.$store.commit(
+            'localStorage/setUserName',
+            loginResponse.user.username
+          )
           this.$router.push('/')
         })
         .catch((error) => {

@@ -17,4 +17,6 @@ public interface AuthHelper {
     String getUserRoleFromAuthRoles(Collection<? extends GrantedAuthority> authRoles);
     Authentication getAuthentication();
     void setAuthentication(Authentication authentication);
+    String getUserId();
+    String getUsername();
 }

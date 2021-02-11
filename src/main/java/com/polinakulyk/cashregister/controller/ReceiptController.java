@@ -44,9 +44,18 @@ public class ReceiptController {
     }
 
     @GetMapping
-    @RolesAllowed({TELLER, SR_TELLER})
+    @RolesAllowed({SR_TELLER})
     public @ResponseBody List<Receipt> listReceipts() {
         List<Receipt> receiptsStripped = receiptService.findAll();
+        receiptsStripped.forEach(CashRegisterUtil::strip);
+        return receiptsStripped;
+    }
+
+    @GetMapping("/by-teller")
+    @RolesAllowed({TELLER, SR_TELLER})
+    public @ResponseBody List<Receipt> listReceiptsByTeller() {
+        String tellerId = authHelper.getUserId();
+        List<Receipt> receiptsStripped = receiptService.findAllByTellerId(tellerId);
         receiptsStripped.forEach(CashRegisterUtil::strip);
         return receiptsStripped;
     }
@@ -57,7 +66,7 @@ public class ReceiptController {
         if (!emptyRequestBody.isEmpty()) {
             throw new CashRegisterException(BAD_REQUEST, "Request body must be empty");
         }
-        String userId = authHelper.getAuthentication().getCredentials().toString();
+        String userId = authHelper.getUserId();
         return receiptService.createReceipt(userId);
     }
 
