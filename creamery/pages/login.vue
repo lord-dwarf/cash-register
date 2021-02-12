@@ -3,7 +3,7 @@
     <v-spacer></v-spacer>
     <v-card id="login-card">
       <!-- TODO refactor text alignment to center via 'px' -->
-      <v-card-title class="px-13">Welcome to Creamery</v-card-title>
+      <v-card-title class="px-13">{{ $t('welcomeToCreamery') }}</v-card-title>
       <v-card-text>
         <v-form v-model="isFormValid">
           <!-- TODO validate user name -->
@@ -11,7 +11,7 @@
           <!-- TODO space character for password -->
           <!-- TODO consider some validation framework for Vue/Vuetify -->
           <v-text-field
-            label="Username"
+            :label="$t('usernameLabel')"
             v-model="username"
             required
             :rules="[(v) => !!v || 'Username is required']"
@@ -80,11 +80,11 @@ export default {
             loginResponse.user.username
           )
           this.$router.push('/')
+          return loginResponse
         })
-        .catch((error) => {
-          // TODO display the exact error for user, when needed
-          console.log(error)
+        .catch((_error) => {
           this.password = null
+          return Promise.resolve(null)
         })
     },
   },

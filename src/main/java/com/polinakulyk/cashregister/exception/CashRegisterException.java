@@ -16,4 +16,11 @@ public class CashRegisterException extends ResponseStatusException {
     public CashRegisterException(HttpStatus httpStatus, Throwable cause) {
         super(httpStatus, cause.getMessage(), cause);
     }
+
+    @Override
+    public String getMessage() {
+
+        // to get rid of HTTP status code appended to reason, and get only text message
+        return getReason();
+    }
 }

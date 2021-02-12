@@ -85,7 +85,7 @@ export default {
 
   methods: {
     async loadProducts() {
-      await this.$http
+      return await this.$http
         .$get('/products')
         .then((products) => {
           this.tableItems = products.map((p) => {
@@ -99,11 +99,11 @@ export default {
               actions: [],
             }
           })
+          return products
         })
-        .catch((error) => {
-          // nothing - just show data table without data loaded
-          // TODO notify user on errors that might require user action
-          console.error(error)
+        .catch((_error) => {
+          // nothing
+          return Promise.resolve(null)
         })
     },
     formatPrice(price, amountUnit) {

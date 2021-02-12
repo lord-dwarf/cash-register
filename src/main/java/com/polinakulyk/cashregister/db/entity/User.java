@@ -3,6 +3,7 @@ package com.polinakulyk.cashregister.db.entity;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -22,6 +23,7 @@ public class User {
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private String id;
+    @Column(unique = true)
     private String username;
     private String password;
     private String role;

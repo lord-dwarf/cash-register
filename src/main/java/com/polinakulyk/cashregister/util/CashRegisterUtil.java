@@ -12,6 +12,8 @@ import java.util.Date;
 
 public class CashRegisterUtil {
 
+    private static final String QUOTE = "'";
+
     private CashRegisterUtil() {
         throw new UnsupportedOperationException("Cannot instantiate");
     }
@@ -21,12 +23,12 @@ public class CashRegisterUtil {
     }
 
     public static String quote(String message, Object value) {
-        return "" + message + ": \"" + (value != null ? value.toString() : "null") + "\"";
+        return "" + message + ": " + QUOTE + (value != null ? value.toString() : "null") + QUOTE;
     }
 
     public static String quote(String message, Object value1, Object value2) {
-        return "" + message + ": \"" + (value1 != null ? value1.toString() : "null") + "\", \""
-                + (value2 != null ? value2.toString() : "null") + "\"";
+        return "" + message + ": " + QUOTE + (value1 != null ? value1.toString() : "null")
+                + QUOTE + ", " + QUOTE + (value2 != null ? value2.toString() : "null") + QUOTE;
     }
 
     public static LocalDateTime now() {

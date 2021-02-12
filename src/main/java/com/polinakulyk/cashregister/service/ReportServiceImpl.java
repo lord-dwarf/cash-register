@@ -13,6 +13,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,6 +24,8 @@ import static com.polinakulyk.cashregister.util.CashRegisterUtil.*;
 
 @Service
 public class ReportServiceImpl implements ReportService {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ReportServiceImpl.class);
+
     // we use repos, because we need an iterator that may potentially be lazy,
     // while services provide eager lists, instead of iterator
     private final ReceiptRepository receiptRepository;

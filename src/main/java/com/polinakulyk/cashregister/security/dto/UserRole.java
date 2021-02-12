@@ -1,4 +1,4 @@
-package com.polinakulyk.cashregister.db.entity;
+package com.polinakulyk.cashregister.security.dto;
 
 public enum UserRole {
 

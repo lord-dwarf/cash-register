@@ -1,12 +1,18 @@
 package com.polinakulyk.cashregister.db.entity;
 
+import com.polinakulyk.cashregister.db.dto.ProductAmountUnit;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.StringJoiner;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import org.hibernate.annotations.GenericGenerator;
 
 @Entity
@@ -15,14 +21,27 @@ public class Product {
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private String id;
+    @Column(unique = true)
+    @NotBlank(message = "Code cannot be blank")
     private String code;
+    @NotBlank(message = "Category cannot be blank")
     private String category;
+    @NotBlank(message = "Name cannot be blank")
     private String name;
+    @NotBlank(message = "Name cannot be blank")
     private String details;
-    private int price;
-    private String amountUnit;
-    private int amountAvailable;
+    @NotNull(message = "Price cannot be null")
+    @Min(value = 1, message = "Price must be greater than 0")
+    @Max(value = 9999999, message = "Price must be less than 100k")
+    private Integer price;
+    @NotNull(message = "Amount unit cannot be null")
+    private ProductAmountUnit amountUnit;
+    @NotNull(message = "Amount available cannot be null")
+    @Min(value = 0, message = "Amount available must be non-negative")
+    @Max(value = 9999999, message = "Amount available must be less than 10k")
+    private Integer amountAvailable;
     @OneToMany(mappedBy = "product")
+    @NotNull(message = "Receipt items cannot be null")
     private Set<ReceiptItem> receiptItems = new HashSet<>();
 
     public String getId() {
@@ -70,29 +89,29 @@ public class Product {
         return this;
     }
 
-    public int getPrice() {
+    public Integer getPrice() {
         return price;
     }
 
-    public Product setPrice(int price) {
+    public Product setPrice(Integer price) {
         this.price = price;
         return this;
     }
 
-    public String getAmountUnit() {
+    public ProductAmountUnit getAmountUnit() {
         return amountUnit;
     }
 
-    public Product setAmountUnit(String unit) {
+    public Product setAmountUnit(ProductAmountUnit unit) {
         this.amountUnit = unit;
         return this;
     }
 
-    public int getAmountAvailable() {
+    public Integer getAmountAvailable() {
         return amountAvailable;
     }
 
-    public Product setAmountAvailable(int amountAvailable) {
+    public Product setAmountAvailable(Integer amountAvailable) {
         this.amountAvailable = amountAvailable;
         return this;
     }
@@ -123,7 +142,8 @@ public class Product {
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", Product.class.getSimpleName() + "[", "]")
+        return new StringJoiner(
+                ", ", Product.class.getSimpleName() + "[", "]")
                 .add("id='" + id + "'")
                 .add("code='" + code + "'")
                 .add("category='" + category + "'")

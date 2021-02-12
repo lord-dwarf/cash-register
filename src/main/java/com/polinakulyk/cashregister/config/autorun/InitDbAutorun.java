@@ -11,19 +11,18 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
-import static com.polinakulyk.cashregister.db.entity.ProductAmountUnit.Value.GRAM;
-import static com.polinakulyk.cashregister.db.entity.ProductAmountUnit.Value.UNIT;
+import static com.polinakulyk.cashregister.db.dto.ProductAmountUnit.GRAM;
+import static com.polinakulyk.cashregister.db.dto.ProductAmountUnit.UNIT;
 
 @Component
 public class InitDbAutorun {
 
+    private static final AtomicBoolean isContextInitializedOnce = new AtomicBoolean();
+
     private final UserService userService;
     private final ProductService productService;
     private final ReceiptService receiptService;
-
-    private final AtomicBoolean isContextInitialized = new AtomicBoolean();
 
     @Value("${cashregister.initdb.user.teller.id}")
     private String tellerId;
@@ -70,7 +69,7 @@ public class InitDbAutorun {
 
     @EventListener
     public void onApplicationEvent(ContextRefreshedEvent event) {
-        if (isContextInitialized.compareAndSet(false, true)) {
+        if (isContextInitializedOnce.compareAndSet(false, true)) {
             createUsers();
             createProducts();
             createReceipts();
@@ -109,7 +108,7 @@ public class InitDbAutorun {
                 .setCode("DE-2020-1")
                 .setCategory("mold")
                 .setName("Paladin Edelpilz 50%")
-                .setDetails("Produced in Germany by folk")
+                .setDetails("Produced in Germany")
                 .setPrice(40000)
                 .setAmountAvailable(8000)
                 .setAmountUnit(GRAM)
@@ -118,7 +117,7 @@ public class InitDbAutorun {
                 .setCode("NL-2017-2")
                 .setCategory("parmesan")
                 .setName("Grand'Or Old Mill 50%")
-                .setDetails("Produced in Netherlands by cows")
+                .setDetails("Produced in Netherlands")
                 .setPrice(80000)
                 .setAmountAvailable(8000)
                 .setAmountUnit(GRAM)
@@ -127,7 +126,7 @@ public class InitDbAutorun {
                 .setCode("DE-2020-2")
                 .setCategory("cream")
                 .setName("Kaserei Fitaki Original 40% 500g")
-                .setDetails("Produced in Germany by folk")
+                .setDetails("Produced in Germany")
                 .setPrice(14000)
                 .setAmountAvailable(175)
                 .setAmountUnit(UNIT)
@@ -136,7 +135,7 @@ public class InitDbAutorun {
                 .setCode("NL-2021")
                 .setCategory("goat")
                 .setName("Le Chevre")
-                .setDetails("Produced in Netherlands by goats")
+                .setDetails("Produced in Netherlands")
                 .setPrice(60000)
                 .setAmountAvailable(8000)
                 .setAmountUnit(GRAM)
@@ -145,7 +144,7 @@ public class InitDbAutorun {
                 .setCode("IT-2017")
                 .setCategory("cream")
                 .setName("Philadelphia 69% 125g")
-                .setDetails("Produced in Italy by mafia")
+                .setDetails("Produced in Italy")
                 .setPrice(5500)
                 .setAmountAvailable(180)
                 .setAmountUnit(UNIT)
@@ -154,7 +153,7 @@ public class InitDbAutorun {
                 .setCode("UA-2017")
                 .setCategory("camembert")
                 .setName("Pastourelle camembert in wine crust 50%")
-                .setDetails("Produced in Ukraine by peasants")
+                .setDetails("Produced in Ukraine")
                 .setPrice(50000)
                 .setAmountAvailable(7000)
                 .setAmountUnit(GRAM)
@@ -163,7 +162,7 @@ public class InitDbAutorun {
                 .setCode("GB-2019")
                 .setCategory("cheddar")
                 .setName("Wyke Farms Ivy's Vintage Reserve 58% 200g")
-                .setDetails("Produced in England by queen")
+                .setDetails("Produced in England")
                 .setPrice(13000)
                 .setAmountAvailable(155)
                 .setAmountUnit(UNIT)
@@ -172,7 +171,7 @@ public class InitDbAutorun {
                 .setCode("FR-2021")
                 .setCategory("goat")
                 .setName("Le Chevre 150g")
-                .setDetails("Produced in France by goats")
+                .setDetails("Produced in France")
                 .setPrice(15000)
                 .setAmountAvailable(160)
                 .setAmountUnit(UNIT)
@@ -181,7 +180,7 @@ public class InitDbAutorun {
                 .setCode("DE-2017-3")
                 .setCategory("dorblu")
                 .setName("Kaserei Champignon Grand Noir 60%")
-                .setDetails("Produced in Germany by folk")
+                .setDetails("Produced in Germany")
                 .setPrice(80000)
                 .setAmountAvailable(8000)
                 .setAmountUnit(GRAM)
@@ -190,7 +189,7 @@ public class InitDbAutorun {
                 .setCode("PL-never")
                 .setCategory("blue mold")
                 .setName("Lazur Blue")
-                .setDetails("Produced in Poland by monks")
+                .setDetails("Produced in Poland")
                 .setPrice(45000)
                 .setAmountAvailable(4000)
                 .setAmountUnit(GRAM)

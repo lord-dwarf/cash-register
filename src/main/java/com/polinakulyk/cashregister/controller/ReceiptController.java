@@ -3,7 +3,6 @@ package com.polinakulyk.cashregister.controller;
 import com.polinakulyk.cashregister.controller.dto.UpdateReceiptItemDto;
 import com.polinakulyk.cashregister.db.entity.Receipt;
 import com.polinakulyk.cashregister.db.entity.ReceiptItem;
-import com.polinakulyk.cashregister.db.repository.ReceiptRepository;
 import com.polinakulyk.cashregister.exception.CashRegisterException;
 import com.polinakulyk.cashregister.security.api.AuthHelper;
 import com.polinakulyk.cashregister.service.api.ReceiptService;
@@ -23,8 +22,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import static com.polinakulyk.cashregister.db.entity.UserRole.Value.SR_TELLER;
-import static com.polinakulyk.cashregister.db.entity.UserRole.Value.TELLER;
+import static com.polinakulyk.cashregister.security.dto.UserRole.Value.SR_TELLER;
+import static com.polinakulyk.cashregister.security.dto.UserRole.Value.TELLER;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.*;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.quote;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -67,7 +66,7 @@ public class ReceiptController {
             throw new CashRegisterException(BAD_REQUEST, "Request body must be empty");
         }
         String userId = authHelper.getUserId();
-        return receiptService.createReceipt(userId);
+        return strip(receiptService.createReceipt(userId));
     }
 
     @GetMapping("/{id}")

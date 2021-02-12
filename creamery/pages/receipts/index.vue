@@ -83,7 +83,7 @@ export default {
 
   methods: {
     async loadReceipts() {
-      await this.$http
+      return await this.$http
         .$get('/receipts')
         .then((receipts) => {
           this.tableItems = receipts.map((r) => {
@@ -98,11 +98,11 @@ export default {
               actions: [],
             }
           })
+          return receipts
         })
-        .catch((error) => {
-          // nothing - just show data table without data loaded
-          // TODO notify user on errors that might require user action
-          console.error(error)
+        .catch((_error) => {
+          // nothing
+          return Promise.resolve(null)
         })
     },
     formatReceiptCode(receiptId) {

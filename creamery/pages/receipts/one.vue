@@ -187,10 +187,9 @@ export default {
       await this.$http
         .$get('/receipts' + '/' + receiptId)
         .then(this.applyReceipt)
-        .catch((error) => {
-          // nothing - just show data table without data loaded
-          // TODO notify user on errors that might require user action
-          console.error(error)
+        .catch((_error) => {
+          // nothing
+          return Promise.resolve(null)
         })
     },
     formatReceiptCode(receiptId) {
@@ -257,6 +256,7 @@ export default {
           actions: [],
         }
       })
+      return receipt
     },
     getStaticRootUrl() {
       return window.location.protocol + '//' + window.location.host
@@ -272,10 +272,9 @@ export default {
       await this.$http
         .$patch('/receipts' + '/' + this.receiptId + '/cancel')
         .then(this.applyReceipt)
-        .catch((error) => {
-          // nothing - just show data table without data loaded
-          // TODO notify user on errors that might require user action
-          console.error(error)
+        .catch((_error) => {
+          // nothing
+          return Promise.resolve(null)
         })
     },
     async cancelReceiptItem(receiptItem) {
@@ -289,18 +288,18 @@ export default {
             '/' +
             receiptItem.id
         )
-        .then((_result) => {
+        .then(() => {
           const indexToDelete = this.tableItems.findIndex(
             (el) => el.id === receiptItem.id
           )
           if (indexToDelete > -1) {
             this.tableItems.splice(indexToDelete, 1)
           }
+          return {}
         })
-        .catch((error) => {
-          // nothing - just show data table without data loaded
-          // TODO notify user on errors that might require user action
-          console.error(error)
+        .catch((_error) => {
+          // nothing
+          return Promise.resolve(null)
         })
     },
   },
@@ -309,7 +308,7 @@ export default {
 
 <style>
 #receipt-card {
-  width: 60em;
+  width: 70em;
 }
 #receipt-fields-card {
   width: 30em;

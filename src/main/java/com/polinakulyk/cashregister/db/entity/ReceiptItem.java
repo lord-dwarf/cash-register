@@ -1,5 +1,6 @@
 package com.polinakulyk.cashregister.db.entity;
 
+import com.polinakulyk.cashregister.db.dto.ProductAmountUnit;
 import java.util.StringJoiner;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
@@ -20,7 +21,7 @@ public class ReceiptItem {
     private Product product;
     private String name;
     private int amount;
-    private String amountUnit;
+    private ProductAmountUnit amountUnit;
     private int price;
 
     public String getId() {
@@ -68,11 +69,11 @@ public class ReceiptItem {
         return this;
     }
 
-    public String getAmountUnit() {
+    public ProductAmountUnit getAmountUnit() {
         return amountUnit;
     }
 
-    public ReceiptItem setAmountUnit(String amountUnit) {
+    public ReceiptItem setAmountUnit(ProductAmountUnit amountUnit) {
         this.amountUnit = amountUnit;
         return this;
     }

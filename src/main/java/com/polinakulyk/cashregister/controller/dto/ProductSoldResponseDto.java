@@ -1,5 +1,6 @@
 package com.polinakulyk.cashregister.controller.dto;
 
+import com.polinakulyk.cashregister.db.dto.ProductAmountUnit;
 import java.util.StringJoiner;
 
 public class ProductSoldResponseDto {
@@ -8,7 +9,7 @@ public class ProductSoldResponseDto {
     private String productCategory;
     private String productName;
     private int productPrice;
-    private String productAmountUnit;
+    private ProductAmountUnit productAmountUnit;
     private int productAmountAvailable;
     private int productSoldSumTotal;
 
@@ -57,11 +58,11 @@ public class ProductSoldResponseDto {
         return this;
     }
 
-    public String getProductAmountUnit() {
+    public ProductAmountUnit getProductAmountUnit() {
         return productAmountUnit;
     }
 
-    public ProductSoldResponseDto setProductAmountUnit(String productAmountUnit) {
+    public ProductSoldResponseDto setProductAmountUnit(ProductAmountUnit productAmountUnit) {
         this.productAmountUnit = productAmountUnit;
         return this;
     }

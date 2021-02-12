@@ -167,42 +167,58 @@ export default {
       )
     },
     async onSave() {
+      let result = null
       if (this.mode === 'EDIT') {
-        await this.$http.$put('/products' + '/' + this.id, {
-          id: this.id,
-          code: this.code,
-          category: this.category,
-          name: this.name,
-          details: this.details,
-          price: Math.round(parseFloat(this.price) * 100),
-          amountAvailable:
-            this.amountUnit === 'UNIT'
-              ? parseInt(this.amountAvailable)
-              : Math.round(this.amountAvailable * 1000),
-          amountUnit: this.amountUnit,
-        })
+        result = await this.$http
+          .$put('/products' + '/' + this.id, {
+            id: this.id,
+            code: this.code,
+            category: this.category,
+            name: this.name,
+            details: this.details,
+            price: Math.round(parseFloat(this.price) * 100),
+            amountAvailable:
+              this.amountUnit === 'UNIT'
+                ? parseInt(this.amountAvailable)
+                : Math.round(this.amountAvailable * 1000),
+            amountUnit: this.amountUnit,
+          })
+          .then(() => {
+            return {}
+          })
+          .catch((_error) => {
+            // nothing
+            return Promise.resolve(null)
+          })
       } else if (this.mode === 'ADD') {
-        await this.$http.$post('/products', {
-          code: this.code,
-          category: this.category,
-          name: this.name,
-          details: this.details,
-          price: Math.round(parseFloat(this.price) * 100),
-          amountAvailable:
-            this.amountUnit === 'UNIT'
-              ? parseInt(this.amountAvailable)
-              : Math.round(this.amountAvailable * 1000),
-          amountUnit: this.amountUnit,
-        })
+        result = await this.$http
+          .$post('/products', {
+            code: this.code,
+            category: this.category,
+            name: this.name,
+            details: this.details,
+            price: Math.round(parseFloat(this.price) * 100),
+            amountAvailable:
+              this.amountUnit === 'UNIT'
+                ? parseInt(this.amountAvailable)
+                : Math.round(this.amountAvailable * 1000),
+            amountUnit: this.amountUnit,
+          })
+          .catch((_error) => {
+            // nothing
+            return Promise.resolve(null)
+          })
       }
-      this.closePage()
+      if (result) {
+        this.closePage()
+      }
     },
     onBack() {
       this.closePage()
     },
     closePage() {
-      this.$store.commit('localStorage/closeProductsOne')
       this.$router.push('/products')
+      this.$store.commit('localStorage/closeProductsOne')
     },
   },
 }

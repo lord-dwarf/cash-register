@@ -1,5 +1,13 @@
 <template>
   <v-app dark>
+    <v-snackbar v-model="isShowErrorMessage" :timeout="8000">
+      {{ errorMessage }}
+      <template v-slot:action="{ attrs }">
+        <v-btn color="blue" text v-bind="attrs" @click="errorMessage = null">
+          Close
+        </v-btn>
+      </template>
+    </v-snackbar>
     <v-navigation-drawer
       v-model="drawer"
       :mini-variant="miniVariant"
@@ -50,11 +58,7 @@
           to="/receipts"
           router
           exact
-          v-if="
-            ['teller', 'sr_teller'].indexOf(
-              this.$store.state.localStorage.userRole
-            ) > -1
-          "
+          v-if="'sr_teller' === this.$store.state.localStorage.userRole"
         >
           <v-list-item-action>
             <v-icon>mdi-paper-roll-outline</v-icon>
@@ -84,7 +88,11 @@
           to="/my-receipts"
           router
           exact
-          v-if="'sr_teller' === this.$store.state.localStorage.userRole"
+          v-if="
+            ['teller', 'sr_teller'].indexOf(
+              this.$store.state.localStorage.userRole
+            ) > -1
+          "
         >
           <v-list-item-action>
             <v-icon>mdi-account-cash-outline</v-icon>
@@ -165,6 +173,7 @@
       <v-avatar size="90">
         <img :src="getUserRoleImage()" />
       </v-avatar>
+      <language-input></language-input>
     </v-app-bar>
     <v-main>
       <v-container>
@@ -186,6 +195,26 @@ export default {
       miniVariant: false,
       title: 'Creamery',
     }
+  },
+  computed: {
+    isShowErrorMessage: {
+      get() {
+        return !!this.errorMessage
+      },
+      set(value) {
+        this.errorMessage = null
+      },
+    },
+    errorMessage: {
+      get() {
+        console.log(this.$store.state.localStorage.errorMessage)
+        return this.$store.state.localStorage.errorMessage
+      },
+      set(value) {
+        console.log(value)
+        this.$store.commit('localStorage/setErrorMessage', value)
+      },
+    },
   },
   methods: {
     getUserRoleImage() {
@@ -235,7 +264,7 @@ export default {
     isMyReceiptsOneVisible() {
       const role = this.$store.state.localStorage.userRole
       return (
-        role === 'sr_teller' &&
+        (role === 'sr_teller' || role === 'teller') &&
         this.$store.state.localStorage.myReceiptsOne.visible
       )
     },

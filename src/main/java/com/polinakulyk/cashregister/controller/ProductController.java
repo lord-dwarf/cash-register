@@ -2,13 +2,18 @@ package com.polinakulyk.cashregister.controller;
 
 import com.polinakulyk.cashregister.controller.dto.FindProductsDto;
 import com.polinakulyk.cashregister.db.entity.Product;
-import com.polinakulyk.cashregister.db.repository.ProductRepository;
 import com.polinakulyk.cashregister.exception.CashRegisterException;
 import com.polinakulyk.cashregister.service.api.ProductService;
 import com.polinakulyk.cashregister.util.CashRegisterUtil;
 import java.util.List;
+import java.util.Set;
 import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
+import javax.validation.Valid;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,9 +24,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import static com.polinakulyk.cashregister.db.entity.UserRole.Value.MERCH;
-import static com.polinakulyk.cashregister.db.entity.UserRole.Value.SR_TELLER;
-import static com.polinakulyk.cashregister.db.entity.UserRole.Value.TELLER;
+import static com.polinakulyk.cashregister.security.dto.UserRole.Value.MERCH;
+import static com.polinakulyk.cashregister.security.dto.UserRole.Value.SR_TELLER;
+import static com.polinakulyk.cashregister.security.dto.UserRole.Value.TELLER;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.quote;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.strip;
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
@@ -49,8 +54,13 @@ public class ProductController {
 
     @PostMapping
     @RolesAllowed({MERCH})
-    public @ResponseBody Product createProduct(@RequestBody Product product) {
-        return productService.create(product);
+    public @ResponseBody Product createProduct(@Valid @RequestBody Product product) {
+        try {
+            return productService.create(product);
+        } catch (DataIntegrityViolationException e) {
+            throw new CashRegisterException(BAD_REQUEST, quote(
+                    "Product with this code already exists", product.getCode()));
+        }
     }
 
     @GetMapping("/{id}")
@@ -72,7 +82,10 @@ public class ProductController {
     @PutMapping("/{id}")
     @RolesAllowed({MERCH})
     public @ResponseBody String updateProduct(
-            @PathVariable String id, @RequestBody Product product, HttpServletResponse response) {
+            @PathVariable String id,
+            @Valid @RequestBody Product product,
+            HttpServletResponse response
+    ) {
         if (!id.equals(product.getId())) {
             throw new CashRegisterException(BAD_REQUEST, quote("Product id does not match", id));
         }

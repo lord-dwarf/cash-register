@@ -29,7 +29,11 @@
         class="ma-1"
         color="yellow accent-3"
         @click="editReceipt(item)"
-        :disabled="item.status === 'CANCELED'"
+        :disabled="
+          item.status === 'CANCELED' ||
+          (item.status === 'COMPLETED' &&
+            'teller' === $store.state.localStorage.userRole)
+        "
       >
         mdi-pencil
       </v-icon>
@@ -116,11 +120,11 @@ export default {
               actions: [],
             }
           })
+          return receipts
         })
-        .catch((error) => {
-          // nothing - just show data table without data loaded
-          // TODO notify user on errors that might require user action
-          console.error(error)
+        .catch((_error) => {
+          // nothing
+          return Promise.resolve(null)
         })
     },
     formatReceiptCode(receiptId) {

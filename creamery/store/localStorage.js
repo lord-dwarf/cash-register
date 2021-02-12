@@ -2,11 +2,12 @@ export const state = () => ({
   authJwt: null,
   userRole: null,
   userName: null,
+  errorMessage: null,
   productsOne: {
     visible: false,
     initialized: false,
     mode: null,
-    product: null,
+    product: {},
   },
   receiptsOne: {
     visible: false,
@@ -31,7 +32,10 @@ export const mutations = {
   setUserName(state, userName) {
     state.userName = userName
   },
-
+  // Error state
+  setErrorMessage(state, errorMessage) {
+    state.errorMessage = errorMessage
+  },
   // ProductsOne page state
   viewProductsOne(state, product) {
     state.productsOne.visible = true
@@ -64,7 +68,7 @@ export const mutations = {
     state.productsOne.visible = false
     state.productsOne.initialized = false
     state.productsOne.mode = null
-    state.productsOne.product = null
+    state.productsOne.product = {}
   },
   setProductsOneInitialized(state) {
     state.productsOne.initialized = true
@@ -128,5 +132,8 @@ export const mutations = {
     state.myReceiptsOne.visible = false
     state.myReceiptsOne.mode = null
     state.myReceiptsOne.receiptId = null
+  },
+  setMyReceiptsOneReceiptId(state, receiptId) {
+    state.myReceiptsOne.receiptId = receiptId
   },
 }

@@ -1,5 +1,6 @@
 package com.polinakulyk.cashregister.service;
 
+import com.polinakulyk.cashregister.CashRegisterApplication;
 import com.polinakulyk.cashregister.controller.dto.FindProductsDto;
 import com.polinakulyk.cashregister.db.entity.Product;
 import com.polinakulyk.cashregister.db.repository.ProductRepository;
@@ -9,6 +10,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,6 +22,7 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @Service
 public class ProductServiceImpl implements ProductService {
+    private static final Logger LOG = LoggerFactory.getLogger(ProductServiceImpl.class);
 
     private static final int FIND_BY_FILTER_LIMIT = 5;
 
@@ -64,11 +68,11 @@ public class ProductServiceImpl implements ProductService {
         List<Product> productsFound = new ArrayList<>();
         Pattern codeFilterPattern = findProductsDto.getCodeFilter() != null
                 ? Pattern.compile(
-                        findProductsDto.getCodeFilter() + ".*", Pattern.CASE_INSENSITIVE)
+                findProductsDto.getCodeFilter() + ".*", Pattern.CASE_INSENSITIVE)
                 : null;
         Pattern nameFilterPattern = findProductsDto.getNameFilter() != null
                 ? Pattern.compile(
-                        findProductsDto.getNameFilter() + ".*", Pattern.CASE_INSENSITIVE)
+                findProductsDto.getNameFilter() + ".*", Pattern.CASE_INSENSITIVE)
                 : null;
         productRepository.findAll().forEach((product) -> {
             if (productsFound.size() < FIND_BY_FILTER_LIMIT) {

@@ -9,13 +9,12 @@ import java.util.List;
 import javax.annotation.security.RolesAllowed;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
-import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import static com.polinakulyk.cashregister.db.entity.UserRole.Value.MERCH;
-import static com.polinakulyk.cashregister.db.entity.UserRole.Value.SR_TELLER;
+import static com.polinakulyk.cashregister.security.dto.UserRole.Value.SR_TELLER;
 
 @Controller
 @RequestMapping("/api/reports")
@@ -28,7 +27,7 @@ public class ReportController {
         this.reportService = reportService;
     }
 
-    @GetMapping("/products-sold")
+    @PostMapping("/products-sold")
     @RolesAllowed({SR_TELLER})
     public @ResponseBody List<ProductSoldResponseDto> listProductsSold(
             @RequestBody DateRangeDto dateRangeDto) {
@@ -36,7 +35,7 @@ public class ReportController {
                 dateRangeDto.getStart(), dateRangeDto.getEnd());
     }
 
-    @GetMapping("/products-not-sold")
+    @PostMapping("/products-not-sold")
     @RolesAllowed({SR_TELLER})
     public @ResponseBody List<Product> listProductsNotSold(
             @RequestBody DateRangeDto dateRangeDto) {
