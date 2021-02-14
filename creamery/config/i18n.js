@@ -1,7 +1,7 @@
-import en from '../locales/en.json'
 import ua from '../locales/ua.json'
+import en from '../locales/en.json'
 export default {
-  locale: 'en',
-  fallbackLocale: 'en',
-  messages: { en, ua }
+  locale: 'ua',
+  fallbackLocale: 'ua',
+  messages: {ua, en},
 }

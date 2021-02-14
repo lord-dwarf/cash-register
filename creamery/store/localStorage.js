@@ -2,6 +2,7 @@ export const state = () => ({
   authJwt: null,
   userRole: null,
   userName: null,
+  userLocale: 'ua',
   errorMessage: null,
   productsOne: {
     visible: false,
@@ -31,6 +32,10 @@ export const mutations = {
   },
   setUserName(state, userName) {
     state.userName = userName
+  },
+  // i18 state
+  setUserLocale(state, userLocale) {
+    state.userLocale = userLocale
   },
   // Error state
   setErrorMessage(state, errorMessage) {

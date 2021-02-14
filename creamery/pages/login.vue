@@ -3,7 +3,11 @@
     <v-spacer></v-spacer>
     <v-card id="login-card">
       <!-- TODO refactor text alignment to center via 'px' -->
-      <v-card-title class="px-13">{{ $t('welcomeToCreamery') }}</v-card-title>
+      <v-card-title>
+        <v-spacer></v-spacer>
+        {{ $t('login.welcomeToCreamery') }}
+        <v-spacer></v-spacer>
+      </v-card-title>
       <v-card-text>
         <v-form v-model="isFormValid">
           <!-- TODO validate user name -->
@@ -11,13 +15,13 @@
           <!-- TODO space character for password -->
           <!-- TODO consider some validation framework for Vue/Vuetify -->
           <v-text-field
-            :label="$t('usernameLabel')"
+            :label="$t('login.usernameLabel')"
             v-model="username"
             required
             :rules="[(v) => !!v || 'Username is required']"
           ></v-text-field>
           <v-text-field
-            label="Password"
+            :label="$t('login.passwordLabel')"
             v-model="password"
             type="password"
             required
@@ -46,7 +50,7 @@
           :disabled="!isFormValid"
           @click="onLogin()"
         >
-          Sign In
+          {{ $t('login.signIn') }}
         </v-btn>
         <v-spacer></v-spacer>
       </v-card-actions>
@@ -93,7 +97,7 @@ export default {
 
 <style>
 #login-card {
-  width: 20em;
+  width: 25em;
 }
 #login-button {
   width: 8em;

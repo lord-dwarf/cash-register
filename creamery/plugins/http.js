@@ -1,6 +1,6 @@
 export default function (context, _inject) {
   context.$http.onRequest((httpConfig) => {
-    const authJwt = context.app.store.state.localStorage.authJwt
+    const authJwt = context.store.state.localStorage.authJwt
     if (authJwt) {
       httpConfig.headers.set('Authorization', 'Bearer ' + authJwt)
     }
@@ -40,6 +40,6 @@ export default function (context, _inject) {
       console.log(error)
     }
     // show message
-    context.app.store.commit('localStorage/setErrorMessage', errorMessageToShow)
+    context.store.commit('localStorage/setErrorMessage', errorMessageToShow)
   })
 }

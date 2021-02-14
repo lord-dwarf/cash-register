@@ -1,4 +1,20 @@
 {
-  "welcomeToCreamery": "Ласкаво просимо до Сироварні",
-  "usernameLabel": "Ім'я користувача"
+  "login": {
+    "welcomeToCreamery": "Ласкаво просимо до Сироварні",
+    "usernameLabel": "Ім`я користувача",
+    "passwordLabel": "Пароль",
+    "signIn": "Увійти"
+  },
+  "home": {
+    "creamery": "Сироварня",
+    "userRoleTeller": "КА-СИР",
+    "userRoleSrTeller": "СТАРШИЙ КА-СИР",
+    "userRoleMerch": "ТОВАРОЗНАВЕЦЬ",
+    "userRoleGuest": "ГІСТЬ",
+    "menuHome": "Додому",
+    "menuLogin": "Увійти",
+    "menuLogout": "Вийти",
+    "menuProducts": "Продукти",
+    "menuMyReceipts": "Мої чеки"
+  }
 }

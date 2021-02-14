@@ -1,4 +1,20 @@
 {
-  "welcomeToCreamery": "Welcome to Creamery",
-  "usernameLabel": "Username"
+  "login": {
+    "welcomeToCreamery": "Welcome to Creamery",
+    "usernameLabel": "Username",
+    "passwordLabel": "Password",
+    "signIn": "Sign In"
+  },
+  "home": {
+    "creamery": "Creamery",
+    "userRoleTeller": "TELLER",
+    "userRoleSrTeller": "SR TELLER",
+    "userRoleMerch": "MERCH",
+    "userRoleGuest": "GUEST",
+    "menuHome": "Home",
+    "menuLogin": "Login",
+    "menuLogout": "Logout",
+    "menuProducts": "Products",
+    "menuMyReceipts": "Receipts"
+  }
 }

@@ -25,7 +25,10 @@ export default {
 
   // Plugins to run before rendering page: https://go.nuxtjs.dev/config-plugins
   plugins: [
-    '~/plugins/http'
+    '~/plugins/http',
+    '~/plugins/vue-cookies',
+    // must run after vue-cookies plugin
+    '~/plugins/lang',
   ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components
@@ -44,15 +47,26 @@ export default {
         defaultLocale: 'ua',
         locales: [
           {
-            code: 'en',
-            name: 'English'
-          },
-          {
             code: 'ua',
             name: 'Українська'
+          },
+          {
+            code: 'en',
+            name: 'English'
           }
         ],
         vueI18n: i18n,
+        strategy: 'no_prefix',
+        detectBrowserLanguage: {
+          useCookie: true,
+          cookieKey: 'cashregister_i18n',
+          fallbackLocale: 'ua',
+          alwaysRedirect: true,
+          onlyOnRoot: false,
+          cookieCrossOrigin: false,
+          // TODO cookie secure must be true for PROD
+          cookieSecure: false,
+        },
       },
     ],
   ],

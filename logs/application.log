@@ -1,0 +1,92 @@
+2021-02-14 00:08:24.478  WARN 59058 --- [HikariPool-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=26m10s229ms).
+2021-02-14 00:08:24.484 DEBUG 59058 --- [HikariPool-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Pool stats (total=10, active=0, idle=10, waiting=0)
+2021-02-14 00:08:24.484 DEBUG 59058 --- [HikariPool-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Fill pool skipped, pool is at sufficient level.
+2021-02-14 00:38:18.725  WARN 59058 --- [HikariPool-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=29m54s247ms).
+2021-02-14 00:38:18.725 DEBUG 59058 --- [HikariPool-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Pool stats (total=10, active=0, idle=10, waiting=0)
+2021-02-14 00:38:18.725 DEBUG 59058 --- [HikariPool-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Fill pool skipped, pool is at sufficient level.
+2021-02-14 00:53:17.751 DEBUG 59058 --- [Catalina-utility-2] org.apache.catalina.session.ManagerBase  : Start expire sessions StandardManager at 1613256797751 sessioncount 0
+2021-02-14 00:53:17.752 DEBUG 59058 --- [Catalina-utility-2] org.apache.catalina.session.ManagerBase  : End expire sessions StandardManager processingTime 1 expired sessions: 0
+2021-02-14 01:00:05.495 DEBUG 59058 --- [HikariPool-1 connection closer] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Closing connection com.mysql.cj.jdbc.ConnectionImpl@429160b7: (connection has passed maxLifetime)
+2021-02-14 01:00:05.509 DEBUG 59058 --- [HikariPool-1 connection adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@25d0b08b
+2021-02-14 01:15:09.487  WARN 59058 --- [HikariPool-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=36m50s758ms).
+2021-02-14 01:15:09.487 DEBUG 59058 --- [HikariPool-1 connection closer] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Closing connection com.mysql.cj.jdbc.ConnectionImpl@3ac6a8c: (connection has passed maxLifetime)
+2021-02-14 01:15:09.527 DEBUG 59058 --- [HikariPool-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Pool stats (total=8, active=0, idle=8, waiting=0)
+2021-02-14 01:15:09.528 DEBUG 59058 --- [HikariPool-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Add connection elided, waiting 0, queue 2
+2021-02-14 01:15:09.537 DEBUG 59058 --- [HikariPool-1 connection closer] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Closing connection com.mysql.cj.jdbc.ConnectionImpl@79046ea6: (connection has passed maxLifetime)
+2021-02-14 01:15:09.546 DEBUG 59058 --- [HikariPool-1 connection closer] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Fill pool skipped, pool is at sufficient level.
+2021-02-14 01:15:09.546 DEBUG 59058 --- [HikariPool-1 connection closer] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Closing connection com.mysql.cj.jdbc.ConnectionImpl@7d794a74: (connection has passed maxLifetime)
+2021-02-14 01:15:09.567 DEBUG 59058 --- [HikariPool-1 connection closer] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Fill pool skipped, pool is at sufficient level.
+2021-02-14 01:15:09.613 DEBUG 59058 --- [HikariPool-1 connection adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@2bb4ceab
+2021-02-14 01:15:09.653 DEBUG 59058 --- [HikariPool-1 connection adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@6a89c490
+2021-02-14 01:15:09.668 DEBUG 59058 --- [HikariPool-1 connection adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@5ba948d9
+2021-02-14 01:15:09.668 DEBUG 59058 --- [HikariPool-1 connection adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - After adding stats (total=10, active=0, idle=10, waiting=0)
+2021-02-14 01:15:14.914 DEBUG 59058 --- [HikariPool-1 connection closer] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Closing connection com.mysql.cj.jdbc.ConnectionImpl@3c44404f: (connection has passed maxLifetime)
+2021-02-14 01:15:14.943 DEBUG 59058 --- [HikariPool-1 connection adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@2f0a2e15
+2021-02-14 01:15:18.915 DEBUG 59058 --- [HikariPool-1 connection closer] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Closing connection com.mysql.cj.jdbc.ConnectionImpl@5f8ed4e5: (connection has passed maxLifetime)
+2021-02-14 01:15:18.935 DEBUG 59058 --- [HikariPool-1 connection adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@6e37242e
+2021-02-14 01:45:26.056  WARN 59058 --- [HikariPool-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=30m16s567ms).
+2021-02-14 01:45:26.062 DEBUG 59058 --- [HikariPool-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Pool stats (total=10, active=0, idle=10, waiting=0)
+2021-02-14 01:45:26.063 DEBUG 59058 --- [HikariPool-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Fill pool skipped, pool is at sufficient level.
+2021-02-14 02:00:29.366 DEBUG 59058 --- [HikariPool-1 connection closer] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Closing connection com.mysql.cj.jdbc.ConnectionImpl@7dd8f769: (connection has passed maxLifetime)
+2021-02-14 02:00:29.456 DEBUG 59058 --- [HikariPool-1 connection adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@4f4cfb41
+2021-02-14 02:00:30.024 DEBUG 59058 --- [Catalina-utility-1] org.apache.catalina.session.ManagerBase  : Start expire sessions StandardManager at 1613260830018 sessioncount 0
+2021-02-14 02:00:30.025 DEBUG 59058 --- [Catalina-utility-1] org.apache.catalina.session.ManagerBase  : End expire sessions StandardManager processingTime 7 expired sessions: 0
+2021-02-14 02:00:33.212 DEBUG 59058 --- [HikariPool-1 connection closer] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Closing connection com.mysql.cj.jdbc.ConnectionImpl@1eb3dede: (connection has passed maxLifetime)
+2021-02-14 02:00:33.242 DEBUG 59058 --- [HikariPool-1 connection adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@e71f17a
+2021-02-14 02:15:34.913 DEBUG 59058 --- [HikariPool-1 connection closer] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Closing connection com.mysql.cj.jdbc.ConnectionImpl@3ce5fd52: (connection has passed maxLifetime)
+2021-02-14 02:15:35.044 DEBUG 59058 --- [HikariPool-1 connection adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@34068668
+2021-02-14 02:15:42.077  WARN 59058 --- [HikariPool-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=30m16s27ms).
+2021-02-14 02:15:42.078 DEBUG 59058 --- [HikariPool-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Pool stats (total=10, active=0, idle=10, waiting=0)
+2021-02-14 02:15:42.078 DEBUG 59058 --- [HikariPool-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Fill pool skipped, pool is at sufficient level.
+2021-02-14 05:15:42.435 DEBUG 59058 --- [HikariPool-1 connection closer] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Closing connection com.mysql.cj.jdbc.ConnectionImpl@600aef79: (connection has passed maxLifetime)
+2021-02-14 05:15:42.501 DEBUG 59058 --- [HikariPool-1 connection adder] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection com.mysql.cj.jdbc.ConnectionImpl@5fcc5088
+2021-02-14 06:15:45.019  WARN 59058 --- [HikariPool-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=4h2s923ms).
+2021-02-14 06:15:45.037 DEBUG 59058 --- [HikariPool-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Pool stats (total=10, active=0, idle=10, waiting=0)
+2021-02-14 06:15:45.040 DEBUG 59058 --- [HikariPool-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Fill pool skipped, pool is at sufficient level.
+2021-02-14 08:15:58.002 DEBUG 59058 --- [Catalina-utility-2] org.apache.catalina.session.ManagerBase  : Start expire sessions StandardManager at 1613283357941 sessioncount 0
+2021-02-14 08:15:58.011 DEBUG 59058 --- [Catalina-utility-2] org.apache.catalina.session.ManagerBase  : End expire sessions StandardManager processingTime 70 expired sessions: 0
+2021-02-14 08:54:01.812  WARN 59058 --- [HikariPool-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=2h38m16s811ms).
+2021-02-14 08:54:01.815 DEBUG 59058 --- [HikariPool-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Pool stats (total=10, active=0, idle=10, waiting=0)
+2021-02-14 08:54:01.815 DEBUG 59058 --- [HikariPool-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Fill pool skipped, pool is at sufficient level.
+2021-02-14 10:36:15.456  WARN 59058 --- [HikariPool-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=1h42m13s645ms).
+2021-02-14 10:36:15.456 DEBUG 59058 --- [HikariPool-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Pool stats (total=10, active=0, idle=10, waiting=0)
+2021-02-14 10:36:15.456 DEBUG 59058 --- [HikariPool-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Fill pool skipped, pool is at sufficient level.
+2021-02-14 12:32:18.167 DEBUG 59058 --- [Catalina-utility-1] org.apache.catalina.session.ManagerBase  : Start expire sessions StandardManager at 1613298737988 sessioncount 0
+2021-02-14 12:32:18.175 DEBUG 59058 --- [Catalina-utility-1] org.apache.catalina.session.ManagerBase  : End expire sessions StandardManager processingTime 185 expired sessions: 0
+2021-02-14 12:32:31.957  WARN 59058 --- [HikariPool-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Thread starvation or clock leap detected (housekeeper delta=1h56m16s499ms).
+2021-02-14 12:32:31.958 DEBUG 59058 --- [HikariPool-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Pool stats (total=10, active=0, idle=10, waiting=0)
+2021-02-14 12:32:31.958 DEBUG 59058 --- [HikariPool-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Fill pool skipped, pool is at sufficient level.
+2021-02-14 12:33:01.960 DEBUG 59058 --- [HikariPool-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Pool stats (total=10, active=0, idle=10, waiting=0)
+2021-02-14 12:33:01.960 DEBUG 59058 --- [HikariPool-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Fill pool skipped, pool is at sufficient level.
+2021-02-14 12:33:18.373 DEBUG 59058 --- [Catalina-utility-1] org.apache.catalina.session.ManagerBase  : Start expire sessions StandardManager at 1613298798372 sessioncount 0
+2021-02-14 12:33:18.373 DEBUG 59058 --- [Catalina-utility-1] org.apache.catalina.session.ManagerBase  : End expire sessions StandardManager processingTime 1 expired sessions: 0
+2021-02-14 12:33:31.965 DEBUG 59058 --- [HikariPool-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Pool stats (total=10, active=0, idle=10, waiting=0)
+2021-02-14 12:33:31.965 DEBUG 59058 --- [HikariPool-1 housekeeper] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Fill pool skipped, pool is at sufficient level.
+2021-02-14 12:33:49.520 DEBUG 59058 --- [SpringContextShutdownHook] ConfigServletWebServerApplicationContext : Closing org.springframework.boot.web.servlet.context.AnnotationConfigServletWebServerApplicationContext@6c5945a7, started on Sat Feb 13 17:18:24 EET 2021
+2021-02-14 12:33:49.525 DEBUG 59058 --- [SpringContextShutdownHook] o.s.c.e.PropertySourcesPropertyResolver  : Found key 'spring.liveBeansView.mbeanDomain' in PropertySource 'systemProperties' with value of type String
+2021-02-14 12:33:49.587 DEBUG 59058 --- [SpringContextShutdownHook] o.s.c.support.DefaultLifecycleProcessor  : Stopping beans in phase 2147483647
+2021-02-14 12:33:49.606 DEBUG 59058 --- [SpringContextShutdownHook] o.s.c.support.DefaultLifecycleProcessor  : Bean 'webServerGracefulShutdown' completed its stop procedure
+2021-02-14 12:33:49.606 DEBUG 59058 --- [SpringContextShutdownHook] o.s.c.support.DefaultLifecycleProcessor  : Stopping beans in phase 2147483646
+2021-02-14 12:33:49.687 DEBUG 59058 --- [SpringContextShutdownHook] o.s.c.support.DefaultLifecycleProcessor  : Bean 'webServerStartStop' completed its stop procedure
+2021-02-14 12:33:49.691  INFO 59058 --- [SpringContextShutdownHook] o.s.s.concurrent.ThreadPoolTaskExecutor  : Shutting down ExecutorService 'applicationTaskExecutor'
+2021-02-14 12:33:49.696 DEBUG 59058 --- [SpringContextShutdownHook] o.s.j.e.a.AnnotationMBeanExporter        : Unregistering JMX-exposed beans on shutdown
+2021-02-14 12:33:49.698 DEBUG 59058 --- [SpringContextShutdownHook] o.s.j.e.a.AnnotationMBeanExporter        : Unregistering JMX-exposed beans
+2021-02-14 12:33:49.699  INFO 59058 --- [SpringContextShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2021-02-14 12:33:49.700 DEBUG 59058 --- [SpringContextShutdownHook] o.hibernate.internal.SessionFactoryImpl  : HHH000031: Closing
+2021-02-14 12:33:49.705 DEBUG 59058 --- [SpringContextShutdownHook] o.h.type.spi.TypeConfiguration$Scope     : Un-scoping TypeConfiguration [org.hibernate.type.spi.TypeConfiguration$Scope@4106cffd] from SessionFactory [org.hibernate.internal.SessionFactoryImpl@727dcc64]
+2021-02-14 12:33:49.714 DEBUG 59058 --- [SpringContextShutdownHook] o.h.s.i.AbstractServiceRegistryImpl      : Implicitly destroying ServiceRegistry on de-registration of all child ServiceRegistries
+2021-02-14 12:33:49.717 DEBUG 59058 --- [SpringContextShutdownHook] o.h.b.r.i.BootstrapServiceRegistryImpl   : Implicitly destroying Boot-strap registry on de-registration of all child ServiceRegistries
+2021-02-14 12:33:49.718  INFO 59058 --- [SpringContextShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2021-02-14 12:33:49.719 DEBUG 59058 --- [SpringContextShutdownHook] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Before shutdown stats (total=10, active=0, idle=10, waiting=0)
+2021-02-14 12:33:49.727 DEBUG 59058 --- [HikariPool-1 connection closer] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Closing connection com.mysql.cj.jdbc.ConnectionImpl@25d0b08b: (connection evicted)
+2021-02-14 12:33:49.733 DEBUG 59058 --- [HikariPool-1 connection closer] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Closing connection com.mysql.cj.jdbc.ConnectionImpl@2bb4ceab: (connection evicted)
+2021-02-14 12:33:49.735 DEBUG 59058 --- [HikariPool-1 connection closer] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Closing connection com.mysql.cj.jdbc.ConnectionImpl@6a89c490: (connection evicted)
+2021-02-14 12:33:49.737 DEBUG 59058 --- [HikariPool-1 connection closer] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Closing connection com.mysql.cj.jdbc.ConnectionImpl@5ba948d9: (connection evicted)
+2021-02-14 12:33:49.740 DEBUG 59058 --- [HikariPool-1 connection closer] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Closing connection com.mysql.cj.jdbc.ConnectionImpl@2f0a2e15: (connection evicted)
+2021-02-14 12:33:49.742 DEBUG 59058 --- [HikariPool-1 connection closer] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Closing connection com.mysql.cj.jdbc.ConnectionImpl@6e37242e: (connection evicted)
+2021-02-14 12:33:49.743 DEBUG 59058 --- [HikariPool-1 connection closer] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Closing connection com.mysql.cj.jdbc.ConnectionImpl@4f4cfb41: (connection evicted)
+2021-02-14 12:33:49.744 DEBUG 59058 --- [HikariPool-1 connection closer] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Closing connection com.mysql.cj.jdbc.ConnectionImpl@e71f17a: (connection evicted)
+2021-02-14 12:33:49.746 DEBUG 59058 --- [HikariPool-1 connection closer] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Closing connection com.mysql.cj.jdbc.ConnectionImpl@34068668: (connection evicted)
+2021-02-14 12:33:49.747 DEBUG 59058 --- [HikariPool-1 connection closer] com.zaxxer.hikari.pool.PoolBase          : HikariPool-1 - Closing connection com.mysql.cj.jdbc.ConnectionImpl@5fcc5088: (connection evicted)
+2021-02-14 12:33:49.748 DEBUG 59058 --- [SpringContextShutdownHook] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - After shutdown stats (total=0, active=0, idle=0, waiting=0)
+2021-02-14 12:33:49.748  INFO 59058 --- [SpringContextShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.

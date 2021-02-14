@@ -21,7 +21,7 @@
             <v-icon>mdi-home</v-icon>
           </v-list-item-action>
           <v-list-item-content>
-            <v-list-item-title v-text="'Home'" />
+            <v-list-item-title v-text="$t('home.menuHome')" />
           </v-list-item-content>
         </v-list-item>
         <v-list-item
@@ -34,7 +34,7 @@
             <v-icon>mdi-cheese</v-icon>
           </v-list-item-action>
           <v-list-item-content>
-            <v-list-item-title v-text="'Products'" />
+            <v-list-item-title v-text="$t('home.menuProducts')" />
           </v-list-item-content>
         </v-list-item>
         <v-list-item
@@ -142,7 +142,7 @@
             <v-icon>mdi-login</v-icon>
           </v-list-item-action>
           <v-list-item-content>
-            <v-list-item-title v-text="'Login'" />
+            <v-list-item-title v-text="$t('home.menuLogin')" />
           </v-list-item-content>
         </v-list-item>
         <v-list-item
@@ -155,7 +155,7 @@
             <v-icon>mdi-logout</v-icon>
           </v-list-item-action>
           <v-list-item-content>
-            <v-list-item-title v-text="'Logout'" />
+            <v-list-item-title v-text="$t('home.menuLogout')" />
           </v-list-item-content>
         </v-list-item>
       </v-list>
@@ -167,7 +167,7 @@
       </v-btn>
       <v-toolbar-title v-text="title" />
       <v-spacer></v-spacer>
-      <v-chip id="avatar-name" class="ma-3 pa-4" color="yellow accent-3">
+      <v-chip id="avatar-name" class="ma-3 pa-4" color="yellow accent-2">
         {{ getUserRoleFriendlyName() }}
       </v-chip>
       <v-avatar size="90">
@@ -193,10 +193,14 @@ export default {
       clipped: false,
       drawer: false,
       miniVariant: false,
-      title: 'Creamery',
     }
   },
   computed: {
+    title: {
+      get() {
+        return this.$t('home.creamery')
+      },
+    },
     isShowErrorMessage: {
       get() {
         return !!this.errorMessage
@@ -207,11 +211,9 @@ export default {
     },
     errorMessage: {
       get() {
-        console.log(this.$store.state.localStorage.errorMessage)
         return this.$store.state.localStorage.errorMessage
       },
       set(value) {
-        console.log(value)
         this.$store.commit('localStorage/setErrorMessage', value)
       },
     },
@@ -235,13 +237,13 @@ export default {
     getUserRoleFriendlyName() {
       switch (this.$store.state.localStorage.userRole) {
         case 'teller':
-          return 'Teller'
+          return this.$t('home.userRoleTeller')
         case 'sr_teller':
-          return 'Sr. Teller'
+          return this.$t('home.userRoleSrTeller')
         case 'merch':
-          return 'Merchandiser'
+          return this.$t('home.userRoleMerch')
         default:
-          return 'Guest'
+          return this.$t('home.userRoleGuest')
       }
     },
     isProductsOneVisible() {

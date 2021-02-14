@@ -7,6 +7,11 @@
         <v-spacer></v-spacer>
       </v-toolbar>
     </template>
+    <template v-slot:[`item.reportName`]="props">
+      <v-chip color="primary">
+        <div>{{ props.item.reportName }}</div>
+      </v-chip>
+    </template>
     <template v-slot:[`item.start`]="props">
       <v-edit-dialog :return-value.sync="props.item.start" large persistent>
         <div>{{ props.item.start }}</div>
@@ -36,8 +41,8 @@
       </v-edit-dialog>
     </template>
     <template v-slot:[`item.actions`]="{ item }">
-      <v-icon class="ma-1" color="blue accent-1" @click="downloadReport(item)">
-        mdi-eye
+      <v-icon class="ma-1" color="green accent-4" @click="downloadReport(item)">
+        mdi-download
       </v-icon>
     </template>
   </v-data-table>

@@ -17,7 +17,8 @@
     "core-js": "^3.8.3",
     "nuxt": "^2.14.12",
     "nuxt-i18n": "^6.20.0",
-    "nuxt-vuex-localstorage": "^1.2.7"
+    "nuxt-vuex-localstorage": "^1.2.7",
+    "vue-cookies": "^1.7.4"
   },
   "devDependencies": {
     "@nuxtjs/eslint-config": "^5.0.0",
