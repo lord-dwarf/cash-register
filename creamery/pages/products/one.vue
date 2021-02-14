@@ -4,44 +4,46 @@
     <v-card id="product-card">
       <v-card-text>
         <v-toolbar flat>
-          <v-toolbar-title>Product #{{ code }}</v-toolbar-title>
+          <v-toolbar-title
+            >{{ $t('productsOne.product') }} #{{ code }}
+          </v-toolbar-title>
           <v-divider class="mx-4" inset vertical></v-divider>
           <div id="toolbar-product-name">{{ name }}</div>
           <v-spacer></v-spacer>
         </v-toolbar>
         <v-form class="mt-5">
           <v-text-field
-            label="Code"
+            :label="$t('productsOne.code')"
             v-model="code"
             :readonly="mode === 'VIEW'"
           ></v-text-field>
           <v-text-field
-            label="Name"
+            :label="$t('productsOne.name')"
             v-model="name"
             :readonly="mode === 'VIEW'"
           ></v-text-field>
           <v-text-field
-            label="Category"
+            :label="$t('productsOne.category')"
             v-model="category"
             :readonly="mode === 'VIEW'"
           ></v-text-field>
           <v-text-field
-            label="Price"
+            :label="$t('productsOne.price')"
             v-model="price"
             :readonly="mode === 'VIEW'"
           ></v-text-field>
           <v-text-field
-            label="In Stock"
+            :label="$t('productsOne.inStock')"
             v-model="amountAvailable"
             :readonly="mode === 'VIEW'"
           ></v-text-field>
           <v-text-field
-            label="Units"
+            :label="$t('productsOne.unit')"
             v-model="amountUnit"
             :readonly="mode === 'VIEW'"
           ></v-text-field>
           <v-text-field
-            label="Details"
+            :label="$t('productsOne.details')"
             v-model="details"
             :readonly="mode === 'VIEW'"
           ></v-text-field>
@@ -49,7 +51,7 @@
       </v-card-text>
       <v-card-actions>
         <v-btn id="back-button" class="ml-2" color="primary" @click="onBack()">
-          Back to Products
+          {{ $t('productsOne.backToProducts') }}
         </v-btn>
         <v-spacer></v-spacer>
         <v-btn
@@ -59,7 +61,7 @@
           @click="onSave()"
           v-if="isSaveButtonVisible()"
         >
-          Save
+          {{ $t('productsOne.save') }}
         </v-btn>
       </v-card-actions>
     </v-card>
@@ -228,12 +230,15 @@ export default {
 #product-card {
   width: 40em;
 }
+
 #save-button {
-  width: 8em;
+  width: 9em;
 }
+
 #back-button {
   width: 14em;
 }
+
 #toolbar-product-name {
   font-size: large;
 }

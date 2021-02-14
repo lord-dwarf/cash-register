@@ -6,11 +6,19 @@
         <v-data-table
           :headers="tableHeaders"
           :items="tableItems"
+          :page.sync="page"
+          :items-per-page="itemsPerPage"
+          hide-default-footer
           class="elevation-1"
+          @page-count="pageCount = $event"
         >
           <template v-slot:top>
             <v-toolbar flat>
-              <v-toolbar-title>Receipt #{{ receiptCode }}</v-toolbar-title>
+              <v-toolbar-title
+                >{{ $t('receiptsOne.receipt') }} #{{
+                  receiptCode
+                }}</v-toolbar-title
+              >
               <v-divider class="mx-4" inset vertical></v-divider>
               <v-spacer></v-spacer>
               <v-btn
@@ -24,7 +32,7 @@
                   mode === 'EDIT'
                 "
               >
-                Cancel
+                {{ $t('receiptsOne.cancel') }}
               </v-btn>
             </v-toolbar>
             <v-row>
@@ -34,31 +42,31 @@
                   <v-card-text>
                     <v-form>
                       <v-text-field
-                        label="Created At"
+                        :label="$t('receiptsOne.createdTime')"
                         v-model="createdTime"
                         readonly
                         dense
                       ></v-text-field>
                       <v-text-field
-                        label="Closed At"
+                        :label="$t('receiptsOne.checkoutTime')"
                         v-model="checkoutTime"
                         readonly
                         dense
                       ></v-text-field>
                       <v-text-field
-                        label="Status"
+                        :label="$t('receiptsOne.status')"
                         v-model="status"
                         readonly
                         dense
                       ></v-text-field>
                       <v-text-field
-                        label="Teller"
+                        :label="$t('receiptsOne.tellerName')"
                         v-model="tellerName"
                         readonly
                         dense
                       ></v-text-field>
                       <v-text-field
-                        label="Total"
+                        :label="$t('receiptsOne.sumTotal')"
                         v-model="sumTotal"
                         readonly
                         dense
@@ -97,10 +105,33 @@
             </v-icon>
           </template>
         </v-data-table>
+        <div class="text-center pt-2">
+          <v-row>
+            <v-spacer></v-spacer>
+            <v-pagination
+              v-model="page"
+              :length="pageCount"
+              class="mt-3"
+            ></v-pagination>
+            <v-spacer></v-spacer>
+            <div id="items-per-page">
+              <v-text-field
+                :value="itemsPerPage"
+                :label="$t('componentDataTable.itemsPerPage')"
+                type="number"
+                min="3"
+                max="20"
+                class="mt-6 mr-3"
+                dense
+                @input="itemsPerPage = parseInt($event, 10)"
+              ></v-text-field>
+            </div>
+          </v-row>
+        </div>
       </v-card-text>
       <v-card-actions>
         <v-btn id="back-button" class="ml-2" color="primary" @click="onBack()">
-          Back to Receipts
+          {{ $t('receiptsOne.backToReceipts') }}
         </v-btn>
         <v-spacer></v-spacer>
       </v-card-actions>
@@ -112,54 +143,60 @@
 <script>
 export default {
   data: () => ({
+    page: 1,
+    pageCount: 0,
+    itemsPerPage: 10,
     createdTime: null,
     checkoutTime: null,
     status: null,
     sumTotal: null,
     tellerName: null,
-    tableHeaders: [
-      {
-        text: 'Product Code',
-        value: 'code',
-        align: 'start',
-        sortable: true,
-      },
-      {
-        text: 'Product Name',
-        value: 'name',
-        align: 'start',
-        sortable: true,
-      },
-      {
-        text: 'Amount',
-        value: 'amount',
-        align: 'start',
-        sortable: true,
-      },
-      {
-        text: 'Price',
-        value: 'price',
-        align: 'start',
-        sortable: true,
-      },
-      {
-        text: 'Cost',
-        value: 'cost',
-        align: 'start',
-        sortable: true,
-      },
-      {
-        text: 'Actions',
-        value: 'actions',
-        align: 'start',
-        sortable: false,
-      },
-    ],
     tableItems: [],
   }),
 
   computed: {
-    // ProductsOne page properties
+    tableHeaders: {
+      get() {
+        return [
+          {
+            text: this.$t('receiptsOne.tableProductCode'),
+            value: 'code',
+            align: 'start',
+            sortable: true,
+          },
+          {
+            text: this.$t('receiptsOne.tableProductName'),
+            value: 'name',
+            align: 'start',
+            sortable: true,
+          },
+          {
+            text: this.$t('receiptsOne.tableAmount'),
+            value: 'amount',
+            align: 'start',
+            sortable: true,
+          },
+          {
+            text: this.$t('receiptsOne.tablePrice'),
+            value: 'price',
+            align: 'start',
+            sortable: true,
+          },
+          {
+            text: this.$t('receiptsOne.tableCost'),
+            value: 'cost',
+            align: 'start',
+            sortable: true,
+          },
+          {
+            text: this.$t('receiptsOne.tableActions'),
+            value: 'actions',
+            align: 'start',
+            sortable: false,
+          },
+        ]
+      },
+    },
     receiptId: {
       get() {
         return this.$store.state.localStorage.receiptsOne.receiptId
@@ -170,7 +207,6 @@ export default {
         return this.$store.state.localStorage.receiptsOne.mode
       },
     },
-    // computed properties
     receiptCode: {
       get() {
         return this.formatReceiptCode(this.receiptId)
@@ -310,13 +346,20 @@ export default {
 #receipt-card {
   width: 70em;
 }
+
 #receipt-fields-card {
   width: 30em;
 }
+
 #back-button {
   width: 14em;
 }
+
 #cancel-button {
+  width: 9em;
+}
+
+#items-per-page {
   width: 8em;
 }
 </style>

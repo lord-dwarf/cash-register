@@ -1,84 +1,131 @@
 <template>
-  <v-data-table :headers="tableHeaders" :items="tableItems" class="elevation-1">
-    <template v-slot:top>
-      <v-toolbar flat>
-        <v-toolbar-title>Reports</v-toolbar-title>
-        <v-divider class="mx-4" inset vertical></v-divider>
+  <div>
+    <v-data-table
+      :headers="tableHeaders"
+      :items="tableItems"
+      :page.sync="page"
+      :items-per-page="itemsPerPage"
+      hide-default-footer
+      class="elevation-1"
+      @page-count="pageCount = $event"
+    >
+      <template v-slot:top>
+        <v-toolbar flat>
+          <v-toolbar-title>{{ $t('reports.reports') }}</v-toolbar-title>
+          <v-divider class="mx-4" inset vertical></v-divider>
+          <v-spacer></v-spacer>
+        </v-toolbar>
+      </template>
+      <template v-slot:[`item.reportName`]="props">
+        <v-chip color="primary">
+          <div>{{ props.item.reportName }}</div>
+        </v-chip>
+      </template>
+      <template v-slot:[`item.start`]="props">
+        <v-edit-dialog :return-value.sync="props.item.start" large persistent>
+          <div>{{ props.item.start }}</div>
+          <template v-slot:input>
+            <div class="mt-4 title">Enter Date</div>
+            <v-text-field
+              v-model="props.item.start"
+              label="Edit"
+              single-line
+              autofocus
+            ></v-text-field>
+          </template>
+        </v-edit-dialog>
+      </template>
+      <template v-slot:[`item.end`]="props">
+        <v-edit-dialog :return-value.sync="props.item.end" large persistent>
+          <div>{{ props.item.end }}</div>
+          <template v-slot:input>
+            <div class="mt-4 title">Enter Date</div>
+            <v-text-field
+              v-model="props.item.end"
+              label="Edit"
+              single-line
+              autofocus
+            ></v-text-field>
+          </template>
+        </v-edit-dialog>
+      </template>
+      <template v-slot:[`item.actions`]="{ item }">
+        <v-icon
+          class="ma-1"
+          color="green accent-4"
+          @click="downloadReport(item)"
+        >
+          mdi-download
+        </v-icon>
+      </template>
+    </v-data-table>
+    <div class="text-center pt-2">
+      <v-row>
         <v-spacer></v-spacer>
-      </v-toolbar>
-    </template>
-    <template v-slot:[`item.reportName`]="props">
-      <v-chip color="primary">
-        <div>{{ props.item.reportName }}</div>
-      </v-chip>
-    </template>
-    <template v-slot:[`item.start`]="props">
-      <v-edit-dialog :return-value.sync="props.item.start" large persistent>
-        <div>{{ props.item.start }}</div>
-        <template v-slot:input>
-          <div class="mt-4 title">Enter Date</div>
+        <v-pagination
+          v-model="page"
+          :length="pageCount"
+          class="mt-3"
+        ></v-pagination>
+        <v-spacer></v-spacer>
+        <div id="items-per-page">
           <v-text-field
-            v-model="props.item.start"
-            label="Edit"
-            single-line
-            autofocus
+            :value="itemsPerPage"
+            :label="$t('componentDataTable.itemsPerPage')"
+            type="number"
+            min="3"
+            max="20"
+            class="mt-6 mr-3"
+            dense
+            @input="itemsPerPage = parseInt($event, 10)"
           ></v-text-field>
-        </template>
-      </v-edit-dialog>
-    </template>
-    <template v-slot:[`item.end`]="props">
-      <v-edit-dialog :return-value.sync="props.item.end" large persistent>
-        <div>{{ props.item.end }}</div>
-        <template v-slot:input>
-          <div class="mt-4 title">Enter Date</div>
-          <v-text-field
-            v-model="props.item.end"
-            label="Edit"
-            single-line
-            autofocus
-          ></v-text-field>
-        </template>
-      </v-edit-dialog>
-    </template>
-    <template v-slot:[`item.actions`]="{ item }">
-      <v-icon class="ma-1" color="green accent-4" @click="downloadReport(item)">
-        mdi-download
-      </v-icon>
-    </template>
-  </v-data-table>
+        </div>
+      </v-row>
+    </div>
+  </div>
 </template>
 
 <script>
 export default {
   data: () => ({
-    tableHeaders: [
-      {
-        text: 'Report',
-        value: 'reportName',
-        align: 'start',
-        sortable: true,
-      },
-      {
-        text: 'Start',
-        value: 'start',
-        align: 'start',
-        sortable: true,
-      },
-      {
-        text: 'End',
-        value: 'end',
-        align: 'start',
-        sortable: true,
-      },
-      {
-        text: 'Actions',
-        value: 'actions',
-        align: 'start',
-        sortable: false,
-      },
-    ],
+    page: 1,
+    pageCount: 0,
+    itemsPerPage: 10,
     tableItems: [],
   }),
+
+  computed: {
+    tableHeaders: {
+      get() {
+        return [
+          {
+            text: this.$t('reports.tableReportName'),
+            value: 'reportName',
+            align: 'start',
+            sortable: true,
+          },
+          {
+            text: this.$t('reports.tableStart'),
+            value: 'start',
+            align: 'start',
+            sortable: true,
+          },
+          {
+            text: this.$t('reports.tableEnd'),
+            value: 'end',
+            align: 'end',
+            sortable: true,
+          },
+          {
+            text: this.$t('reports.tableActions'),
+            value: 'actions',
+            align: 'start',
+            sortable: false,
+          },
+        ]
+      },
+    },
+  },
 
   created() {
     this.tableItems = [
@@ -178,3 +225,9 @@ export default {
   },
 }
 </script>
+
+<style>
+#items-per-page {
+  width: 8em;
+}
+</style>

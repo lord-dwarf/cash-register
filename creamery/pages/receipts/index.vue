@@ -1,81 +1,126 @@
 <template>
-  <v-data-table :headers="tableHeaders" :items="tableItems" class="elevation-1">
-    <template v-slot:top>
-      <v-toolbar flat>
-        <v-toolbar-title>Receipts</v-toolbar-title>
-        <v-divider class="mx-4" inset vertical></v-divider>
-        <div id="toolbar-receipts-all">All</div>
+  <div>
+    <v-data-table
+      :headers="tableHeaders"
+      :items="tableItems"
+      :page.sync="page"
+      :items-per-page="itemsPerPage"
+      hide-default-footer
+      class="elevation-1"
+      @page-count="pageCount = $event"
+    >
+      <template v-slot:top>
+        <v-toolbar flat>
+          <v-toolbar-title>{{ $t('receipts.receipts') }}</v-toolbar-title>
+          <v-divider class="mx-4" inset vertical></v-divider>
+          <div id="toolbar-receipts-all">{{ $t('receipts.all') }}</div>
+          <v-spacer></v-spacer>
+        </v-toolbar>
+      </template>
+      <template v-slot:no-data>
+        <v-btn color="primary" @click="loadReceipts()">
+          {{ $t('componentDataTable.reload') }}
+        </v-btn>
+      </template>
+      <template v-slot:[`item.actions`]="{ item }">
+        <v-icon class="ma-1" color="blue accent-1" @click="viewReceipt(item)">
+          mdi-eye
+        </v-icon>
+        <v-icon
+          class="ma-1"
+          color="yellow accent-3"
+          @click="editReceipt(item)"
+          :disabled="item.status === 'CANCELED'"
+        >
+          mdi-pencil
+        </v-icon>
+      </template>
+    </v-data-table>
+    <div class="text-center pt-2">
+      <v-row>
         <v-spacer></v-spacer>
-      </v-toolbar>
-    </template>
-    <template v-slot:no-data>
-      <v-btn color="primary" @click="loadReceipts()">Reload</v-btn>
-    </template>
-    <template v-slot:[`item.actions`]="{ item }">
-      <v-icon class="ma-1" color="blue accent-1" @click="viewReceipt(item)">
-        mdi-eye
-      </v-icon>
-      <v-icon
-        class="ma-1"
-        color="yellow accent-3"
-        @click="editReceipt(item)"
-        :disabled="item.status === 'CANCELED'"
-      >
-        mdi-pencil
-      </v-icon>
-    </template>
-  </v-data-table>
+        <v-pagination
+          v-model="page"
+          :length="pageCount"
+          class="mt-3"
+        ></v-pagination>
+        <v-spacer></v-spacer>
+        <div id="items-per-page">
+          <v-text-field
+            :value="itemsPerPage"
+            :label="$t('componentDataTable.itemsPerPage')"
+            type="number"
+            min="3"
+            max="20"
+            class="mt-6 mr-3"
+            dense
+            @input="itemsPerPage = parseInt($event, 10)"
+          ></v-text-field>
+        </div>
+      </v-row>
+    </div>
+  </div>
 </template>
 
 <script>
 export default {
   data: () => ({
-    tableHeaders: [
-      {
-        text: 'Code',
-        value: 'receiptCode',
-        align: 'start',
-        sortable: true,
-      },
-      {
-        text: 'Created At',
-        value: 'createdTime',
-        align: 'start',
-        sortable: true,
-      },
-      {
-        text: 'Closed At',
-        value: 'checkoutTime',
-        align: 'start',
-        sortable: true,
-      },
-      {
-        text: 'Status',
-        value: 'status',
-        align: 'start',
-        sortable: true,
-      },
-      {
-        text: 'Teller',
-        value: 'tellerId',
-        align: 'start',
-        sortable: true,
-      },
-      {
-        text: 'Total',
-        value: 'sumTotal',
-        align: 'start',
-        sortable: true,
-      },
-      {
-        text: 'Actions',
-        value: 'actions',
-        align: 'start',
-        sortable: false,
-      },
-    ],
+    page: 1,
+    pageCount: 0,
+    itemsPerPage: 10,
     tableItems: [],
   }),
+
+  computed: {
+    tableHeaders: {
+      get() {
+        return [
+          {
+            text: this.$t('receipts.tableReceiptCode'),
+            value: 'receiptCode',
+            align: 'start',
+            sortable: true,
+          },
+          {
+            text: this.$t('receipts.tableCreatedTime'),
+            value: 'createdTime',
+            align: 'start',
+            sortable: true,
+          },
+          {
+            text: this.$t('receipts.tableCheckoutTime'),
+            value: 'checkoutTime',
+            align: 'start',
+            sortable: true,
+          },
+          {
+            text: this.$t('receipts.tableStatus'),
+            value: 'status',
+            align: 'start',
+            sortable: true,
+          },
+          {
+            text: this.$t('receipts.tableTellerName'),
+            value: 'tellerName',
+            align: 'start',
+            sortable: true,
+          },
+          {
+            text: this.$t('receipts.tableSumTotal'),
+            value: 'sumTotal',
+            align: 'start',
+            sortable: true,
+          },
+          {
+            text: this.$t('receipts.tableActions'),
+            value: 'actions',
+            align: 'start',
+            sortable: false,
+          },
+        ]
+      },
+    },
+  },
 
   async created() {
     await this.loadReceipts()
@@ -94,7 +139,7 @@ export default {
               checkoutTime: this.formatDateTime(r.checkoutTime),
               status: r.status,
               sumTotal: '' + (r.sumTotal / 100).toFixed(2),
-              tellerId: r.user.username,
+              tellerName: r.user.username,
               actions: [],
             }
           })
@@ -147,5 +192,8 @@ export default {
 <style>
 #toolbar-receipts-all {
   font-size: large;
+}
+#items-per-page {
+  width: 8em;
 }
 </style>

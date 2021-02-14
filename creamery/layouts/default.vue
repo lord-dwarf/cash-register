@@ -1,10 +1,10 @@
 <template>
   <v-app dark>
-    <v-snackbar v-model="isShowErrorMessage" :timeout="8000">
-      {{ errorMessage }}
+    <v-snackbar v-model="isShowErrorMessage" :timeout="8000" rounded="pill">
+      {{ localizeErrorMessageIfNeeded(errorMessage) }}
       <template v-slot:action="{ attrs }">
         <v-btn color="blue" text v-bind="attrs" @click="errorMessage = null">
-          Close
+          {{ $t('default.errorMessageClose') }}
         </v-btn>
       </template>
     </v-snackbar>
@@ -21,7 +21,7 @@
             <v-icon>mdi-home</v-icon>
           </v-list-item-action>
           <v-list-item-content>
-            <v-list-item-title v-text="$t('home.menuHome')" />
+            <v-list-item-title v-text="$t('default.menuHome')" />
           </v-list-item-content>
         </v-list-item>
         <v-list-item
@@ -34,7 +34,7 @@
             <v-icon>mdi-cheese</v-icon>
           </v-list-item-action>
           <v-list-item-content>
-            <v-list-item-title v-text="$t('home.menuProducts')" />
+            <v-list-item-title v-text="$t('default.menuProducts')" />
           </v-list-item-content>
         </v-list-item>
         <v-list-item
@@ -49,7 +49,11 @@
           <v-list-item-content>
             <v-list-item-title
               v-text="
-                this.$store.state.localStorage.productsOne.mode + ' Product'
+                $t(
+                  'default.menu' +
+                    this.$store.state.localStorage.productsOne.mode +
+                    'Product'
+                )
               "
             />
           </v-list-item-content>
@@ -64,7 +68,7 @@
             <v-icon>mdi-paper-roll-outline</v-icon>
           </v-list-item-action>
           <v-list-item-content>
-            <v-list-item-title v-text="'Receipts'" />
+            <v-list-item-title v-text="$t('default.menuReceipts')" />
           </v-list-item-content>
         </v-list-item>
         <v-list-item
@@ -79,7 +83,11 @@
           <v-list-item-content>
             <v-list-item-title
               v-text="
-                this.$store.state.localStorage.receiptsOne.mode + ' Receipt'
+                $t(
+                  'default.menu' +
+                    this.$store.state.localStorage.receiptsOne.mode +
+                    'Receipt'
+                )
               "
             />
           </v-list-item-content>
@@ -98,7 +106,7 @@
             <v-icon>mdi-account-cash-outline</v-icon>
           </v-list-item-action>
           <v-list-item-content>
-            <v-list-item-title v-text="'My Receipts'" />
+            <v-list-item-title v-text="$t('default.menuMyReceipts')" />
           </v-list-item-content>
         </v-list-item>
         <v-list-item
@@ -113,8 +121,11 @@
           <v-list-item-content>
             <v-list-item-title
               v-text="
-                this.$store.state.localStorage.myReceiptsOne.mode +
-                ' My Receipt'
+                $t(
+                  'default.menu' +
+                    this.$store.state.localStorage.myReceiptsOne.mode +
+                    'MyReceipt'
+                )
               "
             />
           </v-list-item-content>
@@ -129,7 +140,7 @@
             <v-icon>mdi-file-pdf-box-outline</v-icon>
           </v-list-item-action>
           <v-list-item-content>
-            <v-list-item-title v-text="'Reports'" />
+            <v-list-item-title v-text="$t('default.menuReports')" />
           </v-list-item-content>
         </v-list-item>
         <v-list-item
@@ -142,7 +153,7 @@
             <v-icon>mdi-login</v-icon>
           </v-list-item-action>
           <v-list-item-content>
-            <v-list-item-title v-text="$t('home.menuLogin')" />
+            <v-list-item-title v-text="$t('default.menuLogin')" />
           </v-list-item-content>
         </v-list-item>
         <v-list-item
@@ -155,7 +166,7 @@
             <v-icon>mdi-logout</v-icon>
           </v-list-item-action>
           <v-list-item-content>
-            <v-list-item-title v-text="$t('home.menuLogout')" />
+            <v-list-item-title v-text="$t('default.menuLogout')" />
           </v-list-item-content>
         </v-list-item>
       </v-list>
@@ -181,7 +192,10 @@
       </v-container>
     </v-main>
     <v-footer :absolute="false" app>
-      <span>&copy; {{ new Date().getFullYear() }}</span>
+      <span
+        >&copy;
+        {{ new Date().getFullYear() + ' ' + $t('default.copyright') }}</span
+      >
     </v-footer>
   </v-app>
 </template>
@@ -198,7 +212,7 @@ export default {
   computed: {
     title: {
       get() {
-        return this.$t('home.creamery')
+        return this.$t('default.creamery')
       },
     },
     isShowErrorMessage: {
@@ -237,13 +251,13 @@ export default {
     getUserRoleFriendlyName() {
       switch (this.$store.state.localStorage.userRole) {
         case 'teller':
-          return this.$t('home.userRoleTeller')
+          return this.$t('default.userRoleTeller')
         case 'sr_teller':
-          return this.$t('home.userRoleSrTeller')
+          return this.$t('default.userRoleSrTeller')
         case 'merch':
-          return this.$t('home.userRoleMerch')
+          return this.$t('default.userRoleMerch')
         default:
-          return this.$t('home.userRoleGuest')
+          return this.$t('default.userRoleGuest')
       }
     },
     isProductsOneVisible() {
@@ -269,6 +283,17 @@ export default {
         (role === 'sr_teller' || role === 'teller') &&
         this.$store.state.localStorage.myReceiptsOne.visible
       )
+    },
+    localizeErrorMessageIfNeeded(errorMessage) {
+      if (
+        errorMessage &&
+        errorMessage.startsWith('$') &&
+        this.$te(errorMessage.substring(1))
+      ) {
+        return this.$t(errorMessage.substring(1))
+      } else {
+        return errorMessage
+      }
     },
   },
 }

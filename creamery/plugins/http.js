@@ -9,7 +9,7 @@ export default function (context, _inject) {
     let errorMessageToShow = null
     let isLogError = true
     if (!error.statusCode) {
-      errorMessageToShow = 'Service error'
+      errorMessageToShow = '$errorMessages.serverError'
     } else if (error.statusCode === 400) {
       if (
         error.response &&
@@ -21,20 +21,20 @@ export default function (context, _inject) {
       } else if (error.response && error.response.data) {
         errorMessageToShow = error.response.data
       } else {
-        errorMessageToShow = 'Client error'
+        errorMessageToShow = '$errorMessages.clientError'
       }
     } else if (error.statusCode === 401) {
-      errorMessageToShow = 'User not authorized'
+      errorMessageToShow = '$errorMessages.userNotAuthorized'
       isLogError = false
     } else if (error.statusCode === 403) {
-      errorMessageToShow = 'User not authenticated'
+      errorMessageToShow = '$errorMessages.userNotAuthenticated'
       isLogError = false
     } else if (error.statusCode >= 400 && error.statusCode < 500) {
-      errorMessageToShow = 'Client error'
+      errorMessageToShow = '$errorMessages.clientError'
     } else if (error.statusCode >= 500 && error.statusCode < 600) {
-      errorMessageToShow = 'Service error'
+      errorMessageToShow = '$errorMessages.serverError'
     } else {
-      errorMessageToShow = 'Service error'
+      errorMessageToShow = '$errorMessages.serverError'
     }
     if (isLogError) {
       console.log(error)
