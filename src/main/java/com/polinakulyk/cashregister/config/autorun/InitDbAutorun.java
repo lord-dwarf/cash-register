@@ -3,11 +3,14 @@ package com.polinakulyk.cashregister.config.autorun;
 import com.polinakulyk.cashregister.db.entity.Product;
 import com.polinakulyk.cashregister.db.entity.Receipt;
 import com.polinakulyk.cashregister.db.entity.ReceiptItem;
+import com.polinakulyk.cashregister.db.entity.User;
+import com.polinakulyk.cashregister.service.api.CashboxService;
 import com.polinakulyk.cashregister.service.api.ProductService;
 import com.polinakulyk.cashregister.service.api.ReceiptService;
 import com.polinakulyk.cashregister.service.api.UserService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -20,10 +23,15 @@ public class InitDbAutorun {
 
     private static final AtomicBoolean isContextInitializedOnce = new AtomicBoolean();
 
+    private final CashboxService cashboxService;
     private final UserService userService;
     private final ProductService productService;
     private final ReceiptService receiptService;
 
+    @Value("${cashregister.initdb.cashbox.id}")
+    private String cashboxId;
+    @Value("${cashregister.initdb.cashbox.name}")
+    private String cashboxName;
     @Value("${cashregister.initdb.user.teller.id}")
     private String tellerId;
     @Value("${cashregister.initdb.user.teller.username}")
@@ -32,6 +40,8 @@ public class InitDbAutorun {
     private String tellerPassword;
     @Value("${cashregister.initdb.user.teller.role}")
     private String tellerRole;
+    @Value("${cashregister.initdb.user.teller.full_name}")
+    private String tellerFullName;
     @Value("${cashregister.initdb.user.teller2.id}")
     private String teller2Id;
     @Value("${cashregister.initdb.user.teller2.username}")
@@ -40,6 +50,8 @@ public class InitDbAutorun {
     private String teller2Password;
     @Value("${cashregister.initdb.user.teller2.role}")
     private String teller2Role;
+    @Value("${cashregister.initdb.user.teller2.full_name}")
+    private String teller2FullName;
     @Value("${cashregister.initdb.user.sr_teller.id}")
     private String srTellerId;
     @Value("${cashregister.initdb.user.sr_teller.username}")
@@ -48,6 +60,8 @@ public class InitDbAutorun {
     private String srTellerPassword;
     @Value("${cashregister.initdb.user.sr_teller.role}")
     private String srTellerRole;
+    @Value("${cashregister.initdb.user.sr_teller.full_name}")
+    private String srTellerFullName;
     @Value("${cashregister.initdb.user.merch.id}")
     private String merchId;
     @Value("${cashregister.initdb.user.merch.username}")
@@ -56,12 +70,16 @@ public class InitDbAutorun {
     private String merchPassword;
     @Value("${cashregister.initdb.user.merch.role}")
     private String merchRole;
+    @Value("${cashregister.initdb.user.merch.full_name}")
+    private String merchFullName;
 
     public InitDbAutorun(
+            CashboxService cashboxService,
             UserService userService,
             ProductService productService,
             ReceiptService receiptService
     ) {
+        this.cashboxService = cashboxService;
         this.userService = userService;
         this.productService = productService;
         this.receiptService = receiptService;
@@ -70,10 +88,15 @@ public class InitDbAutorun {
     @EventListener
     public void onApplicationEvent(ContextRefreshedEvent event) {
         if (isContextInitializedOnce.compareAndSet(false, true)) {
+            createCashboxes();
             createUsers();
             createProducts();
             createReceipts();
         }
+    }
+
+    private void createCashboxes() {
+        cashboxService.createWithId(cashboxId, cashboxName, "ACTIVE");
     }
 
     private void createProducts() {
@@ -199,25 +222,45 @@ public class InitDbAutorun {
     private void createUsers() {
 
         // predefined ids make the already existing auth JTWs to be valid
-        // TODO remove UserWithId class
         userService.createWithId(
-                tellerId, tellerUsername, tellerPassword, tellerRole, false);
+                tellerId,
+                cashboxId,
+                tellerUsername,
+                tellerPassword,
+                tellerRole,
+                tellerFullName,
+                false
+        );
+        User user = userService.findById(tellerId).get();
+        user.getCashbox();
+
         userService.createWithId(
                 teller2Id,
+                cashboxId,
                 teller2Username,
                 teller2Password,
                 teller2Role,
+                teller2FullName,
                 false
         );
         userService.createWithId(
                 srTellerId,
+                cashboxId,
                 srTellerUsername,
                 srTellerPassword,
                 srTellerRole,
+                srTellerFullName,
                 false
         );
         userService.createWithId(
-                merchId, merchUsername, merchPassword, merchRole, false);
+                merchId,
+                cashboxId,
+                merchUsername,
+                merchPassword,
+                merchRole,
+                merchFullName,
+                false
+        );
     }
 
     private void createReceipts() {
@@ -227,25 +270,29 @@ public class InitDbAutorun {
     }
 
     private void createReceipts(String userId) {
-        for (Product p : productService.findAll()) {
-            Receipt r = receiptService.createReceipt(userId);
-            receiptService.add(r.getId(), new ReceiptItem()
-                    .setProduct(p)
-                    .setAmount(50));
-        }
-        for (Product p : productService.findAll()) {
-            Receipt r = receiptService.createReceipt(userId);
-            receiptService.add(r.getId(), new ReceiptItem()
-                    .setProduct(p)
-                    .setAmount(50));
-            receiptService.cancel(r.getId());
-        }
+
+        // COMPLETED receipts
         for (Product p : productService.findAll()) {
             Receipt r = receiptService.createReceipt(userId);
             receiptService.add(r.getId(), new ReceiptItem()
                     .setProduct(p)
                     .setAmount(50));
             receiptService.complete(r.getId());
+        }
+
+        // x1 CREATED receipt
+        Receipt receipt = receiptService.createReceipt(userId);
+        receiptService.add(receipt.getId(), new ReceiptItem()
+                .setProduct(productService.findAll().stream().findFirst().get())
+                .setAmount(50));
+
+        // CANCELED receipts
+        for (Product p : productService.findAll()) {
+            Receipt r = receiptService.createReceipt(userId);
+            receiptService.add(r.getId(), new ReceiptItem()
+                    .setProduct(p)
+                    .setAmount(50));
+            receiptService.cancel(r.getId());
         }
     }
 }

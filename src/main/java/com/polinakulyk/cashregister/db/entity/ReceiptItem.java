@@ -15,10 +15,13 @@ public class ReceiptItem {
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private String id;
+
     @ManyToOne
     private Receipt receipt;
+
     @ManyToOne
     private Product product;
+
     private String name;
     private int amount;
     private ProductAmountUnit amountUnit;

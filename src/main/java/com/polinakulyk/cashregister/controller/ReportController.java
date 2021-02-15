@@ -1,7 +1,7 @@
 package com.polinakulyk.cashregister.controller;
 
 import com.polinakulyk.cashregister.controller.dto.DateRangeDto;
-import com.polinakulyk.cashregister.controller.dto.ProductSoldResponseDto;
+import com.polinakulyk.cashregister.controller.dto.XZReportDto;
 import com.polinakulyk.cashregister.db.entity.Product;
 import com.polinakulyk.cashregister.service.api.ReportService;
 import com.polinakulyk.cashregister.util.CashRegisterUtil;
@@ -9,6 +9,7 @@ import java.util.List;
 import javax.annotation.security.RolesAllowed;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,22 +28,17 @@ public class ReportController {
         this.reportService = reportService;
     }
 
-    @PostMapping("/products-sold")
+    @GetMapping("/x")
     @RolesAllowed({SR_TELLER})
-    public @ResponseBody List<ProductSoldResponseDto> listProductsSold(
-            @RequestBody DateRangeDto dateRangeDto) {
-        return reportService.listProductsSold(
-                dateRangeDto.getStart(), dateRangeDto.getEnd());
+    public @ResponseBody
+    XZReportDto reportX() {
+        return reportService.createXZReport("X");
     }
 
-    @PostMapping("/products-not-sold")
+    @GetMapping("/z")
     @RolesAllowed({SR_TELLER})
-    public @ResponseBody List<Product> listProductsNotSold(
-            @RequestBody DateRangeDto dateRangeDto) {
-        List<Product> products = reportService.listProductsNotSold(
-                dateRangeDto.getStart(), dateRangeDto.getEnd());
-        products.forEach(CashRegisterUtil::strip);
-        return products;
+    public @ResponseBody
+    XZReportDto reportZ() {
+        return reportService.createXZReport("Z");
     }
-
 }

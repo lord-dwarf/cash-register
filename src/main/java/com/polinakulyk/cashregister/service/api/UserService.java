@@ -9,7 +9,20 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 public interface UserService extends UserDetailsService {
     Optional<User> findById(String userId);
     UserDetails loadUserByUsername(String username) throws UsernameNotFoundException;
-    User create(String username, String password, String role, boolean isPasswordEncoded);
+    User create(
+            String username,
+            String password,
+            String role,
+            String fullName,
+            boolean isPasswordEncoded
+    );
     void createWithId(
-            String id, String username, String password, String role, boolean isPasswordEncoded);
+            String id,
+            String cashboxId,
+            String username,
+            String password,
+            String role,
+            String fullName,
+            boolean isPasswordEncoded
+    );
 }

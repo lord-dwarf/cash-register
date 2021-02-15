@@ -29,7 +29,9 @@
                   (mode === 'EDIT' || mode === 'NEW') &&
                   tableItems.length > 0
                 "
-                :disabled="isReceiptItemEditionInProgress()"
+                :disabled="
+                  isReceiptItemEditionInProgress() || shiftStatus !== 'ACTIVE'
+                "
               >
                 {{ $t('myReceiptsOne.complete') }}
               </v-btn>
@@ -45,7 +47,9 @@
                   (mode === 'EDIT' || mode === 'NEW') &&
                   tableItems.length > 0
                 "
-                :disabled="isReceiptItemEditionInProgress()"
+                :disabled="
+                  isReceiptItemEditionInProgress() || shiftStatus !== 'ACTIVE'
+                "
               >
                 {{ $t('myReceiptsOne.cancel') }}
               </v-btn>
@@ -264,7 +268,9 @@
           color="primary"
           @click="onAddReceiptItem()"
           v-if="status === 'CREATED' && (mode === 'EDIT' || mode === 'NEW')"
-          :disabled="isReceiptItemEditionInProgress()"
+          :disabled="
+            isReceiptItemEditionInProgress() || shiftStatus !== 'ACTIVE'
+          "
         >
           {{ $t('myReceiptsOne.addItem') }}
         </v-btn>
@@ -299,6 +305,11 @@ export default {
   }),
 
   computed: {
+    shiftStatus: {
+      get() {
+        return this.$store.state.shiftStatus
+      },
+    },
     tableHeaders: {
       get() {
         return [
@@ -730,7 +741,7 @@ export default {
 }
 
 #add-item-button {
-  width: 10em;
+  width: 12em;
 }
 
 #items-per-page {

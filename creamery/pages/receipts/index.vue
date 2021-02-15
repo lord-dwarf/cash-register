@@ -30,7 +30,9 @@
           class="ma-1"
           color="yellow accent-3"
           @click="editReceipt(item)"
-          :disabled="item.status === 'CANCELED'"
+          :disabled="
+            item.status === 'CANCELED' || item.shiftStatus !== 'ACTIVE'
+          "
         >
           mdi-pencil
         </v-icon>
@@ -138,6 +140,7 @@ export default {
               createdTime: this.formatDateTime(r.createdTime),
               checkoutTime: this.formatDateTime(r.checkoutTime),
               status: r.status,
+              shiftStatus: r.shiftStatus,
               sumTotal: '' + (r.sumTotal / 100).toFixed(2),
               tellerName: r.user.username,
               actions: [],
@@ -193,6 +196,7 @@ export default {
 #toolbar-receipts-all {
   font-size: large;
 }
+
 #items-per-page {
   width: 8em;
 }

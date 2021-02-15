@@ -54,6 +54,7 @@
           class="ma-1"
           color="green accent-4"
           @click="downloadReport(item)"
+          :disabled="shiftStatus !== 'ACTIVE'"
         >
           mdi-download
         </v-icon>
@@ -95,6 +96,14 @@ export default {
   }),
 
   computed: {
+    shiftStatus: {
+      get() {
+        return this.$store.state.shiftStatus
+      },
+      set(val) {
+        this.$store.commit('setShiftStatus', val)
+      },
+    },
     tableHeaders: {
       get() {
         return [
@@ -102,18 +111,6 @@ export default {
             text: this.$t('reports.tableReportName'),
             value: 'reportName',
             align: 'start',
-            sortable: true,
-          },
-          {
-            text: this.$t('reports.tableStart'),
-            value: 'start',
-            align: 'start',
-            sortable: true,
-          },
-          {
-            text: this.$t('reports.tableEnd'),
-            value: 'end',
-            align: 'end',
             sortable: true,
           },
           {
@@ -130,17 +127,13 @@ export default {
   created() {
     this.tableItems = [
       {
-        reportName: 'Products Sold',
-        reportKind: 'products-sold',
-        start: this.formatDateBeginOfCurrentMonth(),
-        end: this.formatDateEndOfCurrentDay(),
+        reportName: 'X Report',
+        reportKind: 'x-report',
         actions: [],
       },
       {
-        reportName: 'Products Not Sold',
-        reportKind: 'products-not-sold',
-        start: this.formatDateBeginOfCurrentMonth(),
-        end: this.formatDateEndOfCurrentDay(),
+        reportName: 'Z Report',
+        reportKind: 'z-report',
         actions: [],
       },
     ]
@@ -200,11 +193,11 @@ export default {
     },
     downloadReport(reportItem) {
       this.$http
-        .$post('/reports/' + reportItem.reportKind, {
-          start: this.convertDateStringToIsoString(reportItem.start, 0),
-          end: this.convertDateStringToIsoString(reportItem.end, 59),
-        })
+        .$get('/reports/' + (reportItem.reportKind === 'x-report' ? 'x' : 'z'))
         .then((report) => {
+          if (reportItem.reportKind === 'z-report') {
+            this.shiftStatus = 'INACTIVE'
+          }
           this.downloadJson(report, reportItem.reportKind)
           return report
         })

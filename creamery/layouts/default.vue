@@ -178,6 +178,22 @@
       </v-btn>
       <v-toolbar-title v-text="title" />
       <v-spacer></v-spacer>
+      <div>
+        {{
+          'Shift ' +
+          (shiftStatus || 'LOADING') +
+          (shiftTime ? ' | ' + shiftTime + '' : '')
+        }}
+      </div>
+      <v-btn
+        v-if="shiftStatus === 'INACTIVE'"
+        color="green"
+        text
+        @click="activateShift()"
+      >
+        Start
+      </v-btn>
+      <v-divider class="mx-4" inset vertical></v-divider>
       <v-chip id="avatar-name" class="ma-3 pa-4" color="yellow accent-2">
         {{ getUserRoleFriendlyName() }}
       </v-chip>
@@ -207,9 +223,23 @@ export default {
       clipped: false,
       drawer: false,
       miniVariant: false,
+      shiftTime: null,
     }
   },
   computed: {
+    shiftStatus: {
+      get() {
+        return this.$store.state.shiftStatus
+      },
+      set(val) {
+        this.$store.commit('setShiftStatus', val)
+      },
+    },
+    userRole: {
+      get() {
+        return this.$store.state.localStorage.userRole
+      },
+    },
     title: {
       get() {
         return this.$t('default.creamery')
@@ -232,9 +262,41 @@ export default {
       },
     },
   },
+  created() {
+    this.pullShiftStatus()
+  },
   methods: {
+    async pullShiftStatus() {
+      setTimeout(this.pullShiftStatus, 12000)
+      if (this.userRole !== null) {
+        await this.$http
+          .$get('/cashbox/shift-status')
+          .then((shiftStatus) => {
+            this.shiftStatus = shiftStatus.shiftStatus
+            this.shiftTime = shiftStatus.shiftStatusElapsedTime
+            return shiftStatus
+          })
+          .catch((_error) => {
+            // nothing
+            return Promise.resolve(null)
+          })
+      }
+    },
+    async activateShift() {
+      await this.$http
+        .$patch('/cashbox/activate-shift', {})
+        .then((shiftStatus) => {
+          this.shiftStatus = shiftStatus.shiftStatus
+          this.shiftTime = shiftStatus.shiftStatusElapsedTime
+          return shiftStatus
+        })
+        .catch((_error) => {
+          // nothing
+          return Promise.resolve(null)
+        })
+    },
     getUserRoleImage() {
-      switch (this.$store.state.localStorage.userRole) {
+      switch (this.userRole) {
         case 'teller':
           return this.getStaticRootUrl() + '/avatar-teller.png'
         case 'sr_teller':
@@ -249,7 +311,7 @@ export default {
       return window.location.protocol + '//' + window.location.host
     },
     getUserRoleFriendlyName() {
-      switch (this.$store.state.localStorage.userRole) {
+      switch (this.userRole) {
         case 'teller':
           return this.$t('default.userRoleTeller')
         case 'sr_teller':
@@ -261,26 +323,25 @@ export default {
       }
     },
     isProductsOneVisible() {
-      const role = this.$store.state.localStorage.userRole
       const mode = this.$store.state.localStorage.productsOne.mode
       return (
-        (((role === 'teller' || role === 'sr_teller' || role === 'merch') &&
+        (((this.userRole === 'teller' ||
+          this.userRole === 'sr_teller' ||
+          this.userRole === 'merch') &&
           mode === 'VIEW') ||
-          (role === 'merch' && (mode === 'EDIT' || mode === 'ADD'))) &&
+          (this.userRole === 'merch' && (mode === 'EDIT' || mode === 'ADD'))) &&
         this.$store.state.localStorage.productsOne.visible
       )
     },
     isReceiptsOneVisible() {
-      const role = this.$store.state.localStorage.userRole
       return (
-        role === 'sr_teller' &&
+        this.userRole === 'sr_teller' &&
         this.$store.state.localStorage.receiptsOne.visible
       )
     },
     isMyReceiptsOneVisible() {
-      const role = this.$store.state.localStorage.userRole
       return (
-        (role === 'sr_teller' || role === 'teller') &&
+        (this.userRole === 'sr_teller' || this.userRole === 'teller') &&
         this.$store.state.localStorage.myReceiptsOne.visible
       )
     },

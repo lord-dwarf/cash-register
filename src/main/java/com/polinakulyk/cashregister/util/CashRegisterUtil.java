@@ -1,5 +1,6 @@
 package com.polinakulyk.cashregister.util;
 
+import com.polinakulyk.cashregister.db.entity.Cashbox;
 import com.polinakulyk.cashregister.db.entity.Product;
 import com.polinakulyk.cashregister.db.entity.Receipt;
 import com.polinakulyk.cashregister.db.entity.ReceiptItem;
@@ -9,6 +10,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.util.Date;
+import java.util.UUID;
 
 public class CashRegisterUtil {
 
@@ -43,6 +45,10 @@ public class CashRegisterUtil {
         return date.toInstant().atZone(ZoneId.of("Z")).toLocalDateTime();
     }
 
+    public static String generateUuid() {
+        return UUID.randomUUID().toString();
+    }
+
     // TODO replace all strip methods usage, with explicit loading of related entities
     public static Product strip(Product product) {
         return product.setReceiptItems(null);
@@ -63,7 +69,13 @@ public class CashRegisterUtil {
     }
 
     public static User strip(User user) {
-        return user.setReceipts(null);
+        return user
+                .setReceipts(null)
+                .setCashbox(strip(user.getCashbox()));
+    }
+
+    public static Cashbox strip(Cashbox cashbox) {
+        return cashbox.setUsers(null);
     }
 
 }

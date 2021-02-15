@@ -1,15 +1,24 @@
 package com.polinakulyk.cashregister.service;
 
-import com.polinakulyk.cashregister.controller.dto.ProductSoldResponseDto;
+import com.polinakulyk.cashregister.controller.dto.XZReportDto;
+import com.polinakulyk.cashregister.db.entity.Cashbox;
 import com.polinakulyk.cashregister.db.entity.Product;
 import com.polinakulyk.cashregister.db.entity.Receipt;
 import com.polinakulyk.cashregister.db.entity.ReceiptItem;
+import com.polinakulyk.cashregister.db.entity.User;
 import com.polinakulyk.cashregister.db.repository.ProductRepository;
 import com.polinakulyk.cashregister.db.repository.ReceiptRepository;
 import com.polinakulyk.cashregister.exception.CashRegisterException;
+import com.polinakulyk.cashregister.security.api.AuthHelper;
+import com.polinakulyk.cashregister.service.api.CashboxService;
 import com.polinakulyk.cashregister.service.api.ReportService;
+import com.polinakulyk.cashregister.service.api.UserService;
+import com.polinakulyk.cashregister.util.CashRegisterUtil;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,108 +35,98 @@ import static com.polinakulyk.cashregister.util.CashRegisterUtil.*;
 public class ReportServiceImpl implements ReportService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ReportServiceImpl.class);
 
-    // we use repos, because we need an iterator that may potentially be lazy,
+    // we use repo, because we need an iterator that may potentially be lazy,
     // while services provide eager lists, instead of iterator
     private final ReceiptRepository receiptRepository;
-    private final ProductRepository productRepository;
+    private final AuthHelper authHelper;
+    private final UserService userService;
+    private final CashboxService cashboxService;
 
     public ReportServiceImpl(
-            ReceiptRepository receiptRepository, ProductRepository productRepository) {
+            ReceiptRepository receiptRepository,
+            AuthHelper authHelper,
+            UserService userService,
+            CashboxService cashboxService
+    ) {
         this.receiptRepository = receiptRepository;
-        this.productRepository = productRepository;
+        this.authHelper = authHelper;
+        this.userService = userService;
+        this.cashboxService = cashboxService;
     }
 
     @Override
     @Transactional
-    public List<ProductSoldResponseDto> listProductsSold(LocalDate start, LocalDate end) {
+    public XZReportDto createXZReport(String reportKind) {
 
-        // correct and validate time bounds
-        if (start == null) {
-            start = now().toLocalDate();
-        }
-        if (end == null) {
-            end = now().toLocalDate();
-        }
-        if (start.isAfter(end)) {
-            throw new CashRegisterException(
-                    HttpStatus.BAD_REQUEST,
-                    quote("Start date must not be after end date", start, end));
-        }
+        String userId = authHelper.getUserId();
+        User user = userService.findById(userId).orElseThrow(() -> new CashRegisterException(
+                HttpStatus.FORBIDDEN, quote("User not found", userId)));
 
-        // select COMPLETED receipts
-        List<Receipt> receipts = new ArrayList<>();
+        Cashbox cashbox = user.getCashbox();
+        LocalDateTime shiftStartTime = cashbox.getShiftStatusTime();
+        LocalDateTime createdTime = now();
+        List<Receipt> receiptsCompleted = new ArrayList<>();
+        List<Receipt> receiptsCanceled = new ArrayList<>();
         for (Receipt receipt : receiptRepository.findAll()) {
-            if ("COMPLETED".equals(receipt.getStatus())) {
-                LocalDate receiptDate =  receipt.getCheckoutTime().toLocalDate();
-                if ((start.isBefore(receiptDate) || start.isEqual(receiptDate))
-                        && (end.isAfter(receiptDate) || end.isEqual(receiptDate))) {
-                    receipts.add(receipt);
+            if ("ACTIVE".equals(receipt.getShiftStatus())) {
+                String status = receipt.getStatus();
+                if (!("COMPLETED".equals(status) || "CANCELED".equals(status))) {
+                    throw new CashRegisterException(quote(
+                            "Receipt must be either completed or canceled", receipt.getId()));
+                }
+                if (!(shiftStartTime.isBefore(receipt.getCreatedTime())
+                                && shiftStartTime.isBefore(receipt.getCheckoutTime()))) {
+                    throw new CashRegisterException(quote(
+                            "Receipt must be modified after shift start",
+                            receipt.getId()));
+                }
+                if (!(createdTime.isAfter(receipt.getCreatedTime())
+                        && createdTime.isAfter(receipt.getCheckoutTime()))) {
+                    throw new CashRegisterException(quote(
+                            "Receipt must be modified before report create time",
+                            receipt.getId()));
+                }
+                if ("COMPLETED".equals(status)) {
+                    receiptsCompleted.add(receipt);
+                } else if ("CANCELED".equals(status)) {
+                    receiptsCanceled.add(receipt);
+                } else {
+                    throw new UnsupportedOperationException("Should never happen");
                 }
             }
         }
 
-        // collect products sold, calculate total cost of each product sold
-        Map<String, ProductSoldResponseDto> productIdToProductSold = new HashMap<>();
-        for (Receipt receipt : receipts) {
-            for (ReceiptItem receiptItem : receipt.getReceiptItems()) {
-                int receiptItemCost = calcCost(
-                        receiptItem.getPrice(),
-                        receiptItem.getAmount(),
-                        receiptItem.getAmountUnit());
-                Product product = receiptItem.getProduct();
-                String productId = product.getId();
-                ProductSoldResponseDto productSold = productIdToProductSold.get(productId);
-                if (productSold == null) {
-                    productSold = new ProductSoldResponseDto()
-                            .setProductId(productId)
-                            .setProductCode(product.getCode())
-                            .setProductCategory(product.getCategory())
-                            .setProductName(product.getName())
-                            .setProductAmountUnit(product.getAmountUnit())
-                            .setProductAmountAvailable(product.getAmountAvailable())
-                            .setProductPrice(product.getPrice());
-                    productIdToProductSold.put(productId, productSold);
-                }
-                productSold.setProductSoldSumTotal(
-                        productSold.getProductSoldSumTotal() + receiptItemCost);
+        long minutesSince2021 = ChronoUnit.MINUTES.between(
+                now().withYear(2021).withMonth(1).truncatedTo(ChronoUnit.DAYS),
+                createdTime);
+
+        int sum = 0;
+        for (Receipt receipt : receiptsCompleted) {
+            sum += receipt.getSumTotal();
+        }
+
+        if ("Z".equals(reportKind)) {
+            for (Receipt receipt : receiptsCompleted) {
+                receipt.setShiftStatus("INACTIVE");
+                receiptRepository.save(receipt);
             }
-        }
-        return new ArrayList<>(productIdToProductSold.values());
-    }
-
-    @Override
-    public List<Product> listProductsNotSold(LocalDate start, LocalDate end) {
-
-        // correct and validate time bounds
-        if (start == null) {
-            start = now().toLocalDate();
-        }
-        if (end == null) {
-            end = now().toLocalDate();
-        }
-        if (start.isAfter(end)) {
-            throw new CashRegisterException(
-                    HttpStatus.BAD_REQUEST,
-                    quote("Start date must not be after end date", start, end));
-        }
-
-        // select products
-        List<Product> products = new ArrayList<>();
-        outer:
-        for (Product product : productRepository.findAll()) {
-            for (ReceiptItem receiptItem : product.getReceiptItems()) {
-                Receipt receipt = receiptItem.getReceipt();
-                if ("COMPLETED".equals(receipt.getStatus())) {
-                    LocalDate receiptDate = receipt.getCheckoutTime().toLocalDate();
-                    if ((start.isBefore(receiptDate) || start.isEqual(receiptDate))
-                            && (end.isAfter(receiptDate) || end.isEqual(receiptDate))) {
-                        continue outer;
-                    }
-                }
+            for (Receipt receipt : receiptsCanceled) {
+                receipt.setShiftStatus("INACTIVE");
+                receiptRepository.save(receipt);
             }
-            products.add(product);
+            cashboxService.deactivateShift();
         }
 
-        return products;
+        XZReportDto report = new XZReportDto()
+                .setReportId("" + minutesSince2021)
+                .setReportKind(reportKind)
+                .setCashboxName(cashbox.getName())
+                .setShiftStartTime(shiftStartTime)
+                .setCreatedTime(createdTime)
+                .setCreatedBy(user.getFullName())
+                .setNumReceiptsCompleted(receiptsCompleted.size())
+                .setSumTotal(sum);
+
+        return report;
     }
 }

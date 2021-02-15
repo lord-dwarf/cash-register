@@ -20,7 +20,7 @@
           <v-btn
             id="new-receipt-button"
             color="primary"
-            dark
+            :disabled="shiftStatus !== 'ACTIVE'"
             @click="newReceipt()"
           >
             {{ $t('myReceipts.newReceipt') }}
@@ -86,6 +86,11 @@ export default {
   }),
 
   computed: {
+    shiftStatus: {
+      get() {
+        return this.$store.state.shiftStatus
+      },
+    },
     tableHeaders: {
       get() {
         return [

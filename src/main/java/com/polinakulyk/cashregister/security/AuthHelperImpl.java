@@ -1,8 +1,7 @@
 package com.polinakulyk.cashregister.security;
 
-import com.polinakulyk.cashregister.db.entity.User;
-import com.polinakulyk.cashregister.security.dto.JwtDto;
 import com.polinakulyk.cashregister.security.api.AuthHelper;
+import com.polinakulyk.cashregister.security.dto.JwtDto;
 import com.polinakulyk.cashregister.security.dto.UserDetailsDto;
 import com.polinakulyk.cashregister.util.CashRegisterUtil;
 import io.jsonwebtoken.Claims;
@@ -28,8 +27,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
-import static com.polinakulyk.cashregister.util.CashRegisterUtil.*;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.from;
+import static com.polinakulyk.cashregister.util.CashRegisterUtil.now;
 
 @Component
 public class AuthHelperImpl implements AuthHelper {
@@ -133,12 +132,12 @@ public class AuthHelperImpl implements AuthHelper {
     @Override
     public String getUserId() {
         Authentication auth = getAuthentication();
-        return ((UserDetailsDto)auth.getPrincipal()).getUsername();
+        return ((UserDetailsDto) auth.getPrincipal()).getUsername();
     }
 
     @Override
     public String getUsername() {
         Authentication auth = getAuthentication();
-        return ((UserDetailsDto)auth.getPrincipal()).getPrincipalName();
+        return ((UserDetailsDto) auth.getPrincipal()).getPrincipalName();
     }
 }

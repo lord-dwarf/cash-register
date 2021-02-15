@@ -18,12 +18,16 @@ public class Receipt {
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private String id;
+
     private LocalDateTime createdTime;
     private LocalDateTime checkoutTime;
     private String status;
+    private String shiftStatus;
     private int sumTotal;
+
     @OneToMany(mappedBy = "receipt", cascade = CascadeType.ALL)
     private List<ReceiptItem> receiptItems = new ArrayList<>();
+
     @ManyToOne
     private User user;
 
@@ -60,6 +64,15 @@ public class Receipt {
 
     public Receipt setStatus(String status) {
         this.status = status;
+        return this;
+    }
+
+    public String getShiftStatus() {
+        return shiftStatus;
+    }
+
+    public Receipt setShiftStatus(String shiftStatus) {
+        this.shiftStatus = shiftStatus;
         return this;
     }
 
@@ -113,9 +126,10 @@ public class Receipt {
                 .add("createdTime=" + createdTime)
                 .add("checkoutTime=" + checkoutTime)
                 .add("status='" + status + "'")
+                .add("shiftStatus='" + shiftStatus + "'")
                 .add("sumTotal=" + sumTotal)
                 .add("receiptItems=" + receiptItems)
-                .add("user.id=" + user.getId())
+                .add("user.id=" + (user != null ? user.getId() : null))
                 .toString();
     }
 }

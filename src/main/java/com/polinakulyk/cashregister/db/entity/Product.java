@@ -21,25 +21,33 @@ public class Product {
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private String id;
+
     @Column(unique = true)
     @NotBlank(message = "Code cannot be blank")
     private String code;
+
     @NotBlank(message = "Category cannot be blank")
     private String category;
+
     @NotBlank(message = "Name cannot be blank")
     private String name;
+
     @NotBlank(message = "Name cannot be blank")
     private String details;
+
     @NotNull(message = "Price cannot be null")
     @Min(value = 1, message = "Price must be greater than 0")
     @Max(value = 9999999, message = "Price must be less than 100k")
     private Integer price;
+
     @NotNull(message = "Amount unit cannot be null")
     private ProductAmountUnit amountUnit;
+
     @NotNull(message = "Amount available cannot be null")
     @Min(value = 0, message = "Amount available must be non-negative")
     @Max(value = 9999999, message = "Amount available must be less than 10k")
     private Integer amountAvailable;
+
     @OneToMany(mappedBy = "product")
     @NotNull(message = "Receipt items cannot be null")
     private Set<ReceiptItem> receiptItems = new HashSet<>();

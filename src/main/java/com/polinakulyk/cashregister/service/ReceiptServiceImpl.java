@@ -8,7 +8,6 @@ import com.polinakulyk.cashregister.db.entity.User;
 import com.polinakulyk.cashregister.db.repository.ReceiptItemRepository;
 import com.polinakulyk.cashregister.db.repository.ReceiptRepository;
 import com.polinakulyk.cashregister.exception.CashRegisterException;
-import com.polinakulyk.cashregister.security.api.AuthHelper;
 import com.polinakulyk.cashregister.service.api.ProductService;
 import com.polinakulyk.cashregister.service.api.ReceiptService;
 import com.polinakulyk.cashregister.service.api.UserService;
@@ -33,20 +32,17 @@ public class ReceiptServiceImpl implements ReceiptService {
     private final ReceiptRepository receiptRepository;
     private final ReceiptItemRepository receiptItemRepository;
     private final ProductService productService;
-    private final AuthHelper authHelper;
     private final UserService userService;
 
     public ReceiptServiceImpl(
             ReceiptRepository receiptRepository,
             ReceiptItemRepository receiptItemRepository,
             ProductService productService,
-            AuthHelper authHelper,
             UserService userService
     ) {
         this.receiptRepository = receiptRepository;
         this.receiptItemRepository = receiptItemRepository;
         this.productService = productService;
-        this.authHelper = authHelper;
         this.userService = userService;
     }
 
@@ -66,10 +62,11 @@ public class ReceiptServiceImpl implements ReceiptService {
                         HttpStatus.FORBIDDEN,
                         quote("User not found", tellerId)));
 
-        // filter teller's receipts
+        // filter teller's receipts that belong to active shift
         List<Receipt> receipts = new ArrayList<>();
         receiptRepository.findAll().forEach((receipt) -> {
-            if (tellerId.equals(receipt.getUser().getId())) {
+            if (tellerId.equals(receipt.getUser().getId())
+                    && "ACTIVE".equals(receipt.getShiftStatus())) {
                 receipts.add(receipt);
             }
         });
@@ -88,8 +85,12 @@ public class ReceiptServiceImpl implements ReceiptService {
         User user = userService.findById(userId).orElseThrow(() ->
                 new CashRegisterException(
                         HttpStatus.FORBIDDEN, quote("User not found", userId)));
+
+        // cashbox shift must be active
+        validateCashboxShiftActive(user);
         Receipt receipt = new Receipt()
                 .setStatus("CREATED")
+                .setShiftStatus("ACTIVE")
                 .setCreatedTime(now())
                 .setUser(user);
         return receiptRepository.save(receipt);
@@ -105,6 +106,13 @@ public class ReceiptServiceImpl implements ReceiptService {
                     quote("Receipt not found", receiptId));
         }
         Receipt receipt = receiptOpt.get();
+
+        // cashbox shift must be active
+        validateCashboxShiftActive(receipt.getUser());
+
+        // receipt shift must be active
+        validateReceiptShiftActive(receipt);
+
         if (!("CREATED".equals(receipt.getStatus()) || "COMPLETED".equals(receipt.getStatus()))) {
             throw new CashRegisterException(
                     quote("Receipt status transition not allowed", receipt.getStatus()));
@@ -153,6 +161,13 @@ public class ReceiptServiceImpl implements ReceiptService {
                     quote("Receipt not found", receiptId));
         }
         Receipt receipt = receiptOpt.get();
+
+        // cashbox shift must be active
+        validateCashboxShiftActive(receipt.getUser());
+
+        // receipt shift must be active
+        validateReceiptShiftActive(receipt);
+
         // can cancel from all statuses
         if ("CANCELED".equals(receipt.getStatus())) {
             return receipt;
@@ -187,6 +202,13 @@ public class ReceiptServiceImpl implements ReceiptService {
                     quote("Receipt not found", receiptId));
         }
         Receipt receipt = receiptOpt.get();
+
+        // cashbox shift must be active
+        validateCashboxShiftActive(receipt.getUser());
+
+        // receipt shift must be active
+        validateReceiptShiftActive(receipt);
+
         Optional<Product> productOpt = productService.findById(receiptItem.getProduct().getId());
         if (productOpt.isEmpty()) {
             throw new CashRegisterException(
@@ -254,6 +276,12 @@ public class ReceiptServiceImpl implements ReceiptService {
         }
         Receipt receipt = receiptOpt.get();
 
+        // cashbox shift must be active
+        validateCashboxShiftActive(receipt.getUser());
+
+        // receipt shift must be active
+        validateReceiptShiftActive(receipt);
+
         // validate receipt status
         if (!"CREATED".equals(receipt.getStatus())) {
             throw new CashRegisterException(quote(
@@ -294,6 +322,12 @@ public class ReceiptServiceImpl implements ReceiptService {
         }
         Receipt receipt = receiptOpt.get();
 
+        // cashbox shift must be active
+        validateCashboxShiftActive(receipt.getUser());
+
+        // receipt shift must be active
+        validateReceiptShiftActive(receipt);
+
         // validate receipt status
         if (!"CREATED".equals(receipt.getStatus())) {
             throw new CashRegisterException(quote(
@@ -333,5 +367,17 @@ public class ReceiptServiceImpl implements ReceiptService {
         receiptItem.setAmount(updateReceiptItemDto.getAmount());
 
         return receiptRepository.save(receipt);
+    }
+
+    private void validateCashboxShiftActive(User user) {
+        if (!"ACTIVE".equals(user.getCashbox().getShiftStatus())) {
+            throw new CashRegisterException("User cashbox shift status must be active");
+        }
+    }
+
+    private void validateReceiptShiftActive(Receipt receipt) {
+        if (!"ACTIVE".equals(receipt.getShiftStatus())) {
+            throw new CashRegisterException("Receipt shift status must be active");
+        }
     }
 }
