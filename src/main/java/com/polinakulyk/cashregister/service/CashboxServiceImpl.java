@@ -1,6 +1,7 @@
 package com.polinakulyk.cashregister.service;
 
 import com.polinakulyk.cashregister.controller.dto.CashboxShiftStatusDto;
+import com.polinakulyk.cashregister.db.dto.ShiftStatus;
 import com.polinakulyk.cashregister.db.entity.Cashbox;
 import com.polinakulyk.cashregister.db.entity.User;
 import com.polinakulyk.cashregister.db.repository.CashboxRepository;
@@ -14,9 +15,12 @@ import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static com.polinakulyk.cashregister.db.dto.ShiftStatus.ACTIVE;
+import static com.polinakulyk.cashregister.db.dto.ShiftStatus.INACTIVE;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.generateUuid;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.now;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.quote;
@@ -40,7 +44,7 @@ public class CashboxServiceImpl implements CashboxService {
 
     @Override
     @Transactional
-    public Cashbox createWithId(String cashboxId, String name, String shiftStatus) {
+    public Cashbox createWithId(String cashboxId, String name, ShiftStatus shiftStatus) {
 
         // here we assume that auto-generated cashbox UUID is unique
         return cashboxRepository.save(new Cashbox()
@@ -55,11 +59,11 @@ public class CashboxServiceImpl implements CashboxService {
     public CashboxShiftStatusDto activateShift() {
         String userId = authHelper.getUserId();
         User user = userService.findById(userId).orElseThrow(() ->
-                new CashRegisterException(quote("User not found", userId)));
+                new CashRegisterException(HttpStatus.FORBIDDEN, quote("User not found", userId)));
         Cashbox cashbox = user.getCashbox();
-        String shiftStatus = cashbox.getShiftStatus();
-        if ("INACTIVE".equals(shiftStatus)) {
-            cashbox.setShiftStatus("ACTIVE");
+        ShiftStatus shiftStatus = cashbox.getShiftStatus();
+        if (INACTIVE == shiftStatus) {
+            cashbox.setShiftStatus(ACTIVE);
             cashbox.setShiftStatusTime(now());
         }
         cashbox = cashboxRepository.save(cashbox);
@@ -77,9 +81,9 @@ public class CashboxServiceImpl implements CashboxService {
         User user = userService.findById(userId).orElseThrow(() ->
                 new CashRegisterException(quote("User not found", userId)));
         Cashbox cashbox = user.getCashbox();
-        String shiftStatus = cashbox.getShiftStatus();
-        if ("ACTIVE".equals(shiftStatus)) {
-            cashbox.setShiftStatus("INACTIVE");
+        ShiftStatus shiftStatus = cashbox.getShiftStatus();
+        if (ACTIVE == shiftStatus) {
+            cashbox.setShiftStatus(INACTIVE);
             cashbox.setShiftStatusTime(now());
         }
         cashbox = cashboxRepository.save(cashbox);
@@ -97,7 +101,7 @@ public class CashboxServiceImpl implements CashboxService {
         User user = userService.findById(userId).orElseThrow(() ->
                 new CashRegisterException(quote("User not found", userId)));
         Cashbox cashbox = user.getCashbox();
-        String shiftStatus = cashbox.getShiftStatus();
+        ShiftStatus shiftStatus = cashbox.getShiftStatus();
         LocalDateTime shiftStatusTime = cashbox.getShiftStatusTime();
         return new CashboxShiftStatusDto()
                 .setShiftStatus(shiftStatus)

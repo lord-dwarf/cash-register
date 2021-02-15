@@ -66,7 +66,25 @@ export default {
     password: null,
     isFormValid: true,
   }),
+  computed: {
+    userRole: {
+      get() {
+        return this.$store.state.localStorage.userRole
+      },
+      set(val) {
+        this.$store.commit('localStorage/setUserRole', val)
+      },
+    },
+  },
+  created() {
+    if (this.userRole !== null) {
+      this.$router.push('/')
+      // return
+    }
+  },
   methods: {
+    // executes on click to Login button, performs user login
+    // and sets JTW and role to local storage, after that redirects to Home
     async onLogin(event) {
       await this.$http
         .$post('/auth/login', {
@@ -75,10 +93,7 @@ export default {
         })
         .then((loginResponse) => {
           this.$store.commit('localStorage/setAuthJwt', loginResponse.jwt)
-          this.$store.commit(
-            'localStorage/setUserRole',
-            loginResponse.user.role
-          )
+          this.userRole = loginResponse.user.role.toLowerCase()
           this.$store.commit(
             'localStorage/setUserName',
             loginResponse.user.username
@@ -99,6 +114,7 @@ export default {
 #login-card {
   width: 25em;
 }
+
 #login-button {
   width: 8em;
 }

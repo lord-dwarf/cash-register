@@ -5,6 +5,7 @@ import com.polinakulyk.cashregister.controller.dto.LoginResponseDto;
 import com.polinakulyk.cashregister.db.entity.User;
 import com.polinakulyk.cashregister.security.api.AuthHelper;
 import com.polinakulyk.cashregister.security.dto.UserDetailsDto;
+import com.polinakulyk.cashregister.security.dto.UserRole;
 import javax.servlet.http.HttpServletResponse;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -46,7 +47,7 @@ public class AuthController {
 
         // TODO ensure that after auth manager really clears the password
         String userId = ((UserDetailsDto) auth.getPrincipal()).getUsername();
-        String userRole = authHelper.getUserRoleFromAuthRoles(auth.getAuthorities());
+        UserRole userRole = authHelper.getUserRoleFromAuthRoles(auth.getAuthorities());
         String jwt = authHelper.createJwt(userId, userRole);
         String userName = ((UserDetailsDto) auth.getPrincipal()).getPrincipalName();
 

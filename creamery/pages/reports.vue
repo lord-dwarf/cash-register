@@ -1,89 +1,93 @@
 <template>
-  <div>
-    <v-data-table
-      :headers="tableHeaders"
-      :items="tableItems"
-      :page.sync="page"
-      :items-per-page="itemsPerPage"
-      hide-default-footer
-      class="elevation-1"
-      @page-count="pageCount = $event"
-    >
-      <template v-slot:top>
-        <v-toolbar flat>
-          <v-toolbar-title>{{ $t('reports.reports') }}</v-toolbar-title>
-          <v-divider class="mx-4" inset vertical></v-divider>
+  <v-row>
+    <v-spacer></v-spacer>
+    <v-col id="reports-panel">
+      <v-data-table
+        :headers="tableHeaders"
+        :items="tableItems"
+        :page.sync="page"
+        :items-per-page="itemsPerPage"
+        hide-default-footer
+        class="elevation-1"
+        @page-count="pageCount = $event"
+      >
+        <template v-slot:top>
+          <v-toolbar flat>
+            <v-toolbar-title>{{ $t('reports.reports') }}</v-toolbar-title>
+            <v-divider class="mx-4" inset vertical></v-divider>
+            <v-spacer></v-spacer>
+          </v-toolbar>
+        </template>
+        <template v-slot:[`item.reportName`]="props">
+          <v-chip color="primary">
+            <div>{{ props.item.reportName }}</div>
+          </v-chip>
+        </template>
+        <template v-slot:[`item.start`]="props">
+          <v-edit-dialog :return-value.sync="props.item.start" large persistent>
+            <div>{{ props.item.start }}</div>
+            <template v-slot:input>
+              <div class="mt-4 title">Enter Date</div>
+              <v-text-field
+                v-model="props.item.start"
+                label="Edit"
+                single-line
+                autofocus
+              ></v-text-field>
+            </template>
+          </v-edit-dialog>
+        </template>
+        <template v-slot:[`item.end`]="props">
+          <v-edit-dialog :return-value.sync="props.item.end" large persistent>
+            <div>{{ props.item.end }}</div>
+            <template v-slot:input>
+              <div class="mt-4 title">Enter Date</div>
+              <v-text-field
+                v-model="props.item.end"
+                label="Edit"
+                single-line
+                autofocus
+              ></v-text-field>
+            </template>
+          </v-edit-dialog>
+        </template>
+        <template v-slot:[`item.actions`]="{ item }">
+          <v-icon
+            class="ma-1"
+            color="green accent-4"
+            @click="downloadReport(item)"
+            :disabled="shiftStatus !== 'ACTIVE'"
+          >
+            mdi-download
+          </v-icon>
+        </template>
+      </v-data-table>
+      <div class="text-center pt-2">
+        <v-row>
           <v-spacer></v-spacer>
-        </v-toolbar>
-      </template>
-      <template v-slot:[`item.reportName`]="props">
-        <v-chip color="primary">
-          <div>{{ props.item.reportName }}</div>
-        </v-chip>
-      </template>
-      <template v-slot:[`item.start`]="props">
-        <v-edit-dialog :return-value.sync="props.item.start" large persistent>
-          <div>{{ props.item.start }}</div>
-          <template v-slot:input>
-            <div class="mt-4 title">Enter Date</div>
+          <v-pagination
+            v-model="page"
+            :length="pageCount"
+            class="mt-3"
+          ></v-pagination>
+          <v-spacer></v-spacer>
+          <div id="items-per-page">
             <v-text-field
-              v-model="props.item.start"
-              label="Edit"
-              single-line
-              autofocus
+              :value="itemsPerPage"
+              :label="$t('componentDataTable.itemsPerPage')"
+              type="number"
+              min="3"
+              max="20"
+              class="mt-6 mr-3"
+              dense
+              @input="itemsPerPage = parseInt($event, 10)"
             ></v-text-field>
-          </template>
-        </v-edit-dialog>
-      </template>
-      <template v-slot:[`item.end`]="props">
-        <v-edit-dialog :return-value.sync="props.item.end" large persistent>
-          <div>{{ props.item.end }}</div>
-          <template v-slot:input>
-            <div class="mt-4 title">Enter Date</div>
-            <v-text-field
-              v-model="props.item.end"
-              label="Edit"
-              single-line
-              autofocus
-            ></v-text-field>
-          </template>
-        </v-edit-dialog>
-      </template>
-      <template v-slot:[`item.actions`]="{ item }">
-        <v-icon
-          class="ma-1"
-          color="green accent-4"
-          @click="downloadReport(item)"
-          :disabled="shiftStatus !== 'ACTIVE'"
-        >
-          mdi-download
-        </v-icon>
-      </template>
-    </v-data-table>
-    <div class="text-center pt-2">
-      <v-row>
-        <v-spacer></v-spacer>
-        <v-pagination
-          v-model="page"
-          :length="pageCount"
-          class="mt-3"
-        ></v-pagination>
-        <v-spacer></v-spacer>
-        <div id="items-per-page">
-          <v-text-field
-            :value="itemsPerPage"
-            :label="$t('componentDataTable.itemsPerPage')"
-            type="number"
-            min="3"
-            max="20"
-            class="mt-6 mr-3"
-            dense
-            @input="itemsPerPage = parseInt($event, 10)"
-          ></v-text-field>
-        </div>
-      </v-row>
-    </div>
-  </div>
+          </div>
+        </v-row>
+      </div>
+    </v-col>
+    <v-spacer></v-spacer>
+  </v-row>
 </template>
 
 <script>
@@ -96,12 +100,25 @@ export default {
   }),
 
   computed: {
+    userRole: {
+      get() {
+        return this.$store.state.localStorage.userRole
+      },
+    },
     shiftStatus: {
       get() {
         return this.$store.state.shiftStatus
       },
       set(val) {
         this.$store.commit('setShiftStatus', val)
+      },
+    },
+    shiftTime: {
+      get() {
+        return this.$store.state.shiftTime
+      },
+      set(val) {
+        this.$store.commit('setShiftTime', val)
       },
     },
     tableHeaders: {
@@ -125,6 +142,10 @@ export default {
   },
 
   created() {
+    if (this.userRole !== 'sr_teller') {
+      this.$router.push('/')
+      return
+    }
     this.tableItems = [
       {
         reportName: 'X Report',
@@ -169,8 +190,8 @@ export default {
       const minute = 59
       return year + '-' + month + '-' + day + ' ' + hour + ':' + minute
     },
+    // 2012-02-01 00:00
     convertDateStringToIsoString(dateString, seconds) {
-      // 2012-02-01 00:00
       const date = new Date()
       const year = dateString.substring(0, 4)
       date.setFullYear(parseInt(year))
@@ -196,8 +217,13 @@ export default {
         .$get('/reports/' + (reportItem.reportKind === 'x-report' ? 'x' : 'z'))
         .then((report) => {
           if (reportItem.reportKind === 'z-report') {
+            // on Z report deactivate shift then close ReceiptsOne and MyReceiptsOne pages
             this.shiftStatus = 'INACTIVE'
+            this.shiftTime = '00:00:00'
+            this.$store.commit('localStorage/closeReceiptsOne')
+            this.$store.commit('localStorage/closeMyReceiptsOne')
           }
+          this.formatReport(report)
           this.downloadJson(report, reportItem.reportKind)
           return report
         })
@@ -206,9 +232,14 @@ export default {
           return Promise.resolve(null)
         })
     },
+    formatReport(report) {
+      report.sumTotal = '' + (report.sumTotal / 100).toFixed(2)
+      report.shiftStartTime = new Date(report.shiftStartTime).toUTCString()
+      report.createdTime = new Date(report.createdTime).toUTCString()
+    },
     downloadJson(json, reportKind) {
       const a = document.createElement('a')
-      const file = new Blob([JSON.stringify(json)], {
+      const file = new Blob([JSON.stringify(json, null, 2)], {
         type: 'application/json',
       })
       a.href = URL.createObjectURL(file)
@@ -222,5 +253,10 @@ export default {
 <style>
 #items-per-page {
   width: 8em;
+}
+
+#reports-panel {
+  width: 38em;
+  min-width: 38em;
 }
 </style>

@@ -1,17 +1,18 @@
 package com.polinakulyk.cashregister.controller.dto;
 
+import com.polinakulyk.cashregister.db.dto.ShiftStatus;
 import java.util.StringJoiner;
 
 public class CashboxShiftStatusDto {
 
-    private String shiftStatus;
+    private ShiftStatus shiftStatus;
     private String shiftStatusElapsedTime;
 
-    public String getShiftStatus() {
+    public ShiftStatus getShiftStatus() {
         return shiftStatus;
     }
 
-    public CashboxShiftStatusDto setShiftStatus(String shiftStatus) {
+    public CashboxShiftStatusDto setShiftStatus(ShiftStatus shiftStatus) {
         this.shiftStatus = shiftStatus;
         return this;
     }

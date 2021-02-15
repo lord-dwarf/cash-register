@@ -1,6 +1,7 @@
 package com.polinakulyk.cashregister.controller;
 
 import com.polinakulyk.cashregister.controller.dto.DateRangeDto;
+import com.polinakulyk.cashregister.controller.dto.ReportKind;
 import com.polinakulyk.cashregister.controller.dto.XZReportDto;
 import com.polinakulyk.cashregister.db.entity.Product;
 import com.polinakulyk.cashregister.service.api.ReportService;
@@ -32,13 +33,13 @@ public class ReportController {
     @RolesAllowed({SR_TELLER})
     public @ResponseBody
     XZReportDto reportX() {
-        return reportService.createXZReport("X");
+        return reportService.createXZReport(ReportKind.X);
     }
 
     @GetMapping("/z")
     @RolesAllowed({SR_TELLER})
     public @ResponseBody
     XZReportDto reportZ() {
-        return reportService.createXZReport("Z");
+        return reportService.createXZReport(ReportKind.Z);
     }
 }

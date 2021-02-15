@@ -1,5 +1,10 @@
 {
   "default": {
+    "shift": "Shift",
+    "shiftActive": "ACTIVE",
+    "shiftInactive": "INACTIVE",
+    "shiftLoading": "LOADING...",
+    "shiftStart": "Start Shift",
     "copyright": "Polina Kulyk",
     "errorMessageClose": "Close",
     "creamery": "Creamery",

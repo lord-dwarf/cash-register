@@ -44,8 +44,8 @@ public class ReceiptController {
 
     @GetMapping
     @RolesAllowed({SR_TELLER})
-    public @ResponseBody List<Receipt> listReceipts() {
-        List<Receipt> receiptsStripped = receiptService.findAll();
+    public @ResponseBody Iterable<Receipt> listReceipts() {
+        Iterable<Receipt> receiptsStripped = receiptService.findAll();
         receiptsStripped.forEach(CashRegisterUtil::strip);
         return receiptsStripped;
     }

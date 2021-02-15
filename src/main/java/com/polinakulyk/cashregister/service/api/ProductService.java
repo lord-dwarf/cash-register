@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public interface ProductService {
     Product create(Product product);
-    List<Product> findAll();
+    Iterable<Product> findAll();
     Optional<Product> findById(String id);
     List<Product> findByFilter(FindProductsDto findProductsDto);
     void update(Product product);

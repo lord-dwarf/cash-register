@@ -1,9 +1,11 @@
 package com.polinakulyk.cashregister.config.autorun;
 
+import com.polinakulyk.cashregister.db.dto.ShiftStatus;
 import com.polinakulyk.cashregister.db.entity.Product;
 import com.polinakulyk.cashregister.db.entity.Receipt;
 import com.polinakulyk.cashregister.db.entity.ReceiptItem;
 import com.polinakulyk.cashregister.db.entity.User;
+import com.polinakulyk.cashregister.security.dto.UserRole;
 import com.polinakulyk.cashregister.service.api.CashboxService;
 import com.polinakulyk.cashregister.service.api.ProductService;
 import com.polinakulyk.cashregister.service.api.ReceiptService;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Component;
 
 import static com.polinakulyk.cashregister.db.dto.ProductAmountUnit.GRAM;
 import static com.polinakulyk.cashregister.db.dto.ProductAmountUnit.UNIT;
+import static com.polinakulyk.cashregister.db.dto.ShiftStatus.ACTIVE;
 
 @Component
 public class InitDbAutorun {
@@ -96,7 +99,7 @@ public class InitDbAutorun {
     }
 
     private void createCashboxes() {
-        cashboxService.createWithId(cashboxId, cashboxName, "ACTIVE");
+        cashboxService.createWithId(cashboxId, cashboxName, ACTIVE);
     }
 
     private void createProducts() {
@@ -227,7 +230,7 @@ public class InitDbAutorun {
                 cashboxId,
                 tellerUsername,
                 tellerPassword,
-                tellerRole,
+                UserRole.fromString(tellerRole).get(),
                 tellerFullName,
                 false
         );
@@ -239,7 +242,7 @@ public class InitDbAutorun {
                 cashboxId,
                 teller2Username,
                 teller2Password,
-                teller2Role,
+                UserRole.fromString(teller2Role).get(),
                 teller2FullName,
                 false
         );
@@ -248,7 +251,7 @@ public class InitDbAutorun {
                 cashboxId,
                 srTellerUsername,
                 srTellerPassword,
-                srTellerRole,
+                UserRole.fromString(srTellerRole).get(),
                 srTellerFullName,
                 false
         );
@@ -257,7 +260,7 @@ public class InitDbAutorun {
                 cashboxId,
                 merchUsername,
                 merchPassword,
-                merchRole,
+                UserRole.fromString(merchRole).get(),
                 merchFullName,
                 false
         );
@@ -283,7 +286,7 @@ public class InitDbAutorun {
         // x1 CREATED receipt
         Receipt receipt = receiptService.createReceipt(userId);
         receiptService.add(receipt.getId(), new ReceiptItem()
-                .setProduct(productService.findAll().stream().findFirst().get())
+                .setProduct(productService.findAll().iterator().next())
                 .setAmount(50));
 
         // CANCELED receipts

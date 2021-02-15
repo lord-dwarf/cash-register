@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface ReceiptService {
-    List<Receipt> findAll();
+    Iterable<Receipt> findAll();
     List<Receipt> findAllByTellerId(String tellerId);
     Optional<Receipt> findById(String id);
     Receipt createReceipt(String userId);

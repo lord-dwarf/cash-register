@@ -53,7 +53,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         // TODO cache retrieval of user from DB, because currently it happens on each request
         User user = userService.findById(jwt.getUserId()).orElseThrow(() ->
                 new CashRegisterException(
-                        HttpStatus.UNAUTHORIZED,
+                        HttpStatus.FORBIDDEN,
                         quote("User not found", jwt.getUserId())));
 
         UserDetailsDto principal = new UserDetailsDto()

@@ -1,5 +1,6 @@
 package com.polinakulyk.cashregister.db.entity;
 
+import com.polinakulyk.cashregister.db.dto.ReceiptStatus;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,8 +22,7 @@ public class Receipt {
 
     private LocalDateTime createdTime;
     private LocalDateTime checkoutTime;
-    private String status;
-    private String shiftStatus;
+    private ReceiptStatus status;
     private int sumTotal;
 
     @OneToMany(mappedBy = "receipt", cascade = CascadeType.ALL)
@@ -58,21 +58,12 @@ public class Receipt {
         return this;
     }
 
-    public String getStatus() {
+    public ReceiptStatus getStatus() {
         return status;
     }
 
-    public Receipt setStatus(String status) {
+    public Receipt setStatus(ReceiptStatus status) {
         this.status = status;
-        return this;
-    }
-
-    public String getShiftStatus() {
-        return shiftStatus;
-    }
-
-    public Receipt setShiftStatus(String shiftStatus) {
-        this.shiftStatus = shiftStatus;
         return this;
     }
 
@@ -126,7 +117,6 @@ public class Receipt {
                 .add("createdTime=" + createdTime)
                 .add("checkoutTime=" + checkoutTime)
                 .add("status='" + status + "'")
-                .add("shiftStatus='" + shiftStatus + "'")
                 .add("sumTotal=" + sumTotal)
                 .add("receiptItems=" + receiptItems)
                 .add("user.id=" + (user != null ? user.getId() : null))

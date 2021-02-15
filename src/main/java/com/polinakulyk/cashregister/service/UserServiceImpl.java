@@ -7,6 +7,7 @@ import com.polinakulyk.cashregister.db.repository.UserRepository;
 import com.polinakulyk.cashregister.exception.CashRegisterException;
 import com.polinakulyk.cashregister.security.api.AuthHelper;
 import com.polinakulyk.cashregister.security.dto.UserDetailsDto;
+import com.polinakulyk.cashregister.security.dto.UserRole;
 import com.polinakulyk.cashregister.service.api.UserService;
 import java.util.Optional;
 import org.slf4j.Logger;
@@ -22,7 +23,7 @@ import static com.polinakulyk.cashregister.util.CashRegisterUtil.quote;
 
 @Service
 public class UserServiceImpl implements UserService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(UserServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(UserServiceImpl.class);
 
     private final UserRepository userRepository;
     private final CashboxRepository cashboxRepository;
@@ -66,7 +67,7 @@ public class UserServiceImpl implements UserService {
     public User create(
             String username,
             String password,
-            String role,
+            UserRole userRole,
             String fullName,
             boolean isPasswordEncoded
     ) {
@@ -81,7 +82,7 @@ public class UserServiceImpl implements UserService {
                 .setId(generateUuid())
                 .setUsername(username)
                 .setPassword(password)
-                .setRole(role)
+                .setRole(userRole)
                 .setFullName(fullName));
     }
 
@@ -92,7 +93,7 @@ public class UserServiceImpl implements UserService {
             String cashboxId,
             String username,
             String password,
-            String role,
+            UserRole userRole,
             String fullName,
             boolean isPasswordEncoded
     ) {
@@ -119,7 +120,7 @@ public class UserServiceImpl implements UserService {
                 .setCashbox(cashbox)
                 .setUsername(username)
                 .setPassword(password)
-                .setRole(role)
+                .setRole(userRole)
                 .setFullName(fullName));
     }
 }

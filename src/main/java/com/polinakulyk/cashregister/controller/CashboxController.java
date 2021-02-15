@@ -3,6 +3,7 @@ package com.polinakulyk.cashregister.controller;
 import com.polinakulyk.cashregister.controller.dto.CashboxShiftStatusDto;
 import com.polinakulyk.cashregister.exception.CashRegisterException;
 import com.polinakulyk.cashregister.security.api.AuthHelper;
+import com.polinakulyk.cashregister.security.dto.UserRole;
 import com.polinakulyk.cashregister.service.api.CashboxService;
 import java.util.Map;
 import javax.annotation.security.RolesAllowed;

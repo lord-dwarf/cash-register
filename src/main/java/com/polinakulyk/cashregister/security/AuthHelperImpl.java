@@ -3,6 +3,7 @@ package com.polinakulyk.cashregister.security;
 import com.polinakulyk.cashregister.security.api.AuthHelper;
 import com.polinakulyk.cashregister.security.dto.JwtDto;
 import com.polinakulyk.cashregister.security.dto.UserDetailsDto;
+import com.polinakulyk.cashregister.security.dto.UserRole;
 import com.polinakulyk.cashregister.util.CashRegisterUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
@@ -59,7 +60,7 @@ public class AuthHelperImpl implements AuthHelper {
     }
 
     @Override
-    public String createJwt(String userId, String role) {
+    public String createJwt(String userId, UserRole role) {
 
         // TODO put Issuer into JWT (that identifies CashRegister as issuer)
         // TODO put Audience into JWT (that identifies JWT as CashRegister's auth JWT)
@@ -109,14 +110,15 @@ public class AuthHelperImpl implements AuthHelper {
     }
 
     @Override
-    public List<GrantedAuthority> getAuthRolesFromUserRole(String userRole) {
+    public List<GrantedAuthority> getAuthRolesFromUserRole(UserRole userRole) {
         return List.of(new SimpleGrantedAuthority(SPRING_ROLE_PREFIX + userRole));
     }
 
     @Override
-    public String getUserRoleFromAuthRoles(Collection<? extends GrantedAuthority> authRoles) {
-        return new ArrayList<>(authRoles).get(0)
+    public UserRole getUserRoleFromAuthRoles(Collection<? extends GrantedAuthority> authRoles) {
+        String userRoleStr = new ArrayList<>(authRoles).get(0)
                 .getAuthority().replaceFirst(SPRING_ROLE_PREFIX, "");
+        return UserRole.fromString(userRoleStr).get();
     }
 
     @Override

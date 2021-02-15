@@ -1,6 +1,7 @@
 package com.polinakulyk.cashregister.service;
 
 import com.polinakulyk.cashregister.controller.dto.UpdateReceiptItemDto;
+import com.polinakulyk.cashregister.db.dto.ShiftStatus;
 import com.polinakulyk.cashregister.db.entity.Product;
 import com.polinakulyk.cashregister.db.entity.Receipt;
 import com.polinakulyk.cashregister.db.entity.ReceiptItem;
@@ -11,6 +12,7 @@ import com.polinakulyk.cashregister.exception.CashRegisterException;
 import com.polinakulyk.cashregister.service.api.ProductService;
 import com.polinakulyk.cashregister.service.api.ReceiptService;
 import com.polinakulyk.cashregister.service.api.UserService;
+import com.polinakulyk.cashregister.util.CashRegisterUtil;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -21,13 +23,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import static com.polinakulyk.cashregister.db.dto.ReceiptStatus.CANCELED;
+import static com.polinakulyk.cashregister.db.dto.ReceiptStatus.COMPLETED;
+import static com.polinakulyk.cashregister.db.dto.ReceiptStatus.CREATED;
 import static com.polinakulyk.cashregister.service.ServiceHelper.calcCost;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.now;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.quote;
 
 @Service
 public class ReceiptServiceImpl implements ReceiptService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(ReceiptServiceImpl.class);
+    private static final Logger LOG = LoggerFactory.getLogger(ReceiptServiceImpl.class);
 
     private final ReceiptRepository receiptRepository;
     private final ReceiptItemRepository receiptItemRepository;
@@ -48,10 +53,8 @@ public class ReceiptServiceImpl implements ReceiptService {
 
     @Override
     @Transactional
-    public List<Receipt> findAll() {
-        List<Receipt> receipts = new ArrayList<>();
-        receiptRepository.findAll().forEach(receipts::add);
-        return receipts;
+    public Iterable<Receipt> findAll() {
+        return receiptRepository.findAll();
     }
 
     @Override
@@ -66,7 +69,7 @@ public class ReceiptServiceImpl implements ReceiptService {
         List<Receipt> receipts = new ArrayList<>();
         receiptRepository.findAll().forEach((receipt) -> {
             if (tellerId.equals(receipt.getUser().getId())
-                    && "ACTIVE".equals(receipt.getShiftStatus())) {
+                    && CashRegisterUtil.isReceiptInActiveShift(receipt)) {
                 receipts.add(receipt);
             }
         });
@@ -89,8 +92,7 @@ public class ReceiptServiceImpl implements ReceiptService {
         // cashbox shift must be active
         validateCashboxShiftActive(user);
         Receipt receipt = new Receipt()
-                .setStatus("CREATED")
-                .setShiftStatus("ACTIVE")
+                .setStatus(CREATED)
                 .setCreatedTime(now())
                 .setUser(user);
         return receiptRepository.save(receipt);
@@ -113,7 +115,7 @@ public class ReceiptServiceImpl implements ReceiptService {
         // receipt shift must be active
         validateReceiptShiftActive(receipt);
 
-        if (!("CREATED".equals(receipt.getStatus()) || "COMPLETED".equals(receipt.getStatus()))) {
+        if (!(CREATED == receipt.getStatus() || COMPLETED == receipt.getStatus())) {
             throw new CashRegisterException(
                     quote("Receipt status transition not allowed", receipt.getStatus()));
         }
@@ -122,12 +124,12 @@ public class ReceiptServiceImpl implements ReceiptService {
             throw new CashRegisterException(quote(
                     "Receipt without items cannot be completed", receipt.getStatus()));
         }
-        if ("COMPLETED".equals(receipt.getStatus())) {
+        if (COMPLETED == receipt.getStatus()) {
             return receipt;
         }
 
-        // set receipt status COMPLETED
-        receipt.setStatus("COMPLETED");
+        // set receipt status COMPLETED and update checkout time
+        receipt.setStatus(COMPLETED);
         receipt.setCheckoutTime(now());
 
         // decrease amount available for products in receipt
@@ -169,12 +171,12 @@ public class ReceiptServiceImpl implements ReceiptService {
         validateReceiptShiftActive(receipt);
 
         // can cancel from all statuses
-        if ("CANCELED".equals(receipt.getStatus())) {
+        if (CANCELED == receipt.getStatus()) {
             return receipt;
         }
 
         // set receipt status CANCELED
-        receipt.setStatus("CANCELED");
+        receipt.setStatus(CANCELED);
         receipt.setCheckoutTime(now());
 
         // increase amount available for products in receipt
@@ -217,7 +219,7 @@ public class ReceiptServiceImpl implements ReceiptService {
         Product product = productOpt.get();
 
         // validate receipt status
-        if (!"CREATED".equals(receipt.getStatus())) {
+        if (CREATED != receipt.getStatus()) {
             throw new CashRegisterException(quote(
                     "Receipt status does not allow adding of item", receipt.getStatus()));
         }
@@ -283,7 +285,7 @@ public class ReceiptServiceImpl implements ReceiptService {
         validateReceiptShiftActive(receipt);
 
         // validate receipt status
-        if (!"CREATED".equals(receipt.getStatus())) {
+        if (CREATED != receipt.getStatus()) {
             throw new CashRegisterException(quote(
                     "Receipt status does not allow receipt item cancellation",
                     receipt.getStatus()));
@@ -329,7 +331,7 @@ public class ReceiptServiceImpl implements ReceiptService {
         validateReceiptShiftActive(receipt);
 
         // validate receipt status
-        if (!"CREATED".equals(receipt.getStatus())) {
+        if (CREATED != receipt.getStatus()) {
             throw new CashRegisterException(quote(
                     "Receipt status does not allow receipt item update",
                     receipt.getStatus()));
@@ -370,13 +372,13 @@ public class ReceiptServiceImpl implements ReceiptService {
     }
 
     private void validateCashboxShiftActive(User user) {
-        if (!"ACTIVE".equals(user.getCashbox().getShiftStatus())) {
+        if (ShiftStatus.ACTIVE != user.getCashbox().getShiftStatus()) {
             throw new CashRegisterException("User cashbox shift status must be active");
         }
     }
 
     private void validateReceiptShiftActive(Receipt receipt) {
-        if (!"ACTIVE".equals(receipt.getShiftStatus())) {
+        if (!CashRegisterUtil.isReceiptInActiveShift(receipt)) {
             throw new CashRegisterException("Receipt shift status must be active");
         }
     }

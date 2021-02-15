@@ -1,5 +1,6 @@
 package com.polinakulyk.cashregister.util;
 
+import com.polinakulyk.cashregister.db.dto.ShiftStatus;
 import com.polinakulyk.cashregister.db.entity.Cashbox;
 import com.polinakulyk.cashregister.db.entity.Product;
 import com.polinakulyk.cashregister.db.entity.Receipt;
@@ -9,8 +10,11 @@ import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.time.temporal.ChronoUnit;
 import java.util.Date;
 import java.util.UUID;
+
+import static com.polinakulyk.cashregister.db.dto.ShiftStatus.ACTIVE;
 
 public class CashRegisterUtil {
 
@@ -49,7 +53,50 @@ public class CashRegisterUtil {
         return UUID.randomUUID().toString();
     }
 
-    // TODO replace all strip methods usage, with explicit loading of related entities
+    /**
+     * Create user-friendly (4 chars) but still relatively unique id for receipt,
+     * based on UUID id of receipt
+     *
+     * @param receiptIdUuid
+     * @return
+     */
+    public static String calcReceiptCode(String receiptIdUuid) {
+        return receiptIdUuid.substring(32);
+    }
+
+    /**
+     * Provides relatively unique id for reports based on report created time.
+     * <p>
+     * The result is the number of minutes passed since 2021-01-01 00:00:00,
+     * up to report created time. It is a positive ~6-7 digits number.
+     *
+     * @param reportCreatedTime
+     * @return
+     */
+    public static String calcReportId(LocalDateTime reportCreatedTime) {
+        return "" + ChronoUnit.MINUTES.between(
+                now().withYear(2021).withMonth(1).truncatedTo(ChronoUnit.DAYS),
+                reportCreatedTime);
+    }
+
+    /**
+     * Determines whether the given receipt belongs to a currently active shift of a
+     * receipt user's cash box.
+     *
+     * @param receipt
+     * @return
+     */
+    public static boolean isReceiptInActiveShift(Receipt receipt) {
+        Cashbox cashbox = receipt.getUser().getCashbox();
+        LocalDateTime receiptCreatedTime = receipt.getCreatedTime();
+        LocalDateTime shiftStartTime = cashbox.getShiftStatusTime();
+
+        return ACTIVE == cashbox.getShiftStatus() && (
+                receiptCreatedTime.isAfter(shiftStartTime)
+                        || receiptCreatedTime.isEqual(shiftStartTime));
+    }
+
+    // TODO consider replacing all strip() methods usage, with explicit loading of related entities
     public static Product strip(Product product) {
         return product.setReceiptItems(null);
     }

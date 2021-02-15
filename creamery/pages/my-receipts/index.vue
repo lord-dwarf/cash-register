@@ -42,8 +42,7 @@
           @click="editReceipt(item)"
           :disabled="
             item.status === 'CANCELED' ||
-            (item.status === 'COMPLETED' &&
-              'teller' === $store.state.localStorage.userRole)
+            (item.status === 'COMPLETED' && 'teller' === userRole)
           "
         >
           mdi-pencil
@@ -86,6 +85,16 @@ export default {
   }),
 
   computed: {
+    userRole: {
+      get() {
+        return this.$store.state.localStorage.userRole
+      },
+    },
+    userName: {
+      get() {
+        return this.$store.state.localStorage.userName
+      },
+    },
     shiftStatus: {
       get() {
         return this.$store.state.shiftStatus
@@ -139,14 +148,13 @@ export default {
         ]
       },
     },
-    userName: {
-      get() {
-        return this.$store.state.localStorage.userName
-      },
-    },
   },
 
   async created() {
+    if (!(this.userRole === 'teller' || this.userRole === 'sr_teller')) {
+      await this.$router.push('/')
+      return
+    }
     await this.loadReceipts()
   },
 

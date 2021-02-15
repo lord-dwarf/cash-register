@@ -45,10 +45,8 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    public List<Product> findAll() {
-        List<Product> products = new ArrayList<>();
-        productRepository.findAll().forEach(products::add);
-        return products;
+    public Iterable<Product> findAll() {
+        return productRepository.findAll();
     }
 
     @Override

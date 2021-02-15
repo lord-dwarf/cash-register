@@ -42,7 +42,7 @@
                 class="ml-3"
                 @click="cancelReceipt()"
                 v-if="
-                  'sr_teller' === $store.state.localStorage.userRole &&
+                  'sr_teller' === userRole &&
                   (status === 'CREATED' || status === 'COMPLETED') &&
                   (mode === 'EDIT' || mode === 'NEW') &&
                   tableItems.length > 0
@@ -305,6 +305,11 @@ export default {
   }),
 
   computed: {
+    userRole: {
+      get() {
+        return this.$store.state.localStorage.userRole
+      },
+    },
     shiftStatus: {
       get() {
         return this.$store.state.shiftStatus
@@ -414,6 +419,10 @@ export default {
   },
 
   async created() {
+    if (!(this.userRole === 'teller' || this.userRole === 'sr_teller')) {
+      await this.$router.push('/')
+      return
+    }
     if (this.mode === 'NEW') {
       this.status = 'CREATED'
       this.tellerName = this.$store.state.localStorage.userName
@@ -632,9 +641,7 @@ export default {
       return !item.isSaved
     },
     isCancelReceiptItemActionVisible(item) {
-      return (
-        this.$store.state.localStorage.userRole === 'sr_teller' && item.isSaved
-      )
+      return this.userRole === 'sr_teller' && item.isSaved
     },
     isReceiptItemEditionInProgress() {
       return !!this.tableItems.find((ri) => !ri.isSaved)

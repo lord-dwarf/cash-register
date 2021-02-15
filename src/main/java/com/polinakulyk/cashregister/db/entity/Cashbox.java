@@ -1,5 +1,6 @@
 package com.polinakulyk.cashregister.db.entity;
 
+import com.polinakulyk.cashregister.db.dto.ShiftStatus;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,7 +18,7 @@ public class Cashbox {
     @Column(unique = true)
     private String name;
 
-    private String shiftStatus;
+    private ShiftStatus shiftStatus;
     private LocalDateTime shiftStatusTime;
 
     @OneToMany(mappedBy = "cashbox")
@@ -41,11 +42,11 @@ public class Cashbox {
         return this;
     }
 
-    public String getShiftStatus() {
+    public ShiftStatus getShiftStatus() {
         return shiftStatus;
     }
 
-    public Cashbox setShiftStatus(String status) {
+    public Cashbox setShiftStatus(ShiftStatus status) {
         this.shiftStatus = status;
         return this;
     }

@@ -46,8 +46,8 @@ public class ProductController {
 
     @GetMapping
     @RolesAllowed({MERCH, TELLER, SR_TELLER})
-    public @ResponseBody List<Product> listProducts() {
-        List<Product> products = productService.findAll();
+    public @ResponseBody Iterable<Product> listProducts() {
+        Iterable<Product> products = productService.findAll();
         products.forEach(CashRegisterUtil::strip);
         return products;
     }

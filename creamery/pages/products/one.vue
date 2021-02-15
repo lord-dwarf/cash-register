@@ -72,6 +72,11 @@
 <script>
 export default {
   computed: {
+    userRole: {
+      get() {
+        return this.$store.state.localStorage.userRole
+      },
+    },
     // ProductsOne page properties
     mode: {
       get() {
@@ -145,6 +150,11 @@ export default {
   },
 
   created() {
+    if (this.userRole === null) {
+      this.$router.push('/')
+      return
+    }
+
     // perform the following logic only once
     if (this.$store.state.localStorage.productsOne.initialized === true) {
       return
@@ -163,10 +173,7 @@ export default {
 
   methods: {
     isSaveButtonVisible() {
-      return (
-        this.$store.state.localStorage.userRole === 'merch' &&
-        this.mode !== 'VIEW'
-      )
+      return this.userRole === 'merch' && this.mode !== 'VIEW'
     },
     async onSave() {
       let result = null

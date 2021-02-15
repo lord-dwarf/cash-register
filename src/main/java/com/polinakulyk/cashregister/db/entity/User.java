@@ -1,25 +1,17 @@
 package com.polinakulyk.cashregister.db.entity;
 
+import com.polinakulyk.cashregister.security.dto.UserRole;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
-import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import org.hibernate.annotations.GenericGenerator;
-
-import static com.polinakulyk.cashregister.db.entity.User.*;
 
 @Entity
-@Table(name = TABLE_USERS)
 public class User {
-
-    static final String TABLE_USERS = "users";
 
     @Id
     private String id;
@@ -28,7 +20,7 @@ public class User {
     private String username;
 
     private String password;
-    private String role;
+    private UserRole role;
     private String fullName;
 
     @OneToMany(mappedBy = "user")
@@ -64,11 +56,11 @@ public class User {
         return this;
     }
 
-    public String getRole() {
+    public UserRole getRole() {
         return role;
     }
 
-    public User setRole(String role) {
+    public User setRole(UserRole role) {
         this.role = role;
         return this;
     }

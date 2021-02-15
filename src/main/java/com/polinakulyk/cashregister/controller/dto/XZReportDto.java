@@ -6,7 +6,7 @@ import java.util.StringJoiner;
 
 public class XZReportDto {
     private String reportId;
-    private String reportKind;
+    private ReportKind reportKind;
     private String cashboxName;
     private String companyName = "Creamery";
     private LocalDateTime shiftStartTime;
@@ -24,11 +24,11 @@ public class XZReportDto {
         return this;
     }
 
-    public String getReportKind() {
+    public ReportKind getReportKind() {
         return reportKind;
     }
 
-    public XZReportDto setReportKind(String reportKind) {
+    public XZReportDto setReportKind(ReportKind reportKind) {
         this.reportKind = reportKind;
         return this;
     }

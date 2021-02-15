@@ -80,6 +80,11 @@ export default {
   }),
 
   computed: {
+    userRole: {
+      get() {
+        return this.$store.state.localStorage.userRole
+      },
+    },
     tableHeaders: {
       get() {
         return [
@@ -125,6 +130,10 @@ export default {
   },
 
   async created() {
+    if (this.userRole === null) {
+      await this.$router.push('/')
+      return
+    }
     await this.loadProducts()
   },
 
@@ -174,10 +183,10 @@ export default {
       await this.$router.push('/products/one')
     },
     isAddProductButtonVisible() {
-      return this.$store.state.localStorage.userRole === 'merch'
+      return this.userRole === 'merch'
     },
     isEditProductActionVisible() {
-      return this.$store.state.localStorage.userRole === 'merch'
+      return this.userRole === 'merch'
     },
   },
 }

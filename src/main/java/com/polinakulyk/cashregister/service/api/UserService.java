@@ -1,6 +1,7 @@
 package com.polinakulyk.cashregister.service.api;
 
 import com.polinakulyk.cashregister.db.entity.User;
+import com.polinakulyk.cashregister.security.dto.UserRole;
 import java.util.Optional;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -12,7 +13,7 @@ public interface UserService extends UserDetailsService {
     User create(
             String username,
             String password,
-            String role,
+            UserRole userRole,
             String fullName,
             boolean isPasswordEncoded
     );
@@ -21,7 +22,7 @@ public interface UserService extends UserDetailsService {
             String cashboxId,
             String username,
             String password,
-            String role,
+            UserRole userRole,
             String fullName,
             boolean isPasswordEncoded
     );

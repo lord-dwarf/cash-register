@@ -1,5 +1,10 @@
 {
   "default": {
+    "shift": "Зміна",
+    "shiftActive": "АКТИВНА",
+    "shiftInactive": "НЕАКТИВНА",
+    "shiftLoading": "ЗАВАНТАЖУЄТЬСЯ...",
+    "shiftStart": "Почати зміну",
     "copyright": "Поліна Кулик",
     "errorMessageClose": "Закрити",
     "creamery": "Сироварня",

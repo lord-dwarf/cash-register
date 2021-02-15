@@ -1,6 +1,6 @@
 <template>
   <v-app dark>
-    <v-snackbar v-model="isShowErrorMessage" :timeout="8000" rounded="pill">
+    <v-snackbar v-model="isShowErrorMessage" :timeout="7000" rounded="pill">
       {{ localizeErrorMessageIfNeeded(errorMessage) }}
       <template v-slot:action="{ attrs }">
         <v-btn color="blue" text v-bind="attrs" @click="errorMessage = null">
@@ -179,19 +179,16 @@
       <v-toolbar-title v-text="title" />
       <v-spacer></v-spacer>
       <div>
-        {{
-          'Shift ' +
-          (shiftStatus || 'LOADING') +
-          (shiftTime ? ' | ' + shiftTime + '' : '')
-        }}
+        {{ formatShiftStatusAndTime() }}
       </div>
       <v-btn
         v-if="shiftStatus === 'INACTIVE'"
-        color="green"
+        color="green accent"
         text
+        class="ml-3"
         @click="activateShift()"
       >
-        Start
+        {{ this.$t('default.shiftStart') }}
       </v-btn>
       <v-divider class="mx-4" inset vertical></v-divider>
       <v-chip id="avatar-name" class="ma-3 pa-4" color="yellow accent-2">
@@ -223,10 +220,14 @@ export default {
       clipped: false,
       drawer: false,
       miniVariant: false,
-      shiftTime: null,
     }
   },
   computed: {
+    userRole: {
+      get() {
+        return this.$store.state.localStorage.userRole
+      },
+    },
     shiftStatus: {
       get() {
         return this.$store.state.shiftStatus
@@ -235,14 +236,12 @@ export default {
         this.$store.commit('setShiftStatus', val)
       },
     },
-    userRole: {
+    shiftTime: {
       get() {
-        return this.$store.state.localStorage.userRole
+        return this.$store.state.shiftTime
       },
-    },
-    title: {
-      get() {
-        return this.$t('default.creamery')
+      set(val) {
+        this.$store.commit('setShiftTime', val)
       },
     },
     isShowErrorMessage: {
@@ -261,14 +260,21 @@ export default {
         this.$store.commit('localStorage/setErrorMessage', value)
       },
     },
+    title: {
+      get() {
+        return this.$t('default.creamery')
+      },
+    },
   },
   created() {
-    this.pullShiftStatus()
+    this.pollShiftStatus()
   },
   methods: {
-    async pullShiftStatus() {
-      setTimeout(this.pullShiftStatus, 12000)
-      if (this.userRole !== null) {
+    // every 12s polls shift status and elapsed time from server
+    // TODO handle use case of multiple tabs open
+    async pollShiftStatus() {
+      setTimeout(this.pollShiftStatus, 12000)
+      if (this.userRole === 'teller' || this.userRole === 'sr_teller') {
         await this.$http
           .$get('/cashbox/shift-status')
           .then((shiftStatus) => {
@@ -282,6 +288,7 @@ export default {
           })
       }
     },
+    // activates shift by calling server, updates shift status and elapsed time
     async activateShift() {
       await this.$http
         .$patch('/cashbox/activate-shift', {})
@@ -294,6 +301,22 @@ export default {
           // nothing
           return Promise.resolve(null)
         })
+    },
+    // format shift status and elapsed time to display on top of page
+    formatShiftStatusAndTime() {
+      if (!(this.userRole === 'teller' || this.userRole === 'sr_teller')) {
+        return ''
+      }
+      return (
+        this.$t('default.shift') +
+        ' ' +
+        (this.shiftStatus === 'ACTIVE'
+          ? this.$t('default.shiftActive')
+          : this.shiftStatus === 'INACTIVE'
+          ? this.$t('default.shiftInactive')
+          : this.$t('default.shiftLoading')) +
+        (this.shiftTime ? ' | ' + this.shiftTime + ' ' : '')
+      )
     },
     getUserRoleImage() {
       switch (this.userRole) {

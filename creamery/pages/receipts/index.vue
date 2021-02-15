@@ -74,6 +74,11 @@ export default {
   }),
 
   computed: {
+    userRole: {
+      get() {
+        return this.$store.state.localStorage.userRole
+      },
+    },
     tableHeaders: {
       get() {
         return [
@@ -125,6 +130,10 @@ export default {
   },
 
   async created() {
+    if (this.userRole !== 'sr_teller') {
+      await this.$router.push('/')
+      return
+    }
     await this.loadReceipts()
   },
 
@@ -140,7 +149,7 @@ export default {
               createdTime: this.formatDateTime(r.createdTime),
               checkoutTime: this.formatDateTime(r.checkoutTime),
               status: r.status,
-              shiftStatus: r.shiftStatus,
+              shiftStatus: this.isReceiptInActiveShift(r),
               sumTotal: '' + (r.sumTotal / 100).toFixed(2),
               tellerName: r.user.username,
               actions: [],
@@ -152,6 +161,14 @@ export default {
           // nothing
           return Promise.resolve(null)
         })
+    },
+    isReceiptInActiveShift(receipt) {
+      const cashbox = receipt.user.cashbox
+      const result =
+        cashbox.shiftStatus === 'ACTIVE' &&
+        new Date(receipt.createdTime).getTime() >=
+          new Date(cashbox.shiftStatusTime).getTime()
+      return result ? 'ACTIVE' : 'INACTIVE'
     },
     formatReceiptCode(receiptId) {
       return receiptId.substring(32).toUpperCase()

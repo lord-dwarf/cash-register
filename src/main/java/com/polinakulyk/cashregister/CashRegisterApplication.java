@@ -7,13 +7,13 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 
 @SpringBootApplication
 public class CashRegisterApplication {
-	private static final Logger LOGGER = LoggerFactory.getLogger(CashRegisterApplication.class);
+	private static final Logger LOG = LoggerFactory.getLogger(CashRegisterApplication.class);
 
 	public static void main(String[] args) {
-		LOGGER.info("Before Starting application");
+		LOG.info("Before Starting application");
 		SpringApplication.run(CashRegisterApplication.class, args);
-		LOGGER.debug("Starting my application in debug with {} args", args.length);
-		LOGGER.info("Starting my application with {} args.", args.length);
+		LOG.debug("Starting my application in debug with {} args", args.length);
+		LOG.info("Starting my application with {} args.", args.length);
 	}
 
 }

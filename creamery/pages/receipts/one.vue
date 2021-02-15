@@ -155,6 +155,11 @@ export default {
   }),
 
   computed: {
+    userRole: {
+      get() {
+        return this.$store.state.localStorage.userRole
+      },
+    },
     tableHeaders: {
       get() {
         return [
@@ -215,6 +220,10 @@ export default {
   },
 
   async created() {
+    if (this.userRole !== 'sr_teller') {
+      await this.$router.push('/')
+      return
+    }
     await this.loadReceipt(this.receiptId)
   },
 
