@@ -1,6 +1,5 @@
 package com.polinakulyk.cashregister.controller.dto;
 
-import com.polinakulyk.cashregister.db.dto.ProductAmountUnit;
 import java.time.LocalDateTime;
 import java.util.StringJoiner;
 

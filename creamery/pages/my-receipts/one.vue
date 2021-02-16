@@ -615,10 +615,8 @@ export default {
       } else {
         this.$http
           .$post('/receipts' + '/' + this.receiptId + '/items', {
-            product: {
-              id: receiptItem.productId,
-            },
-            amount: this.decodeAmount(
+            productId: receiptItem.productId,
+            receiptItemAmount: this.decodeAmount(
               receiptItem.amount,
               receiptItem.amountUnit
             ),
@@ -664,7 +662,8 @@ export default {
       this.isSearchProductByCodeLoading = true
       await this.$http
         .$post('/products/find', {
-          codeFilter: searchedCode,
+          filterKind: 'CODE',
+          filterValue: searchedCode,
         })
         .then((products) => {
           this.productsByCode = products.map((p) => {
@@ -690,7 +689,8 @@ export default {
       this.isSearchProductByNameLoading = true
       await this.$http
         .$post('/products/find', {
-          nameFilter: searchedName,
+          filterKind: 'NAME',
+          filterValue: searchedName,
         })
         .then((products) => {
           this.productsByName = products.map((p) => {

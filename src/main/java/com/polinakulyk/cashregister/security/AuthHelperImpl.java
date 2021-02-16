@@ -4,7 +4,6 @@ import com.polinakulyk.cashregister.security.api.AuthHelper;
 import com.polinakulyk.cashregister.security.dto.JwtDto;
 import com.polinakulyk.cashregister.security.dto.UserDetailsDto;
 import com.polinakulyk.cashregister.security.dto.UserRole;
-import com.polinakulyk.cashregister.util.CashRegisterUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
@@ -43,32 +42,32 @@ public class AuthHelperImpl implements AuthHelper {
     private String jwtSecret;
 
     @Value("${cashregister.jwt.expire_sec}")
-    private int jwtExpirationMs;
+    private int jwtExpirationSeconds;
 
     @PostConstruct
     public void init() {
-
-        // TODO validate config
-        // TODO log config (don't expose secrets)
         jwtSecret = Base64.getEncoder().encodeToString(jwtSecret.getBytes(StandardCharsets.UTF_8));
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        // TODO explicitly configure BCrypt encoder
         return new BCryptPasswordEncoder();
     }
 
+    /**
+     * Creates JWT based on user id (not username!) and role.
+     *
+     * @param userId
+     * @param role
+     * @return
+     */
     @Override
     public String createJwt(String userId, UserRole role) {
-
-        // TODO put Issuer into JWT (that identifies CashRegister as issuer)
-        // TODO put Audience into JWT (that identifies JWT as CashRegister's auth JWT)
         Claims claims = Jwts.claims().setSubject(userId);
         claims.put(JWT_CLAIM_ROLE, getAuthRolesFromUserRole(role));
 
         LocalDateTime now = now();
-        LocalDateTime exp = now.plusSeconds(jwtExpirationMs);
+        LocalDateTime exp = now.plusSeconds(jwtExpirationSeconds);
 
         return Jwts.builder()
                 .setClaims(claims)
@@ -80,8 +79,6 @@ public class AuthHelperImpl implements AuthHelper {
 
     @Override
     public boolean validateJwt(String jwt) {
-
-        // TODO ensure exceptions result in HTTP 4xx
         Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(jwt);
         return true;
     }
@@ -94,21 +91,26 @@ public class AuthHelperImpl implements AuthHelper {
         if (jwt != null && jwt.startsWith(JWT_BEARER_PREFIX)) {
             jwt = jwt.substring(JWT_BEARER_PREFIX.length());
         }
-        return Optional.ofNullable(CashRegisterUtil.nonEmpty(jwt));
+        return Optional.ofNullable(jwt != null && !jwt.isEmpty() ? jwt : null);
     }
 
     @Override
     public JwtDto parseJwt(String jwt) {
-
-        // TODO ensure exceptions result in HTTP 4xx
         Jws<Claims> jwtParsed = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(jwt);
+        var body = jwtParsed.getBody();
         return new JwtDto()
-                .setUserId(jwtParsed.getBody().getSubject())
-                .setRole(jwtParsed.getBody().get(JWT_CLAIM_ROLE, List.class).get(0).toString())
-                .setIssuedAt(from(jwtParsed.getBody().getIssuedAt()))
-                .setExpireAt(from(jwtParsed.getBody().getExpiration()));
+                .setUserId(body.getSubject())
+                .setRole(body.get(JWT_CLAIM_ROLE, List.class).get(0).toString())
+                .setIssuedAt(from(body.getIssuedAt()))
+                .setExpireAt(from(body.getExpiration()));
     }
 
+    /**
+     * Convert {@link UserRole} into Spring Security roles.
+     *
+     * @param userRole
+     * @return
+     */
     @Override
     public List<GrantedAuthority> getAuthRolesFromUserRole(UserRole userRole) {
         return List.of(new SimpleGrantedAuthority(SPRING_ROLE_PREFIX + userRole));
@@ -118,7 +120,7 @@ public class AuthHelperImpl implements AuthHelper {
     public UserRole getUserRoleFromAuthRoles(Collection<? extends GrantedAuthority> authRoles) {
         String userRoleStr = new ArrayList<>(authRoles).get(0)
                 .getAuthority().replaceFirst(SPRING_ROLE_PREFIX, "");
-        return UserRole.fromString(userRoleStr).get();
+        return UserRole.fromString(userRoleStr).orElseThrow();
     }
 
     @Override
@@ -134,12 +136,12 @@ public class AuthHelperImpl implements AuthHelper {
     @Override
     public String getUserId() {
         Authentication auth = getAuthentication();
-        return ((UserDetailsDto) auth.getPrincipal()).getUsername();
+        return ((UserDetailsDto) auth.getPrincipal()).getUserId();
     }
 
     @Override
     public String getUsername() {
         Authentication auth = getAuthentication();
-        return ((UserDetailsDto) auth.getPrincipal()).getPrincipalName();
+        return ((UserDetailsDto) auth.getPrincipal()).getUsername();
     }
 }

@@ -1,9 +1,7 @@
 package com.polinakulyk.cashregister.config.autorun;
 
-import com.polinakulyk.cashregister.db.dto.ShiftStatus;
 import com.polinakulyk.cashregister.db.entity.Product;
 import com.polinakulyk.cashregister.db.entity.Receipt;
-import com.polinakulyk.cashregister.db.entity.ReceiptItem;
 import com.polinakulyk.cashregister.db.entity.User;
 import com.polinakulyk.cashregister.security.dto.UserRole;
 import com.polinakulyk.cashregister.service.api.CashboxService;
@@ -12,7 +10,6 @@ import com.polinakulyk.cashregister.service.api.ReceiptService;
 import com.polinakulyk.cashregister.service.api.UserService;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
@@ -154,7 +151,7 @@ public class InitDbAutorun {
                 .setName("Kaserei Fitaki Original 40% 500g")
                 .setDetails("Produced in Germany")
                 .setPrice(14000)
-                .setAmountAvailable(175)
+                .setAmountAvailable(275)
                 .setAmountUnit(UNIT)
         );
         productService.create(new Product()
@@ -172,7 +169,7 @@ public class InitDbAutorun {
                 .setName("Philadelphia 69% 125g")
                 .setDetails("Produced in Italy")
                 .setPrice(5500)
-                .setAmountAvailable(180)
+                .setAmountAvailable(280)
                 .setAmountUnit(UNIT)
         );
         productService.create(new Product()
@@ -190,7 +187,7 @@ public class InitDbAutorun {
                 .setName("Wyke Farms Ivy's Vintage Reserve 58% 200g")
                 .setDetails("Produced in England")
                 .setPrice(13000)
-                .setAmountAvailable(155)
+                .setAmountAvailable(255)
                 .setAmountUnit(UNIT)
         );
         productService.create(new Product()
@@ -199,7 +196,7 @@ public class InitDbAutorun {
                 .setName("Le Chevre 150g")
                 .setDetails("Produced in France")
                 .setPrice(15000)
-                .setAmountAvailable(160)
+                .setAmountAvailable(260)
                 .setAmountUnit(UNIT)
         );
         productService.create(new Product()
@@ -231,10 +228,9 @@ public class InitDbAutorun {
                 tellerUsername,
                 tellerPassword,
                 UserRole.fromString(tellerRole).get(),
-                tellerFullName,
-                false
+                tellerFullName
         );
-        User user = userService.findById(tellerId).get();
+        User user = userService.findExistingById(tellerId);
         user.getCashbox();
 
         userService.createWithId(
@@ -243,8 +239,7 @@ public class InitDbAutorun {
                 teller2Username,
                 teller2Password,
                 UserRole.fromString(teller2Role).get(),
-                teller2FullName,
-                false
+                teller2FullName
         );
         userService.createWithId(
                 srTellerId,
@@ -252,8 +247,7 @@ public class InitDbAutorun {
                 srTellerUsername,
                 srTellerPassword,
                 UserRole.fromString(srTellerRole).get(),
-                srTellerFullName,
-                false
+                srTellerFullName
         );
         userService.createWithId(
                 merchId,
@@ -261,8 +255,7 @@ public class InitDbAutorun {
                 merchUsername,
                 merchPassword,
                 UserRole.fromString(merchRole).get(),
-                merchFullName,
-                false
+                merchFullName
         );
     }
 
@@ -277,25 +270,22 @@ public class InitDbAutorun {
         // COMPLETED receipts
         for (Product p : productService.findAll()) {
             Receipt r = receiptService.createReceipt(userId);
-            receiptService.add(r.getId(), new ReceiptItem()
-                    .setProduct(p)
-                    .setAmount(50));
-            receiptService.complete(r.getId());
+            receiptService.addReceiptItem(r.getId(), p.getId(), 50);
+            receiptService.completeReceipt(r.getId());
         }
 
         // x1 CREATED receipt
         Receipt receipt = receiptService.createReceipt(userId);
-        receiptService.add(receipt.getId(), new ReceiptItem()
-                .setProduct(productService.findAll().iterator().next())
-                .setAmount(50));
+        receiptService.addReceiptItem(
+                receipt.getId(),
+                productService.findAll().iterator().next().getId(),
+                50);
 
         // CANCELED receipts
         for (Product p : productService.findAll()) {
             Receipt r = receiptService.createReceipt(userId);
-            receiptService.add(r.getId(), new ReceiptItem()
-                    .setProduct(p)
-                    .setAmount(50));
-            receiptService.cancel(r.getId());
+            receiptService.addReceiptItem(r.getId(), p.getId(), 50);
+            receiptService.cancelReceipt(r.getId());
         }
     }
 }

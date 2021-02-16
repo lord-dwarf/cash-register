@@ -41,23 +41,26 @@ public class AuthController {
         Authentication auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         loginRequest.getLogin(), loginRequest.getPassword()));
+
+        UserDetailsDto userDetails = (UserDetailsDto) auth.getPrincipal();
+
         // clear principal password after we've authenticated
-        ((UserDetailsDto) auth.getPrincipal()).setPassword("");
+        userDetails.setPassword("");
+
+        // save user details into Spring Security context for the duration of request
         authHelper.setAuthentication(auth);
 
-        // TODO ensure that after auth manager really clears the password
-        String userId = ((UserDetailsDto) auth.getPrincipal()).getUsername();
+        String userId = userDetails.getUserId();
         UserRole userRole = authHelper.getUserRoleFromAuthRoles(auth.getAuthorities());
         String jwt = authHelper.createJwt(userId, userRole);
-        String userName = ((UserDetailsDto) auth.getPrincipal()).getPrincipalName();
 
         return new LoginResponseDto()
                 .setJwt(jwt)
                 .setUser(new User()
                         .setId(userId)
+                        .setUsername(userDetails.getUsername())
                         .setRole(userRole)
-                        .setUsername(userName)
-                        .setReceipts(null));
+                        .setFullName(userDetails.getFullName()));
     }
 
     @PostMapping("/logout")
@@ -65,5 +68,4 @@ public class AuthController {
         response.setStatus(NO_CONTENT.value());
         return "";
     }
-
 }

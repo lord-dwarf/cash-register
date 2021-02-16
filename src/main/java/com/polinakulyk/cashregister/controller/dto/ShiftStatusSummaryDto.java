@@ -3,7 +3,7 @@ package com.polinakulyk.cashregister.controller.dto;
 import com.polinakulyk.cashregister.db.dto.ShiftStatus;
 import java.util.StringJoiner;
 
-public class CashboxShiftStatusDto {
+public class ShiftStatusSummaryDto {
 
     private ShiftStatus shiftStatus;
     private String shiftStatusElapsedTime;
@@ -12,7 +12,7 @@ public class CashboxShiftStatusDto {
         return shiftStatus;
     }
 
-    public CashboxShiftStatusDto setShiftStatus(ShiftStatus shiftStatus) {
+    public ShiftStatusSummaryDto setShiftStatus(ShiftStatus shiftStatus) {
         this.shiftStatus = shiftStatus;
         return this;
     }
@@ -21,7 +21,7 @@ public class CashboxShiftStatusDto {
         return shiftStatusElapsedTime;
     }
 
-    public CashboxShiftStatusDto setShiftStatusElapsedTime(String shiftStatusElapsedTime) {
+    public ShiftStatusSummaryDto setShiftStatusElapsedTime(String shiftStatusElapsedTime) {
         this.shiftStatusElapsedTime = shiftStatusElapsedTime;
         return this;
     }
@@ -31,7 +31,7 @@ public class CashboxShiftStatusDto {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        CashboxShiftStatusDto that = (CashboxShiftStatusDto) o;
+        ShiftStatusSummaryDto that = (ShiftStatusSummaryDto) o;
 
         if (!shiftStatus.equals(that.shiftStatus)) return false;
         return shiftStatusElapsedTime.equals(that.shiftStatusElapsedTime);
@@ -47,7 +47,7 @@ public class CashboxShiftStatusDto {
     @Override
     public String toString() {
         return new StringJoiner(
-                ", ", CashboxShiftStatusDto.class.getSimpleName() + "[", "]")
+                ", ", ShiftStatusSummaryDto.class.getSimpleName() + "[", "]")
                 .add("shiftStatus='" + shiftStatus + "'")
                 .add("shiftStatusElapsedTime='" + shiftStatusElapsedTime + "'")
                 .toString();

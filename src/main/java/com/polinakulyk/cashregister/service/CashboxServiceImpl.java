@@ -1,6 +1,6 @@
 package com.polinakulyk.cashregister.service;
 
-import com.polinakulyk.cashregister.controller.dto.CashboxShiftStatusDto;
+import com.polinakulyk.cashregister.controller.dto.ShiftStatusSummaryDto;
 import com.polinakulyk.cashregister.db.dto.ShiftStatus;
 import com.polinakulyk.cashregister.db.entity.Cashbox;
 import com.polinakulyk.cashregister.db.entity.User;
@@ -9,22 +9,24 @@ import com.polinakulyk.cashregister.exception.CashRegisterException;
 import com.polinakulyk.cashregister.security.api.AuthHelper;
 import com.polinakulyk.cashregister.service.api.CashboxService;
 import com.polinakulyk.cashregister.service.api.UserService;
-import com.polinakulyk.cashregister.util.CashRegisterUtil;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static com.polinakulyk.cashregister.db.dto.ShiftStatus.ACTIVE;
 import static com.polinakulyk.cashregister.db.dto.ShiftStatus.INACTIVE;
-import static com.polinakulyk.cashregister.util.CashRegisterUtil.generateUuid;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.now;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.quote;
 
+/**
+ * Cashbox service.
+ * <p>
+ * The existence of {@link Cashbox} entity allows us to keep track of a current shift status.
+ * Currently, application uses a single cash box, but can be extended to use multiple cash boxes.
+ */
 @Service
 public class CashboxServiceImpl implements CashboxService {
     private static final Logger LOG = LoggerFactory.getLogger(CashboxServiceImpl.class);
@@ -42,11 +44,22 @@ public class CashboxServiceImpl implements CashboxService {
         this.authHelper = authHelper;
     }
 
+    /**
+     * Creates cash box entity with the given id.
+     * <p>
+     * Currently, it is intended to be used only by
+     * {@link com.polinakulyk.cashregister.config.autorun.InitDbAutorun}.
+     *
+     * @param cashboxId
+     * @param name
+     * @param shiftStatus
+     * @return
+     */
     @Override
     @Transactional
     public Cashbox createWithId(String cashboxId, String name, ShiftStatus shiftStatus) {
 
-        // here we assume that auto-generated cashbox UUID is unique
+        // IMPORTANT here we assume that the provided cash box id is unique.
         return cashboxRepository.save(new Cashbox()
                 .setId(cashboxId)
                 .setName(name)
@@ -56,71 +69,94 @@ public class CashboxServiceImpl implements CashboxService {
 
     @Override
     @Transactional
-    public CashboxShiftStatusDto activateShift() {
+    public ShiftStatusSummaryDto activateShift() {
         String userId = authHelper.getUserId();
-        User user = userService.findById(userId).orElseThrow(() ->
-                new CashRegisterException(HttpStatus.FORBIDDEN, quote("User not found", userId)));
+        User user = userService.findExistingById(userId);
+
         Cashbox cashbox = user.getCashbox();
-        ShiftStatus shiftStatus = cashbox.getShiftStatus();
-        if (INACTIVE == shiftStatus) {
-            cashbox.setShiftStatus(ACTIVE);
-            cashbox.setShiftStatusTime(now());
-        }
-        cashbox = cashboxRepository.save(cashbox);
-        shiftStatus = cashbox.getShiftStatus();
-        LocalDateTime shiftStatusTime = cashbox.getShiftStatusTime();
-        return new CashboxShiftStatusDto()
-                .setShiftStatus(shiftStatus)
-                .setShiftStatusElapsedTime(calcShiftElapsedTime(shiftStatusTime));
+        validateShiftStatusTransitionToActive(cashbox);
+
+        return updateShiftStatus(cashbox, ACTIVE);
     }
 
     @Override
     @Transactional
-    public CashboxShiftStatusDto deactivateShift() {
+    public ShiftStatusSummaryDto deactivateShift() {
         String userId = authHelper.getUserId();
-        User user = userService.findById(userId).orElseThrow(() ->
-                new CashRegisterException(quote("User not found", userId)));
+        User user = userService.findExistingById(userId);
+
         Cashbox cashbox = user.getCashbox();
-        ShiftStatus shiftStatus = cashbox.getShiftStatus();
-        if (ACTIVE == shiftStatus) {
-            cashbox.setShiftStatus(INACTIVE);
-            cashbox.setShiftStatusTime(now());
-        }
-        cashbox = cashboxRepository.save(cashbox);
-        shiftStatus = cashbox.getShiftStatus();
-        LocalDateTime shiftStatusTime = cashbox.getShiftStatusTime();
-        return new CashboxShiftStatusDto()
-                .setShiftStatus(shiftStatus)
-                .setShiftStatusElapsedTime(calcShiftElapsedTime(shiftStatusTime));
+        validateShiftStatusTransitionToInactive(cashbox);
+
+        return updateShiftStatus(cashbox, INACTIVE);
     }
 
+    /**
+     * Provides shift status and elapsed time since last shift status change.
+     *
+     * @return
+     */
     @Override
     @Transactional
-    public CashboxShiftStatusDto getShiftStatusAndElapsedTime() {
+    public ShiftStatusSummaryDto getShiftStatusSummary() {
         String userId = authHelper.getUserId();
-        User user = userService.findById(userId).orElseThrow(() ->
-                new CashRegisterException(quote("User not found", userId)));
+        User user = userService.findExistingById(userId);
+
         Cashbox cashbox = user.getCashbox();
-        ShiftStatus shiftStatus = cashbox.getShiftStatus();
         LocalDateTime shiftStatusTime = cashbox.getShiftStatusTime();
-        return new CashboxShiftStatusDto()
-                .setShiftStatus(shiftStatus)
-                .setShiftStatusElapsedTime(calcShiftElapsedTime(shiftStatusTime));
+        return new ShiftStatusSummaryDto()
+                .setShiftStatus(cashbox.getShiftStatus())
+                .setShiftStatusElapsedTime(calcElapsedTime(shiftStatusTime));
     }
 
-    private String calcShiftElapsedTime(LocalDateTime shiftStatusTime) {
-        long elapsedSeconds = ChronoUnit.SECONDS.between(shiftStatusTime, now());
-        long days = elapsedSeconds / (3600 * 24);
-        elapsedSeconds %= 3600 * 24;
-        long hours = elapsedSeconds / 3600;
-        elapsedSeconds %= 3600;
-        long minutes = elapsedSeconds / 60;
-        elapsedSeconds %= 60;
-        String elapsedTime = ""
-                + (days != 0 ? days + ":" : "")
-                + (hours != 0 ? String.format("%02d", hours) : "00") + ":"
-                + (minutes != 0 ? String.format("%02d", minutes) : "00") + ":"
-                + String.format("%02d", elapsedSeconds);
-        return elapsedTime;
+    /*
+     * Calculates elapsed time since the given time.
+     */
+    private String calcElapsedTime(LocalDateTime from) {
+        long seconds = ChronoUnit.SECONDS.between(from, now());
+        long days = seconds / (3600 * 24);
+        seconds %= 3600 * 24;
+        long hours = seconds / 3600;
+        seconds %= 3600;
+        long minutes = seconds / 60;
+        seconds %= 60;
+        return String.format(
+                "%s%02d:%02d:%02d",
+                days != 0 ? days + ":" : "",
+                hours,
+                minutes,
+                seconds
+        );
+    }
+
+    private ShiftStatusSummaryDto updateShiftStatus(Cashbox cashbox, ShiftStatus shiftStatus) {
+        cashbox.setShiftStatus(shiftStatus);
+        cashbox.setShiftStatusTime(now());
+        cashbox = cashboxRepository.save(cashbox);
+
+        LocalDateTime shiftStatusTime = cashbox.getShiftStatusTime();
+        return new ShiftStatusSummaryDto()
+                .setShiftStatus(cashbox.getShiftStatus())
+                .setShiftStatusElapsedTime(calcElapsedTime(shiftStatusTime));
+    }
+
+    private static void validateShiftStatusTransitionToActive(Cashbox cashbox) {
+        ShiftStatus fromStatus = cashbox.getShiftStatus();
+        if (INACTIVE != fromStatus) {
+            throwOnIllegalShiftStatusTransition(fromStatus, ACTIVE);
+        }
+    }
+
+    private static void validateShiftStatusTransitionToInactive(Cashbox cashbox) {
+        ShiftStatus fromStatus = cashbox.getShiftStatus();
+        if (ACTIVE != fromStatus) {
+            throwOnIllegalShiftStatusTransition(fromStatus, INACTIVE);
+        }
+    }
+
+    private static void throwOnIllegalShiftStatusTransition(
+            ShiftStatus from, ShiftStatus to) {
+        throw new CashRegisterException(quote(
+                "Illegal shift status transition", from, to));
     }
 }

@@ -11,12 +11,12 @@ import java.util.Optional;
 public interface ReceiptService {
     Iterable<Receipt> findAll();
     List<Receipt> findAllByTellerId(String tellerId);
-    Optional<Receipt> findById(String id);
+    Receipt findExistingById(String id);
     Receipt createReceipt(String userId);
-    Receipt complete(String receiptId);
-    Receipt cancel(String receiptId);
-    Receipt add(String receiptId, ReceiptItem receiptItem);
-    Receipt cancel(String receiptId, String receiptItemId);
-    Receipt update(
-            String receiptId, String receiptItemId, UpdateReceiptItemDto updateReceiptItemDto);
+    Receipt completeReceipt(String receiptId);
+    Receipt cancelReceipt(String receiptId);
+    Receipt addReceiptItem(String receiptId, String receiptItemProductId, Integer receiptItemAmount);
+    Receipt cancelReceiptItem(String receiptId, String receiptItemId);
+    Receipt updateReceiptItemAmount(
+            String receiptId, String receiptItemId, Integer newAmount);
 }

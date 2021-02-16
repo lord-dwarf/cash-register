@@ -4,24 +4,24 @@ import java.util.StringJoiner;
 
 public class FindProductsDto {
 
-    private String codeFilter;
-    private String nameFilter;
+    private String filterValue;
+    private ProductFilterKind filterKind;
 
-    public String getCodeFilter() {
-        return codeFilter;
+    public String getFilterValue() {
+        return filterValue;
     }
 
-    public FindProductsDto setCodeFilter(String codeFilter) {
-        this.codeFilter = codeFilter;
+    public FindProductsDto setFilterValue(String filterValue) {
+        this.filterValue = filterValue;
         return this;
     }
 
-    public String getNameFilter() {
-        return nameFilter;
+    public ProductFilterKind getFilterKind() {
+        return filterKind;
     }
 
-    public FindProductsDto setNameFilter(String nameFilter) {
-        this.nameFilter = nameFilter;
+    public FindProductsDto setFilterKind(ProductFilterKind filterKind) {
+        this.filterKind = filterKind;
         return this;
     }
 
@@ -32,15 +32,14 @@ public class FindProductsDto {
 
         FindProductsDto that = (FindProductsDto) o;
 
-        if (codeFilter != null ? !codeFilter.equals(that.codeFilter) : that.codeFilter != null)
-            return false;
-        return nameFilter != null ? nameFilter.equals(that.nameFilter) : that.nameFilter == null;
+        if (!filterValue.equals(that.filterValue)) return false;
+        return filterKind == that.filterKind;
     }
 
     @Override
     public int hashCode() {
-        int result = codeFilter != null ? codeFilter.hashCode() : 0;
-        result = 31 * result + (nameFilter != null ? nameFilter.hashCode() : 0);
+        int result = filterValue.hashCode();
+        result = 31 * result + filterKind.hashCode();
         return result;
     }
 
@@ -48,8 +47,8 @@ public class FindProductsDto {
     public String toString() {
         return new StringJoiner(
                 ", ", FindProductsDto.class.getSimpleName() + "[", "]")
-                .add("codeFilter='" + codeFilter + "'")
-                .add("nameFilter='" + nameFilter + "'")
+                .add("filterValue='" + filterValue + "'")
+                .add("filterKind=" + filterKind)
                 .toString();
     }
 }

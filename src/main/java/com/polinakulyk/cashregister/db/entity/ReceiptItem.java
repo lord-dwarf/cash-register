@@ -7,6 +7,7 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
+import javax.persistence.PreRemove;
 import org.hibernate.annotations.GenericGenerator;
 
 @Entity
@@ -116,5 +117,17 @@ public class ReceiptItem {
                 .add("amountUnit='" + amountUnit + "'")
                 .add("price=" + price)
                 .toString();
+    }
+
+    /*
+     * WORKAROUND for receipt item still present in receipt after deletion via Jpa/Crud repository.
+     *
+     * Prior to deleting receipt item, remove all object model bindings
+     * between receipt item and its parent receipt.
+     */
+    @PreRemove
+    private void removeReceiptBinding() {
+        getReceipt().getReceiptItems().remove(this);
+        setReceipt(null);
     }
 }

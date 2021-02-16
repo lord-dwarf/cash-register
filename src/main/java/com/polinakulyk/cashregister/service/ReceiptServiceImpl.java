@@ -1,7 +1,6 @@
 package com.polinakulyk.cashregister.service;
 
-import com.polinakulyk.cashregister.controller.dto.UpdateReceiptItemDto;
-import com.polinakulyk.cashregister.db.dto.ShiftStatus;
+import com.polinakulyk.cashregister.db.dto.ReceiptStatus;
 import com.polinakulyk.cashregister.db.entity.Product;
 import com.polinakulyk.cashregister.db.entity.Receipt;
 import com.polinakulyk.cashregister.db.entity.ReceiptItem;
@@ -9,27 +8,32 @@ import com.polinakulyk.cashregister.db.entity.User;
 import com.polinakulyk.cashregister.db.repository.ReceiptItemRepository;
 import com.polinakulyk.cashregister.db.repository.ReceiptRepository;
 import com.polinakulyk.cashregister.exception.CashRegisterException;
+import com.polinakulyk.cashregister.exception.CashRegisterReceiptItemNotFoundException;
+import com.polinakulyk.cashregister.exception.CashRegisterReceiptNotFoundException;
 import com.polinakulyk.cashregister.service.api.ProductService;
 import com.polinakulyk.cashregister.service.api.ReceiptService;
 import com.polinakulyk.cashregister.service.api.UserService;
-import com.polinakulyk.cashregister.util.CashRegisterUtil;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static com.polinakulyk.cashregister.db.dto.ReceiptStatus.CANCELED;
 import static com.polinakulyk.cashregister.db.dto.ReceiptStatus.COMPLETED;
 import static com.polinakulyk.cashregister.db.dto.ReceiptStatus.CREATED;
-import static com.polinakulyk.cashregister.service.ServiceHelper.calcCost;
+import static com.polinakulyk.cashregister.db.dto.ShiftStatus.ACTIVE;
+import static com.polinakulyk.cashregister.service.ServiceHelper.calcCostByPriceAndUnit;
+import static com.polinakulyk.cashregister.service.ServiceHelper.isReceiptInActiveShift;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.now;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.quote;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.StreamSupport.stream;
 
+/**
+ * Receipt service, which also includes receipt items logic.
+ */
 @Service
 public class ReceiptServiceImpl implements ReceiptService {
     private static final Logger LOG = LoggerFactory.getLogger(ReceiptServiceImpl.class);
@@ -58,328 +62,265 @@ public class ReceiptServiceImpl implements ReceiptService {
     }
 
     @Override
+    @Transactional
     public List<Receipt> findAllByTellerId(String tellerId) {
-        // validate tellerId
-        userService.findById(tellerId).orElseThrow(() ->
-                new CashRegisterException(
-                        HttpStatus.FORBIDDEN,
-                        quote("User not found", tellerId)));
 
-        // filter teller's receipts that belong to active shift
-        List<Receipt> receipts = new ArrayList<>();
-        receiptRepository.findAll().forEach((receipt) -> {
-            if (tellerId.equals(receipt.getUser().getId())
-                    && CashRegisterUtil.isReceiptInActiveShift(receipt)) {
-                receipts.add(receipt);
-            }
-        });
-        return receipts;
+        // validate that user exists
+        userService.findExistingById(tellerId);
+
+        // filter teller's receipts that belong to the active shift
+        return stream(receiptRepository.findAll().spliterator(), false)
+                .filter(r -> tellerId.equals(r.getUser().getId()) && isReceiptInActiveShift(r)).
+                        collect(toList());
     }
 
+    /**
+     * Find the existing receipt by id, otherwise throw
+     * {@link CashRegisterReceiptNotFoundException}.
+     * <p>
+     * Used as a way to retrieve the receipt entity that must be present. Otherwise the specific
+     * exception is thrown, that will result in HTTP 404.
+     *
+     * @param receiptId
+     * @return
+     */
     @Override
     @Transactional
-    public Optional<Receipt> findById(String id) {
-        return receiptRepository.findById(id);
+    public Receipt findExistingById(String receiptId) {
+        return receiptRepository.findById(receiptId).orElseThrow(() ->
+                new CashRegisterReceiptNotFoundException(receiptId));
     }
 
     @Override
     @Transactional
     public Receipt createReceipt(String userId) {
-        User user = userService.findById(userId).orElseThrow(() ->
-                new CashRegisterException(
-                        HttpStatus.FORBIDDEN, quote("User not found", userId)));
+        User user = userService.findExistingById(userId);
 
-        // cashbox shift must be active
-        validateCashboxShiftActive(user);
-        Receipt receipt = new Receipt()
+        validateIsUserShiftActive(user);
+
+        return receiptRepository.save(new Receipt()
                 .setStatus(CREATED)
                 .setCreatedTime(now())
-                .setUser(user);
-        return receiptRepository.save(receipt);
+                .setUser(user));
     }
 
     @Override
     @Transactional
-    public Receipt complete(String receiptId) {
-        Optional<Receipt> receiptOpt = receiptRepository.findById(receiptId);
-        if (receiptOpt.isEmpty()) {
-            throw new CashRegisterException(
-                    HttpStatus.NOT_FOUND, // 404 here, because receipt must be present
-                    quote("Receipt not found", receiptId));
-        }
-        Receipt receipt = receiptOpt.get();
+    public Receipt completeReceipt(String receiptId) {
+        Receipt receipt = findExistingById(receiptId);
 
-        // cashbox shift must be active
-        validateCashboxShiftActive(receipt.getUser());
+        validateShiftStatus(receipt);
+        validateReceiptStatusTransitionToCompleted(receipt);
 
-        // receipt shift must be active
-        validateReceiptShiftActive(receipt);
+        // decrease amount available for products in receipt items
+        for (ReceiptItem receiptItem : receipt.getReceiptItems()) {
 
-        if (!(CREATED == receipt.getStatus() || COMPLETED == receipt.getStatus())) {
-            throw new CashRegisterException(
-                    quote("Receipt status transition not allowed", receipt.getStatus()));
-        }
-        // empty receipt can only be canceled
-        if (receipt.getReceiptItems().isEmpty()) {
-            throw new CashRegisterException(quote(
-                    "Receipt without items cannot be completed", receipt.getStatus()));
-        }
-        if (COMPLETED == receipt.getStatus()) {
-            return receipt;
+            validateProductAmountNotExceeded(receiptItem);
+
+            // decrease amount available for product
+            Product receiptItemProduct = receiptItem.getProduct();
+            receiptItemProduct.setAmountAvailable(
+                    receiptItemProduct.getAmountAvailable() - receiptItem.getAmount());
         }
 
-        // set receipt status COMPLETED and update checkout time
+        // set status
         receipt.setStatus(COMPLETED);
         receipt.setCheckoutTime(now());
 
-        // decrease amount available for products in receipt
-        for (ReceiptItem receiptItem : receipt.getReceiptItems()) {
-
-            Product receiptItemProduct = receiptItem.getProduct();
-            int productAmountAvailable = receiptItemProduct.getAmountAvailable();
-
-            // validate that receipt item amount does not exceed the product amount available
-            if (receiptItem.getAmount() > productAmountAvailable) {
-                throw new CashRegisterException(quote(
-                        "Receipt item amount exceeds product amount available",
-                        receiptItem.getAmount()));
-            }
-
-            // decrease amount available for product
-            receiptItemProduct.setAmountAvailable(productAmountAvailable - receiptItem.getAmount());
-            productService.update(receiptItemProduct);
-        }
-
         return receiptRepository.save(receipt);
     }
 
     @Override
     @Transactional
-    public Receipt cancel(String receiptId) {
-        Optional<Receipt> receiptOpt = receiptRepository.findById(receiptId);
-        if (receiptOpt.isEmpty()) {
-            throw new CashRegisterException(
-                    HttpStatus.NOT_FOUND, // 404 here, because receipt must be present
-                    quote("Receipt not found", receiptId));
-        }
-        Receipt receipt = receiptOpt.get();
+    public Receipt cancelReceipt(String receiptId) {
+        Receipt receipt = findExistingById(receiptId);
 
-        // cashbox shift must be active
-        validateCashboxShiftActive(receipt.getUser());
+        validateShiftStatus(receipt);
+        validateReceiptStatusTransitionToCanceled(receipt);
 
-        // receipt shift must be active
-        validateReceiptShiftActive(receipt);
+        if (COMPLETED == receipt.getStatus()) {
 
-        // can cancel from all statuses
-        if (CANCELED == receipt.getStatus()) {
-            return receipt;
+            // increase amount available for products in receipt items
+            for (ReceiptItem receiptItem : receipt.getReceiptItems()) {
+
+                // increase amount available for product
+                Product receiptItemProduct = receiptItem.getProduct();
+                receiptItemProduct.setAmountAvailable(
+                        receiptItemProduct.getAmountAvailable() + receiptItem.getAmount());
+            }
         }
 
-        // set receipt status CANCELED
+        // set status
         receipt.setStatus(CANCELED);
         receipt.setCheckoutTime(now());
 
-        // increase amount available for products in receipt
-        for (ReceiptItem receiptItem : receipt.getReceiptItems()) {
-
-            // increase amount available for product
-            Product receiptItemProduct = receiptItem.getProduct();
-            receiptItemProduct.setAmountAvailable(
-                    receiptItemProduct.getAmountAvailable() + receiptItem.getAmount());
-            productService.update(receiptItemProduct);
-        }
-
         return receiptRepository.save(receipt);
     }
 
     @Override
     @Transactional
-    public Receipt add(String receiptId, ReceiptItem receiptItem) {
+    public Receipt addReceiptItem(
+            String receiptId, String receiptItemProductId, Integer receiptItemAmount) {
+        Receipt receipt = findExistingById(receiptId);
 
-        // load receipt and product
-        Optional<Receipt> receiptOpt = receiptRepository.findById(receiptId);
-        if (receiptOpt.isEmpty()) {
-            throw new CashRegisterException(
-                    HttpStatus.NOT_FOUND, // 404 here, because receipt must be present
-                    quote("Receipt not found", receiptId));
-        }
-        Receipt receipt = receiptOpt.get();
+        validateShiftStatus(receipt);
+        validateIsReceiptItemsModificationAllowed(receipt);
 
-        // cashbox shift must be active
-        validateCashboxShiftActive(receipt.getUser());
+        Product product = productService.findExistingById(receiptItemProductId);
 
-        // receipt shift must be active
-        validateReceiptShiftActive(receipt);
-
-        Optional<Product> productOpt = productService.findById(receiptItem.getProduct().getId());
-        if (productOpt.isEmpty()) {
-            throw new CashRegisterException(
-                    quote("Product not found", receiptItem.getProduct().getId()));
-        }
-        Product product = productOpt.get();
-
-        // validate receipt status
-        if (CREATED != receipt.getStatus()) {
-            throw new CashRegisterException(quote(
-                    "Receipt status does not allow adding of item", receipt.getStatus()));
-        }
-
-        // save receipt item amount
-        int receiptItemAmountAdded = receiptItem.getAmount();
-
-        // find an existing receipt item
+        // find an already existing receipt item with the same product,
+        // to prevent adding duplicate receipt items
         Optional<ReceiptItem> existingReceiptItemOpt = receipt.getReceiptItems().stream()
-                .filter((existingReceiptItem) ->
-                        product.getId().equals(existingReceiptItem.getProduct().getId())
-                ).findFirst();
+                .filter(ri -> product.getId().equals(ri.getProduct().getId()))
+                .findFirst();
 
-        // init receipt item
-        if (existingReceiptItemOpt.isEmpty()) {
+        ReceiptItem receiptItem = null;
+        if (existingReceiptItemOpt.isPresent()) {
 
-            // init via creating a new receipt item via copying of product
-            receiptItem
+            // update existing receipt item
+            receiptItem = existingReceiptItemOpt.get();
+            receiptItem.setAmount(receiptItem.getAmount() + receiptItemAmount);
+        } else {
+
+            // create receipt item by copying some fields from product, then add to receipt
+            receiptItem = new ReceiptItem()
                     .setReceipt(receipt)
                     .setProduct(product)
                     .setName(product.getName())
+                    .setAmount(receiptItemAmount)
                     .setAmountUnit(product.getAmountUnit())
                     .setPrice(product.getPrice());
             receipt.getReceiptItems().add(receiptItem);
-        } else {
-
-            // init via merging into existing receipt item
-            receiptItem = existingReceiptItemOpt.get();
-            receiptItem.setAmount(receiptItem.getAmount() + receiptItemAmountAdded);
         }
 
-        // validate that receipt item amount does not exceed the product amount available
-        if (receiptItem.getAmount() > receiptItem.getProduct().getAmountAvailable()) {
-            throw new CashRegisterException(quote(
-                    "Receipt item amount exceeds product amount available",
-                    receiptItem.getAmount()));
-        }
+        // validate product amount at the stage after receipt item amount finalized
+        validateProductAmountNotExceeded(receiptItem);
 
-        // increase receipt price total
-        int priceTotalIncrease = calcCost(
-                receiptItem.getPrice(), receiptItemAmountAdded, receiptItem.getAmountUnit());
-        receipt.setSumTotal(receipt.getSumTotal() + priceTotalIncrease);
+        // calculate and increase receipt price total
+        int sumTotalIncrease = calcCostByPriceAndUnit(
+                receiptItem.getPrice(), receiptItemAmount, receiptItem.getAmountUnit());
+        receipt.setSumTotal(receipt.getSumTotal() + sumTotalIncrease);
 
-        // save receipt and associated receipt item
+        // update receipt and associated receipt item
         return receiptRepository.save(receipt);
     }
 
     @Override
     @Transactional
-    public Receipt cancel(String receiptId, String receiptItemId) {
-        Optional<Receipt> receiptOpt = receiptRepository.findById(receiptId);
-        if (receiptOpt.isEmpty()) {
-            throw new CashRegisterException(
-                    HttpStatus.NOT_FOUND, // 404 here, because receipt must be present
-                    quote("Receipt not found", receiptId));
-        }
-        Receipt receipt = receiptOpt.get();
+    public Receipt cancelReceiptItem(String receiptId, String receiptItemId) {
+        Receipt receipt = findExistingById(receiptId);
 
-        // cashbox shift must be active
-        validateCashboxShiftActive(receipt.getUser());
+        validateShiftStatus(receipt);
+        validateIsReceiptItemsModificationAllowed(receipt);
 
-        // receipt shift must be active
-        validateReceiptShiftActive(receipt);
+        ReceiptItem receiptItem = findExistingReceiptItemInReceipt(receipt, receiptItemId);
 
-        // validate receipt status
-        if (CREATED != receipt.getStatus()) {
-            throw new CashRegisterException(quote(
-                    "Receipt status does not allow receipt item cancellation",
-                    receipt.getStatus()));
-        }
+        // decrease receipt price total
+        int sumTotalDecrease = calcCostByPriceAndUnit(
+                receiptItem.getPrice(), receiptItem.getAmount(), receiptItem.getAmountUnit());
+        receipt.setSumTotal(receipt.getSumTotal() - sumTotalDecrease);
 
-        // find receipt item
-        Optional<ReceiptItem> receiptItemOpt = receipt.getReceiptItems().stream().filter((receiptItem) ->
-                receiptItemId.equals(receiptItem.getId())).findFirst();
-
-        if (receiptItemOpt.isPresent()) {
-            ReceiptItem receiptItem = receiptItemOpt.get();
-
-            // decrease receipt price total
-            int priceTotalDecrease = calcCost(
-                    receiptItem.getPrice(), receiptItem.getAmount(), receiptItem.getAmountUnit());
-            receipt.setSumTotal(receipt.getSumTotal() - priceTotalDecrease);
-            receipt = receiptRepository.save(receipt);
-
-            // delete receipt item
-            receiptItemRepository.delete(receiptItem);
-            receipt.setReceiptItems(receipt.getReceiptItems().stream().filter((item) ->
-                    !receiptItemId.equals(item.getId())).collect(Collectors.toList()));
-        }
-        return receipt;
+        receiptItemRepository.delete(receiptItem);
+        return receiptRepository.save(receipt);
     }
 
     @Override
     @Transactional
-    public Receipt update(
-            String receiptId, String receiptItemId, UpdateReceiptItemDto updateReceiptItemDto) {
-        Optional<Receipt> receiptOpt = receiptRepository.findById(receiptId);
-        if (receiptOpt.isEmpty()) {
-            throw new CashRegisterException(
-                    HttpStatus.NOT_FOUND, // 404 here, because receipt must be present
-                    quote("Receipt not found", receiptId));
-        }
-        Receipt receipt = receiptOpt.get();
+    public Receipt updateReceiptItemAmount(
+            String receiptId, String receiptItemId, Integer newAmount) {
+        Receipt receipt = findExistingById(receiptId);
 
-        // cashbox shift must be active
-        validateCashboxShiftActive(receipt.getUser());
+        validateShiftStatus(receipt);
+        validateIsReceiptItemsModificationAllowed(receipt);
 
-        // receipt shift must be active
-        validateReceiptShiftActive(receipt);
-
-        // validate receipt status
-        if (CREATED != receipt.getStatus()) {
-            throw new CashRegisterException(quote(
-                    "Receipt status does not allow receipt item update",
-                    receipt.getStatus()));
-        }
-
-        // find receipt item
-        Optional<ReceiptItem> receiptItemOpt = receipt.getReceiptItems().stream().filter((receiptItem) ->
-                receiptItemId.equals(receiptItem.getId())).findFirst();
-        if (!receiptItemOpt.isPresent()) {
-            throw new CashRegisterException(
-                    HttpStatus.NOT_FOUND, // 404 here, because receipt item must be present
-                    quote("Receipt item not found", receiptItemId));
-        }
-        ReceiptItem receiptItem = receiptItemOpt.get();
-
-        // validate that receipt item amount does not exceed the product amount available
-        if (updateReceiptItemDto.getAmount() > receiptItem.getProduct().getAmountAvailable()) {
-            throw new CashRegisterException(quote(
-                    "Receipt item amount exceeds product amount available",
-                    receiptItem.getAmount()));
-        }
+        ReceiptItem receiptItem = findExistingReceiptItemInReceipt(receipt, receiptItemId);
 
         // determine amount diff
-        int amountDiff = updateReceiptItemDto.getAmount() - receiptItem.getAmount();
+        int amountDiff = newAmount - receiptItem.getAmount();
         if (amountDiff == 0) {
             return receipt;
         }
 
+        // modify receipt item then validate
+        receiptItem.setAmount(newAmount);
+        validateProductAmountNotExceeded(receiptItem);
+
         // change receipt price total
-        int priceTotalDiff = calcCost(
+        int priceTotalDiff = calcCostByPriceAndUnit(
                 receiptItem.getPrice(), amountDiff, receiptItem.getAmountUnit());
         receipt.setSumTotal(receipt.getSumTotal() + priceTotalDiff);
 
-        // modify receipt item
-        receiptItem.setAmount(updateReceiptItemDto.getAmount());
-
+        // save to receipt must propagate to receipt item via cascade
         return receiptRepository.save(receipt);
     }
 
-    private void validateCashboxShiftActive(User user) {
-        if (ShiftStatus.ACTIVE != user.getCashbox().getShiftStatus()) {
-            throw new CashRegisterException("User cashbox shift status must be active");
+    private ReceiptItem findExistingReceiptItemInReceipt(Receipt receipt, String receiptItemId) {
+        return receipt.getReceiptItems().stream()
+                .filter(ri -> receiptItemId.equals(ri.getId()))
+                .findFirst()
+                .orElseThrow(() -> new CashRegisterReceiptItemNotFoundException(receiptItemId));
+    }
+
+    private static void validateShiftStatus(Receipt receipt) {
+
+        // user shift must be active, receipt must belong to an active shift
+        validateIsUserShiftActive(receipt.getUser());
+        validateIsReceiptInActiveShift(receipt);
+    }
+
+    private static void validateIsUserShiftActive(User user) {
+        if (ACTIVE != user.getCashbox().getShiftStatus()) {
+            throw new CashRegisterException("User shift status must be active");
         }
     }
 
-    private void validateReceiptShiftActive(Receipt receipt) {
-        if (!CashRegisterUtil.isReceiptInActiveShift(receipt)) {
-            throw new CashRegisterException("Receipt shift status must be active");
+    private static void validateIsReceiptInActiveShift(Receipt receipt) {
+        if (!isReceiptInActiveShift(receipt)) {
+            throw new CashRegisterException("Receipt must belong to an active shift");
+        }
+    }
+
+    private static void validateReceiptStatusTransitionToCompleted(Receipt receipt) {
+        ReceiptStatus fromStatus = receipt.getStatus();
+        if (CREATED != fromStatus) {
+            throwOnIllegalReceiptStatusTransition(fromStatus, CREATED);
+        }
+        if (receipt.getReceiptItems().isEmpty()) {
+            throw new CashRegisterException("Receipt without items cannot be completed");
+        }
+    }
+
+    private static void validateReceiptStatusTransitionToCanceled(Receipt receipt) {
+        ReceiptStatus fromStatus = receipt.getStatus();
+        if (CANCELED == fromStatus) {
+            throwOnIllegalReceiptStatusTransition(fromStatus, CANCELED);
+        }
+    }
+
+    private static void throwOnIllegalReceiptStatusTransition(
+            ReceiptStatus from, ReceiptStatus to) {
+        throw new CashRegisterException(quote(
+                "Illegal receipt status transition", from, to));
+    }
+
+    private static void validateProductAmountNotExceeded(ReceiptItem receiptItem) {
+        int receiptItemAmount = receiptItem.getAmount();
+        int productAmountAvailable = receiptItem.getProduct().getAmountAvailable();
+
+        // validate that receipt item amount does not exceed the product amount available
+        if (receiptItemAmount > productAmountAvailable) {
+            throw new CashRegisterException(quote(
+                    "Receipt item amount exceeds product amount available",
+                    receiptItemAmount,
+                    productAmountAvailable));
+        }
+    }
+
+    private static void validateIsReceiptItemsModificationAllowed(Receipt receipt) {
+        if (CREATED != receipt.getStatus()) {
+            throw new CashRegisterException(quote(
+                    "Receipt status does not allow modification of receipt items",
+                    receipt.getStatus()));
         }
     }
 }

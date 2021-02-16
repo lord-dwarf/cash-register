@@ -7,12 +7,21 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 public class UserDetailsDto implements UserDetails {
-    // username field is needed by authentication manager, but the real value is user id
+
+    private String userId;
     private String username;
-    // actual username
-    private String principalName;
     private String password;
     private List<GrantedAuthority> grantedAuthorities;
+    private String fullName;
+
+    public String getUserId() {
+        return userId;
+    }
+
+    public UserDetailsDto setUserId(String userId) {
+        this.userId = userId;
+        return this;
+    }
 
     @Override
     public String getUsername() {
@@ -21,15 +30,6 @@ public class UserDetailsDto implements UserDetails {
 
     public UserDetailsDto setUsername(String username) {
         this.username = username;
-        return this;
-    }
-
-    public String getPrincipalName() {
-        return principalName;
-    }
-
-    public UserDetailsDto setPrincipalName(String principalName) {
-        this.principalName = principalName;
         return this;
     }
 
@@ -50,6 +50,15 @@ public class UserDetailsDto implements UserDetails {
 
     public UserDetailsDto setGrantedAuthorities(List<GrantedAuthority> grantedAuthorities) {
         this.grantedAuthorities = grantedAuthorities;
+        return this;
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public UserDetailsDto setFullName(String fullName) {
+        this.fullName = fullName;
         return this;
     }
 
@@ -80,28 +89,32 @@ public class UserDetailsDto implements UserDetails {
 
         UserDetailsDto that = (UserDetailsDto) o;
 
+        if (!userId.equals(that.userId)) return false;
         if (!username.equals(that.username)) return false;
-        if (!principalName.equals(that.principalName)) return false;
         if (!password.equals(that.password)) return false;
-        return grantedAuthorities.equals(that.grantedAuthorities);
+        if (!grantedAuthorities.equals(that.grantedAuthorities)) return false;
+        return fullName.equals(that.fullName);
     }
 
     @Override
     public int hashCode() {
-        int result = username.hashCode();
-        result = 31 * result + principalName.hashCode();
+        int result = userId.hashCode();
+        result = 31 * result + username.hashCode();
         result = 31 * result + password.hashCode();
         result = 31 * result + grantedAuthorities.hashCode();
+        result = 31 * result + fullName.hashCode();
         return result;
     }
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", UserDetailsDto.class.getSimpleName() + "[", "]")
+        return new StringJoiner(
+                ", ", UserDetailsDto.class.getSimpleName() + "[", "]")
+                .add("userId='" + userId + "'")
                 .add("username='" + username + "'")
-                .add("principalName='" + principalName + "'")
                 .add("password='" + password + "'")
                 .add("grantedAuthorities=" + grantedAuthorities)
+                .add("fullName='" + fullName + "'")
                 .toString();
     }
 }

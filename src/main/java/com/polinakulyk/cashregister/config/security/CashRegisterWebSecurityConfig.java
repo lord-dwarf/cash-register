@@ -15,6 +15,9 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
+/**
+ * Web security configuration via Spring Security.
+ */
 @Configuration
 @EnableWebSecurity
 @EnableGlobalMethodSecurity(securedEnabled = true, jsr250Enabled = true, prePostEnabled = true)
@@ -51,10 +54,11 @@ public class CashRegisterWebSecurityConfig extends WebSecurityConfigurerAdapter 
                 .cors().and()
                 // TODO enable CSRF check
                 .csrf().disable()
+                // app is stateless thanks to JWT
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .authorizeRequests()
-                    .antMatchers("/api/auth/**").permitAll()
-                    .anyRequest().authenticated();
+                .antMatchers("/api/auth/**").permitAll()
+                .anyRequest().authenticated();
 
         http.addFilterBefore(
                 authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
