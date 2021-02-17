@@ -1,22 +1,27 @@
 package com.polinakulyk.cashregister.config.autorun;
 
+import com.polinakulyk.cashregister.db.dto.ProductAmountUnit;
 import com.polinakulyk.cashregister.db.entity.Product;
 import com.polinakulyk.cashregister.db.entity.Receipt;
 import com.polinakulyk.cashregister.db.entity.User;
-import com.polinakulyk.cashregister.security.dto.UserRole;
 import com.polinakulyk.cashregister.service.api.CashboxService;
 import com.polinakulyk.cashregister.service.api.ProductService;
 import com.polinakulyk.cashregister.service.api.ReceiptService;
 import com.polinakulyk.cashregister.service.api.UserService;
+import java.math.BigDecimal;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
-import static com.polinakulyk.cashregister.db.dto.ProductAmountUnit.GRAM;
+import static com.polinakulyk.cashregister.db.dto.ProductAmountUnit.KILO;
 import static com.polinakulyk.cashregister.db.dto.ProductAmountUnit.UNIT;
 import static com.polinakulyk.cashregister.db.dto.ShiftStatus.ACTIVE;
+import static com.polinakulyk.cashregister.security.dto.UserRole.fromString;
+import static com.polinakulyk.cashregister.util.CashRegisterUtil.bigDecimalAmount;
+import static com.polinakulyk.cashregister.util.CashRegisterUtil.bigDecimalMoney;
+import static com.polinakulyk.cashregister.util.CashRegisterUtil.quote;
 
 @Component
 public class InitDbAutorun {
@@ -104,130 +109,129 @@ public class InitDbAutorun {
                 .setCode("NL-2017-1")
                 .setCategory("parmesan")
                 .setName("Landana 500 days 48%")
-                .setDetails("Produced in Netherlands by cows")
-                .setPrice(60000)
-                .setAmountAvailable(8000)
-                .setAmountUnit(GRAM)
+                .setDetails("Produced in Netherlands.")
+                .setPrice(bigDecimalMoney("600.00"))
+                .setAmountAvailable(bigDecimalAmount("12.000", KILO))
+                .setAmountUnit(KILO)
         );
         productService.create(new Product()
                 .setCode("DE-2017-1")
                 .setCategory("dorblu")
                 .setName("Kaserei Champignon 55%")
-                .setDetails("Produced in Germany by folk")
-                .setPrice(55000)
-                .setAmountAvailable(12000)
-                .setAmountUnit(GRAM)
+                .setDetails("Produced in Germany.")
+                .setPrice(bigDecimalMoney("550.00"))
+                .setAmountAvailable(bigDecimalAmount("13.000", KILO))
+                .setAmountUnit(KILO)
         );
         productService.create(new Product()
                 .setCode("DE-2017-2")
                 .setCategory("dorblu")
                 .setName("Kaserei Dorblu 50%")
-                .setDetails("Produced in Germany by folk")
-                .setPrice(55000)
-                .setAmountAvailable(8000)
-                .setAmountUnit(GRAM)
+                .setDetails("Produced in Germany.")
+                .setPrice(bigDecimalMoney("500.00"))
+                .setAmountAvailable(bigDecimalAmount("11.000", KILO))
+                .setAmountUnit(KILO)
         );
         productService.create(new Product()
                 .setCode("DE-2020-1")
                 .setCategory("mold")
                 .setName("Paladin Edelpilz 50%")
-                .setDetails("Produced in Germany")
-                .setPrice(40000)
-                .setAmountAvailable(8000)
-                .setAmountUnit(GRAM)
+                .setDetails("Produced in Germany.")
+                .setPrice(bigDecimalMoney("400.00"))
+                .setAmountAvailable(bigDecimalAmount("8.000", KILO))
+                .setAmountUnit(KILO)
         );
         productService.create(new Product()
                 .setCode("NL-2017-2")
                 .setCategory("parmesan")
                 .setName("Grand'Or Old Mill 50%")
-                .setDetails("Produced in Netherlands")
-                .setPrice(80000)
-                .setAmountAvailable(8000)
-                .setAmountUnit(GRAM)
+                .setDetails("Produced in Netherlands.")
+                .setPrice(bigDecimalMoney("800.00"))
+                .setAmountAvailable(bigDecimalAmount("9.000", KILO))
+                .setAmountUnit(KILO)
         );
         productService.create(new Product()
                 .setCode("DE-2020-2")
                 .setCategory("cream")
                 .setName("Kaserei Fitaki Original 40% 500g")
-                .setDetails("Produced in Germany")
-                .setPrice(14000)
-                .setAmountAvailable(275)
+                .setDetails("Produced in Germany.")
+                .setPrice(bigDecimalMoney("140.00"))
+                .setAmountAvailable(bigDecimalAmount("275", UNIT))
                 .setAmountUnit(UNIT)
         );
         productService.create(new Product()
                 .setCode("NL-2021")
                 .setCategory("goat")
                 .setName("Le Chevre")
-                .setDetails("Produced in Netherlands")
-                .setPrice(60000)
-                .setAmountAvailable(8000)
-                .setAmountUnit(GRAM)
+                .setDetails("Produced in Netherlands.")
+                .setPrice(bigDecimalMoney("600.00"))
+                .setAmountAvailable(bigDecimalAmount("8.000", KILO))
+                .setAmountUnit(KILO)
         );
         productService.create(new Product()
                 .setCode("IT-2017")
                 .setCategory("cream")
                 .setName("Philadelphia 69% 125g")
-                .setDetails("Produced in Italy")
-                .setPrice(5500)
-                .setAmountAvailable(280)
+                .setDetails("Produced in Italy.")
+                .setPrice(bigDecimalMoney("550.00"))
+                .setAmountAvailable(bigDecimalAmount("280", UNIT))
                 .setAmountUnit(UNIT)
         );
         productService.create(new Product()
                 .setCode("UA-2017")
                 .setCategory("camembert")
                 .setName("Pastourelle camembert in wine crust 50%")
-                .setDetails("Produced in Ukraine")
-                .setPrice(50000)
-                .setAmountAvailable(7000)
-                .setAmountUnit(GRAM)
+                .setDetails("Produced in Ukraine.")
+                .setPrice(bigDecimalMoney("500.00"))
+                .setAmountAvailable(bigDecimalAmount("7.000", KILO))
+                .setAmountUnit(KILO)
         );
         productService.create(new Product()
                 .setCode("GB-2019")
                 .setCategory("cheddar")
                 .setName("Wyke Farms Ivy's Vintage Reserve 58% 200g")
-                .setDetails("Produced in England")
-                .setPrice(13000)
-                .setAmountAvailable(255)
+                .setDetails("Produced in England.")
+                .setPrice(bigDecimalMoney("130.00"))
+                .setAmountAvailable(bigDecimalAmount("255", UNIT))
                 .setAmountUnit(UNIT)
         );
         productService.create(new Product()
                 .setCode("FR-2021")
                 .setCategory("goat")
                 .setName("Le Chevre 150g")
-                .setDetails("Produced in France")
-                .setPrice(15000)
-                .setAmountAvailable(260)
+                .setDetails("Produced in France.")
+                .setPrice(bigDecimalMoney("150.00"))
+                .setAmountAvailable(bigDecimalAmount("260", UNIT))
                 .setAmountUnit(UNIT)
         );
         productService.create(new Product()
                 .setCode("DE-2017-3")
                 .setCategory("dorblu")
                 .setName("Kaserei Champignon Grand Noir 60%")
-                .setDetails("Produced in Germany")
-                .setPrice(80000)
-                .setAmountAvailable(8000)
-                .setAmountUnit(GRAM)
+                .setDetails("Produced in Germany.")
+                .setPrice(bigDecimalMoney("800.00"))
+                .setAmountAvailable(bigDecimalAmount("8.000", KILO))
+                .setAmountUnit(KILO)
         );
         productService.create(new Product()
                 .setCode("PL-never")
                 .setCategory("blue mold")
                 .setName("Lazur Blue")
-                .setDetails("Produced in Poland")
-                .setPrice(45000)
-                .setAmountAvailable(4000)
-                .setAmountUnit(GRAM)
+                .setDetails("Produced in Poland.")
+                .setPrice(bigDecimalMoney("450.00"))
+                .setAmountAvailable(bigDecimalAmount("4.001", KILO))
+                .setAmountUnit(KILO)
         );
     }
 
     private void createUsers() {
-
         // predefined ids make the already existing auth JTWs to be valid
         userService.createWithId(
                 tellerId,
                 cashboxId,
                 tellerUsername,
                 tellerPassword,
-                UserRole.fromString(tellerRole).get(),
+                fromString(tellerRole).get(),
                 tellerFullName
         );
         User user = userService.findExistingById(tellerId);
@@ -238,7 +242,7 @@ public class InitDbAutorun {
                 cashboxId,
                 teller2Username,
                 teller2Password,
-                UserRole.fromString(teller2Role).get(),
+                fromString(teller2Role).get(),
                 teller2FullName
         );
         userService.createWithId(
@@ -246,7 +250,7 @@ public class InitDbAutorun {
                 cashboxId,
                 srTellerUsername,
                 srTellerPassword,
-                UserRole.fromString(srTellerRole).get(),
+                fromString(srTellerRole).get(),
                 srTellerFullName
         );
         userService.createWithId(
@@ -254,7 +258,7 @@ public class InitDbAutorun {
                 cashboxId,
                 merchUsername,
                 merchPassword,
-                UserRole.fromString(merchRole).get(),
+                fromString(merchRole).get(),
                 merchFullName
         );
     }
@@ -270,22 +274,32 @@ public class InitDbAutorun {
         // COMPLETED receipts
         for (Product p : productService.findAll()) {
             Receipt r = receiptService.createReceipt(userId);
-            receiptService.addReceiptItem(r.getId(), p.getId(), 50);
+            BigDecimal amt = generateReceiptItemAmount(p.getAmountUnit());
+            receiptService.addReceiptItem(r.getId(), p.getId(), amt);
             receiptService.completeReceipt(r.getId());
         }
-
-        // x1 CREATED receipt
-        Receipt receipt = receiptService.createReceipt(userId);
-        receiptService.addReceiptItem(
-                receipt.getId(),
-                productService.findAll().iterator().next().getId(),
-                50);
 
         // CANCELED receipts
         for (Product p : productService.findAll()) {
             Receipt r = receiptService.createReceipt(userId);
-            receiptService.addReceiptItem(r.getId(), p.getId(), 50);
+            BigDecimal amt = generateReceiptItemAmount(p.getAmountUnit());
+            receiptService.addReceiptItem(r.getId(), p.getId(), amt);
             receiptService.cancelReceipt(r.getId());
+        }
+
+        // x1 CREATED receipt
+        Receipt r = receiptService.createReceipt(userId);
+        Product p = productService.findAll().iterator().next();
+        BigDecimal amt = generateReceiptItemAmount(p.getAmountUnit());
+        receiptService.addReceiptItem(r.getId(), p.getId(), amt);
+    }
+
+    private BigDecimal generateReceiptItemAmount(ProductAmountUnit amountUnit) {
+        switch (amountUnit) {
+            case UNIT: return bigDecimalAmount("50", UNIT);
+            case KILO: return bigDecimalAmount("0.150", KILO);
+            default: throw new UnsupportedOperationException(quote(
+                    "Product amount unit not supported", amountUnit));
         }
     }
 }

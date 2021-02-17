@@ -1,17 +1,18 @@
 package com.polinakulyk.cashregister.service;
 
-import com.polinakulyk.cashregister.db.dto.ProductAmountUnit;
 import com.polinakulyk.cashregister.db.entity.Cashbox;
 import com.polinakulyk.cashregister.db.entity.Product;
 import com.polinakulyk.cashregister.db.entity.Receipt;
 import com.polinakulyk.cashregister.db.entity.ReceiptItem;
 import com.polinakulyk.cashregister.db.entity.User;
-import com.polinakulyk.cashregister.exception.CashRegisterException;
-import com.polinakulyk.cashregister.util.CashRegisterUtil;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
 import static com.polinakulyk.cashregister.db.dto.ShiftStatus.ACTIVE;
+import static com.polinakulyk.cashregister.util.CashRegisterUtil.*;
+import static com.polinakulyk.cashregister.util.CashRegisterUtil.MC;
+import static com.polinakulyk.cashregister.util.CashRegisterUtil.RM;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.now;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.quote;
 
@@ -24,13 +25,8 @@ public class ServiceHelper {
         throw new UnsupportedOperationException("Cannot instantiate");
     }
 
-    public static int calcCostByPriceAndUnit(int price, int amount, ProductAmountUnit amountUnit) {
-        switch (amountUnit) {
-            case GRAM: return amount * price / 1000;
-            case UNIT: return amount * price;
-            default: throw new CashRegisterException(quote(
-                    "Amount unit not supported", amountUnit));
-        }
+    public static BigDecimal calcCostByPriceAndAmount(BigDecimal price, BigDecimal amount) {
+        return amount.multiply(price, MC).setScale(MONEY_SCALE, RM);
     }
 
     /**
@@ -76,7 +72,7 @@ public class ServiceHelper {
                         || receiptCreatedTime.isEqual(shiftStartTime));
     }
 
-    // TODO consider replacing all strip() methods usage, with explicit loading of related entities
+    // TODO consider replacing all strip() methods usage, with explicit LAZY loading of related entities
     public static Product strip(Product product) {
         return product.setReceiptItems(null);
     }

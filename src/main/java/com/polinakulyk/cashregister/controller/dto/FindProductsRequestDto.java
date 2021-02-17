@@ -1,17 +1,23 @@
 package com.polinakulyk.cashregister.controller.dto;
 
+import com.polinakulyk.cashregister.service.api.ProductFilterKind;
 import java.util.StringJoiner;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
-public class FindProductsDto {
+public class FindProductsRequestDto {
 
+    @NotBlank(message = "Filter value cannot be blank")
     private String filterValue;
+
+    @NotNull(message = "Filter kind cannot be null")
     private ProductFilterKind filterKind;
 
     public String getFilterValue() {
         return filterValue;
     }
 
-    public FindProductsDto setFilterValue(String filterValue) {
+    public FindProductsRequestDto setFilterValue(String filterValue) {
         this.filterValue = filterValue;
         return this;
     }
@@ -20,7 +26,7 @@ public class FindProductsDto {
         return filterKind;
     }
 
-    public FindProductsDto setFilterKind(ProductFilterKind filterKind) {
+    public FindProductsRequestDto setFilterKind(ProductFilterKind filterKind) {
         this.filterKind = filterKind;
         return this;
     }
@@ -30,7 +36,7 @@ public class FindProductsDto {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        FindProductsDto that = (FindProductsDto) o;
+        FindProductsRequestDto that = (FindProductsRequestDto) o;
 
         if (!filterValue.equals(that.filterValue)) return false;
         return filterKind == that.filterKind;
@@ -46,7 +52,7 @@ public class FindProductsDto {
     @Override
     public String toString() {
         return new StringJoiner(
-                ", ", FindProductsDto.class.getSimpleName() + "[", "]")
+                ", ", FindProductsRequestDto.class.getSimpleName() + "[", "]")
                 .add("filterValue='" + filterValue + "'")
                 .add("filterKind=" + filterKind)
                 .toString();

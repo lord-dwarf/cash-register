@@ -1,16 +1,19 @@
 package com.polinakulyk.cashregister.controller.dto;
 
+import java.math.BigDecimal;
 import java.util.StringJoiner;
+import javax.validation.constraints.NotNull;
 
-public class UpdateReceiptItemDto {
+public class UpdateReceiptItemRequestDto {
 
-    private Integer amount;
+    @NotNull(message = "Amount cannot be null")
+    private BigDecimal amount;
 
-    public Integer getAmount() {
+    public BigDecimal getAmount() {
         return amount;
     }
 
-    public UpdateReceiptItemDto setAmount(Integer amount) {
+    public UpdateReceiptItemRequestDto setAmount(BigDecimal amount) {
         this.amount = amount;
         return this;
     }
@@ -20,7 +23,7 @@ public class UpdateReceiptItemDto {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        UpdateReceiptItemDto that = (UpdateReceiptItemDto) o;
+        UpdateReceiptItemRequestDto that = (UpdateReceiptItemRequestDto) o;
 
         return amount != null ? amount.equals(that.amount) : that.amount == null;
     }
@@ -33,7 +36,7 @@ public class UpdateReceiptItemDto {
     @Override
     public String toString() {
         return new StringJoiner(
-                ", ", UpdateReceiptItemDto.class.getSimpleName() + "[", "]")
+                ", ", UpdateReceiptItemRequestDto.class.getSimpleName() + "[", "]")
                 .add("amount=" + amount)
                 .toString();
     }

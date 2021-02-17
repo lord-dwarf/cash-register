@@ -1,10 +1,14 @@
 package com.polinakulyk.cashregister.controller.dto;
 
 import java.util.StringJoiner;
+import javax.validation.constraints.NotBlank;
 
 public class LoginRequestDto {
 
+    @NotBlank(message = "Login cannot be blank")
     private String login;
+
+    @NotBlank(message = "Password cannot be blank")
     private String password;
 
     public String getLogin() {

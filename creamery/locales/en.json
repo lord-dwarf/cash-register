@@ -133,5 +133,9 @@
     "clientError": "Browser error",
     "userNotAuthorized": "User not authorized",
     "userNotAuthenticated": "User not authenticated"
+  },
+  "unit": {
+    "kilo": "kg",
+    "unit": "unit"
   }
 }

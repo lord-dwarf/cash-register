@@ -1,14 +1,24 @@
 package com.polinakulyk.cashregister.db.entity;
 
 import com.polinakulyk.cashregister.db.dto.ProductAmountUnit;
+import java.math.BigDecimal;
 import java.util.StringJoiner;
-import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.PreRemove;
+import javax.validation.constraints.DecimalMax;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import org.hibernate.annotations.GenericGenerator;
+
+import static com.polinakulyk.cashregister.util.CashRegisterUtil.AMOUNT_KILO_SCALE;
+import static com.polinakulyk.cashregister.util.CashRegisterUtil.MONEY_SCALE;
+import static com.polinakulyk.cashregister.util.CashRegisterUtil.PRECISION;
+import static javax.persistence.FetchType.LAZY;
 
 @Entity
 public class ReceiptItem {
@@ -17,16 +27,29 @@ public class ReceiptItem {
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private String id;
 
-    @ManyToOne
+    @ManyToOne(fetch = LAZY)
+    @NotNull(message = "Receipt cannot be null")
     private Receipt receipt;
 
     @ManyToOne
+    @NotNull(message = "Product cannot be null")
     private Product product;
 
+    @NotBlank(message = "Name cannot be blank")
     private String name;
-    private int amount;
+
+    @Column(precision = PRECISION, scale = AMOUNT_KILO_SCALE)
+    @DecimalMin(value = "0.001", message = "Amount must be greater than 0")
+    @DecimalMax(value = "999.999", message = "Amount must be less than 1000")
+    private BigDecimal amount;
+
+    @NotNull(message = "Amount unit cannot be null")
     private ProductAmountUnit amountUnit;
-    private int price;
+
+    @Column(precision = PRECISION, scale = MONEY_SCALE)
+    @DecimalMin(value = "0.01", message = "Price must be greater than 0")
+    @DecimalMax(value = "99999.99", message = "Price must be less than 100k")
+    private BigDecimal price;
 
     public String getId() {
         return id;
@@ -64,11 +87,11 @@ public class ReceiptItem {
         return this;
     }
 
-    public int getAmount() {
+    public BigDecimal getAmount() {
         return amount;
     }
 
-    public ReceiptItem setAmount(int amount) {
+    public ReceiptItem setAmount(BigDecimal amount) {
         this.amount = amount;
         return this;
     }
@@ -82,11 +105,11 @@ public class ReceiptItem {
         return this;
     }
 
-    public int getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
 
-    public ReceiptItem setPrice(int price) {
+    public ReceiptItem setPrice(BigDecimal price) {
         this.price = price;
         return this;
     }

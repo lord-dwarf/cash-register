@@ -233,7 +233,7 @@ export default {
         })
     },
     formatReport(report) {
-      report.sumTotal = '' + (report.sumTotal / 100).toFixed(2)
+      report.sumTotal = parseFloat(report.sumTotal).toFixed(2)
       report.shiftStartTime = new Date(report.shiftStartTime).toUTCString()
       report.createdTime = new Date(report.createdTime).toUTCString()
     },

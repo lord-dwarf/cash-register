@@ -1,11 +1,7 @@
 package com.polinakulyk.cashregister.service.api;
 
-import com.polinakulyk.cashregister.controller.dto.ReportKind;
-import com.polinakulyk.cashregister.controller.dto.XZReportDto;
-import com.polinakulyk.cashregister.db.entity.Product;
-import java.time.LocalDate;
-import java.util.List;
+import com.polinakulyk.cashregister.service.api.dto.XZReportResponseDto;
 
 public interface ReportService {
-    XZReportDto createXZReport(ReportKind reportKind);
+    XZReportResponseDto createXZReport(ReportKind reportKind);
 }

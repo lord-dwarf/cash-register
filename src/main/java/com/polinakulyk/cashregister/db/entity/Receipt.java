@@ -1,17 +1,25 @@
 package com.polinakulyk.cashregister.db.entity;
 
 import com.polinakulyk.cashregister.db.dto.ReceiptStatus;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.StringJoiner;
 import javax.persistence.CascadeType;
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.validation.constraints.DecimalMax;
+import javax.validation.constraints.DecimalMin;
+import javax.validation.constraints.NotNull;
 import org.hibernate.annotations.GenericGenerator;
+
+import static com.polinakulyk.cashregister.util.CashRegisterUtil.MONEY_SCALE;
+import static com.polinakulyk.cashregister.util.CashRegisterUtil.PRECISION;
 
 @Entity
 public class Receipt {
@@ -20,15 +28,26 @@ public class Receipt {
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private String id;
 
+    @NotNull(message = "Created time cannot be null")
     private LocalDateTime createdTime;
+
     private LocalDateTime checkoutTime;
+
+    @NotNull(message = "Receipt status cannot be null")
     private ReceiptStatus status;
-    private int sumTotal;
+
+    @Column(precision = PRECISION, scale = MONEY_SCALE)
+    @NotNull(message = "Sum total cannot be null")
+    @DecimalMin(value = "0.00", message = "Sum total must be positive")
+    @DecimalMax(value = "99999.99", message = "Sum total must be less than 100k")
+    private BigDecimal sumTotal;
 
     @OneToMany(mappedBy = "receipt", cascade = CascadeType.ALL)
+    @NotNull(message = "Receipt items cannot be null")
     private List<ReceiptItem> receiptItems = new ArrayList<>();
 
     @ManyToOne
+    @NotNull(message = "User cannot be null")
     private User user;
 
     public String getId() {
@@ -67,11 +86,11 @@ public class Receipt {
         return this;
     }
 
-    public int getSumTotal() {
+    public BigDecimal getSumTotal() {
         return sumTotal;
     }
 
-    public Receipt setSumTotal(int total) {
+    public Receipt setSumTotal(BigDecimal total) {
         this.sumTotal = total;
         return this;
     }

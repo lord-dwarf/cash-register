@@ -1,10 +1,8 @@
 package com.polinakulyk.cashregister.security.dto;
 
 import java.util.Optional;
-import org.springframework.util.Assert;
 
 public enum UserRole {
-
     MERCH,
     TELLER,
     SR_TELLER;

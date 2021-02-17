@@ -1,5 +1,9 @@
 package com.polinakulyk.cashregister.util;
 
+import com.polinakulyk.cashregister.db.dto.ProductAmountUnit;
+import java.math.BigDecimal;
+import java.math.MathContext;
+import java.math.RoundingMode;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -11,6 +15,14 @@ import java.util.UUID;
  * Application wide static utility class.
  */
 public class CashRegisterUtil {
+
+    public static final int PRECISION = 9;
+    public static final int MONEY_SCALE = 2;
+    public static final int AMOUNT_UNIT_SCALE = 0;
+    public static final int AMOUNT_KILO_SCALE = 3;
+    public static final RoundingMode RM = RoundingMode.HALF_UP;
+    public static final MathContext MC = new MathContext(PRECISION, RM);
+    public static final BigDecimal ZERO_MONEY = bigDecimalMoney("0");
 
     private CashRegisterUtil() {
         throw new UnsupportedOperationException("Cannot instantiate");
@@ -77,5 +89,47 @@ public class CashRegisterUtil {
      */
     public static String generateUuid() {
         return UUID.randomUUID().toString();
+    }
+
+    /**
+     *
+     * A shorthand for creating {@link BigDecimal} for a money value,
+     * based on a given fixed point string number.
+     * The resulting {@link BigDecimal} will have default precision and rounding mode,
+     * and a scale which is appropriate for money,
+     * 
+     * @param fixedPointValue
+     * @return
+     */
+    public static BigDecimal bigDecimalMoney(String fixedPointValue) {
+        return new BigDecimal(fixedPointValue, MC).setScale(MONEY_SCALE, RM);
+    }
+
+    /**
+     * A shorthand for creating {@link BigDecimal} for an amount value,
+     * based on a given fixed point string number and amount unit.
+     * The resulting {@link BigDecimal} will have default precision and rounding mode,
+     * and a scale which is appropriate for a given amount unit,
+     *
+     * @param fixedPointValue
+     * @param amountUnit
+     * @return
+     */
+    public static BigDecimal bigDecimalAmount(
+            String fixedPointValue, ProductAmountUnit amountUnit) {
+        switch (amountUnit) {
+            case UNIT: return new BigDecimal(fixedPointValue, MC).setScale(AMOUNT_UNIT_SCALE, RM);
+            case KILO: return new BigDecimal(fixedPointValue, MC).setScale(AMOUNT_KILO_SCALE, RM);
+            default: throw new UnsupportedOperationException(quote(
+                    "Product amount unit not supported", amountUnit));
+        }
+    }
+
+    public static BigDecimal add(BigDecimal a, BigDecimal b) {
+        return a.add(b, MC);
+    }
+
+    public static BigDecimal subtract(BigDecimal a, BigDecimal b) {
+        return a.subtract(b, MC);
     }
 }

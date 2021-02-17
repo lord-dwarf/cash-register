@@ -451,18 +451,22 @@ export default {
     formatPrice(price, amountUnit) {
       // TODO localize units, handle exceptional cases
       return amountUnit === 'UNIT'
-        ? '' + (price / 100).toFixed(2) + ' /unit'
-        : '' + (price / 100).toFixed(2) + ' /kg'
+        ? parseFloat(price).toFixed(2) + ' /' + this.$t('unit.unit')
+        : parseFloat(price).toFixed(2) + ' /' + this.$t('unit.kilo')
     },
     formatAmount(amount, amountUnit) {
       // TODO localize units, handle exceptional cases
-      return amountUnit === 'UNIT' ? amount : (amount / 1000).toFixed(3)
+      return amountUnit === 'UNIT'
+        ? parseFloat(amount).toFixed(0)
+        : parseFloat(amount).toFixed(3)
     },
     decodeAmount(amount, amountUnit) {
       // TODO localize units, handle exceptional cases
       const decodedAmount =
-        amountUnit === 'UNIT' ? amount : (amount * 1000).toFixed(0)
-      return parseInt(decodedAmount)
+        amountUnit === 'UNIT'
+          ? parseFloat(amount).toFixed(0)
+          : parseFloat(amount).toFixed(3)
+      return decodedAmount
     },
     formatDateTime(dateTimeStr) {
       if (!dateTimeStr) {
@@ -488,18 +492,15 @@ export default {
       }
       return year + '-' + month + '-' + day + ' ' + hour + ':' + minute
     },
-    calcCost(amount, amountUnit, price) {
-      // TODO localize units, handle exceptional cases
+    calcCost(amount, price) {
       // TODO JS big decimal
-      const cost =
-        amountUnit === 'UNIT' ? amount * price : (amount * price) / 1000
-      return (cost / 100).toFixed(2)
+      return (parseFloat(amount) * parseFloat(price)).toFixed(2)
     },
     setReceiptDataIntoPage(receipt) {
       this.createdTime = this.formatDateTime(receipt.createdTime)
       this.checkoutTime = this.formatDateTime(receipt.checkoutTime)
       this.status = receipt.status
-      this.sumTotal = '' + (receipt.sumTotal / 100).toFixed(2)
+      this.sumTotal = parseFloat(receipt.sumTotal).toFixed(2)
       this.tellerName = receipt.user.username
       this.tableItems = receipt.receiptItems.map((ri) => {
         const calcCostFun = this.calcCost
@@ -511,7 +512,7 @@ export default {
           amount: this.formatAmount(ri.amount, ri.amountUnit),
           amountUnit: ri.amountUnit,
           price: this.formatPrice(ri.price, ri.amountUnit),
-          cost: calcCostFun(ri.amount, ri.amountUnit, ri.price),
+          cost: calcCostFun(ri.amount, ri.price),
           actions: [],
           isSaved: true,
         }

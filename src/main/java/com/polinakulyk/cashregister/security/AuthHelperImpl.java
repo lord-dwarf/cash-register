@@ -85,7 +85,6 @@ public class AuthHelperImpl implements AuthHelper {
 
     @Override
     public Optional<String> getJwtFromRequest(HttpServletRequest req) {
-
         // TODO move JWT from header into cookie because of Security
         String jwt = req.getHeader(JWT_AUTH_HEADER);
         if (jwt != null && jwt.startsWith(JWT_BEARER_PREFIX)) {

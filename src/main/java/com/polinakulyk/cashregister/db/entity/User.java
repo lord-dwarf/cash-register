@@ -6,9 +6,14 @@ import java.util.List;
 import java.util.StringJoiner;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
+import static javax.persistence.FetchType.*;
 
 @Entity
 public class User {
@@ -17,16 +22,24 @@ public class User {
     private String id;
 
     @Column(unique = true)
+    @NotBlank(message = "Username cannot be blank")
     private String username;
 
+    @NotBlank(message = "Password cannot be blank")
     private String password;
+
+    @NotNull(message = "Role cannot be null")
     private UserRole role;
+
+    @NotBlank(message = "Full name cannot be blank")
     private String fullName;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", fetch = LAZY)
+    @NotNull(message = "Receipts cannot be null")
     private List<Receipt> receipts = new ArrayList<>();
 
     @ManyToOne
+    @NotNull(message = "Cash box cannot be null")
     private Cashbox cashbox;
 
     public String getId() {

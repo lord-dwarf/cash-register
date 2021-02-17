@@ -8,7 +8,7 @@ export const state = () => ({
     visible: false,
     initialized: false,
     mode: null,
-    product: {},
+    product: null,
   },
   receiptsOne: {
     visible: false,
@@ -60,9 +60,9 @@ export const mutations = {
       category: null,
       name: null,
       details: null,
-      price: null,
-      amountAvailable: null,
-      amountUnit: null,
+      price: 0.0,
+      amountAvailable: 0.0,
+      amountUnit: 'KILO',
     }
   },
   closeProductsOne(state) {

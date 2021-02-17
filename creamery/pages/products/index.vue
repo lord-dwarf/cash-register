@@ -163,12 +163,14 @@ export default {
     formatPrice(price, amountUnit) {
       // TODO localize units, handle exceptional cases
       return amountUnit === 'UNIT'
-        ? '' + (price / 100).toFixed(2) + ' /unit'
-        : '' + (price / 100).toFixed(2) + ' /kg'
+        ? parseFloat(price).toFixed(2) + ' /' + this.$t('unit.unit')
+        : parseFloat(price).toFixed(2) + ' /' + this.$t('unit.kilo')
     },
     formatAmount(amount, amountUnit) {
       // TODO localize units, handle exceptional cases
-      return amountUnit === 'UNIT' ? amount : (amount / 1000).toFixed(3)
+      return amountUnit === 'UNIT'
+        ? parseFloat(amount).toFixed(0)
+        : parseFloat(amount).toFixed(3)
     },
     async viewProduct(item) {
       this.$store.commit('localStorage/viewProductsOne', item.product)

@@ -150,7 +150,7 @@ export default {
               checkoutTime: this.formatDateTime(r.checkoutTime),
               status: r.status,
               shiftStatus: this.isReceiptInActiveShift(r),
-              sumTotal: '' + (r.sumTotal / 100).toFixed(2),
+              sumTotal: parseFloat(r.sumTotal).toFixed(2),
               tellerName: r.user.username,
               actions: [],
             }

@@ -133,5 +133,9 @@
     "clientError": "Помилка браузера",
     "userNotAuthorized": "Користувач не уповноважений",
     "userNotAuthenticated": "Користувач не розпізнаний"
+  },
+  "unit": {
+    "kilo": "кг",
+    "unit": "шт"
   }
 }

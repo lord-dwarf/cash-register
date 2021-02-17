@@ -1,16 +1,16 @@
 package com.polinakulyk.cashregister.controller;
 
-import com.polinakulyk.cashregister.controller.dto.FindProductsDto;
+import com.polinakulyk.cashregister.controller.dto.FindProductsRequestDto;
 import com.polinakulyk.cashregister.db.entity.Product;
-import com.polinakulyk.cashregister.exception.CashRegisterException;
 import com.polinakulyk.cashregister.service.ServiceHelper;
 import com.polinakulyk.cashregister.service.api.ProductService;
-import com.polinakulyk.cashregister.util.CashRegisterUtil;
 import java.util.List;
+import java.util.stream.Collectors;
 import javax.annotation.security.RolesAllowed;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -25,13 +25,12 @@ import static com.polinakulyk.cashregister.security.dto.UserRole.Value.MERCH;
 import static com.polinakulyk.cashregister.security.dto.UserRole.Value.SR_TELLER;
 import static com.polinakulyk.cashregister.security.dto.UserRole.Value.TELLER;
 import static com.polinakulyk.cashregister.service.ServiceHelper.strip;
-import static com.polinakulyk.cashregister.util.CashRegisterUtil.quote;
-import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static java.util.stream.Collectors.toList;
+import static java.util.stream.StreamSupport.stream;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 
 @Controller
 @RequestMapping("/api/products")
-// TODO configure CORS
 @CrossOrigin
 public class ProductController {
     private final ProductService productService;
@@ -44,21 +43,16 @@ public class ProductController {
     @RolesAllowed({MERCH, TELLER, SR_TELLER})
     public @ResponseBody
     Iterable<Product> listProducts() {
-        Iterable<Product> products = productService.findAll();
-        products.forEach(ServiceHelper::strip);
-        return products;
+        return stream(productService.findAll().spliterator(), false)
+                .map(ServiceHelper::strip)
+                .collect(toList());
     }
 
     @PostMapping
     @RolesAllowed({MERCH})
     public @ResponseBody
     Product createProduct(@Valid @RequestBody Product product) {
-        try {
-            return productService.create(product);
-        } catch (DataIntegrityViolationException e) {
-            throw new CashRegisterException(BAD_REQUEST, quote(
-                    "Product with this code already exists", product.getCode()));
-        }
+        return productService.create(product);
     }
 
     @GetMapping("/{id}")
@@ -71,27 +65,24 @@ public class ProductController {
     @PostMapping("/find")
     @RolesAllowed({MERCH, TELLER, SR_TELLER})
     public @ResponseBody
-    List<Product> findProducts(@RequestBody FindProductsDto findProductsDto) {
-        List<Product> products = productService.findByFilter(
-                findProductsDto.getFilterKind(), findProductsDto.getFilterValue());
-        products.forEach(ServiceHelper::strip);
-        return products;
+    List<Product> findProducts(
+            @Valid @RequestBody FindProductsRequestDto findProductsRequestDto
+    ) {
+        return productService.findByFilter(
+                findProductsRequestDto.getFilterKind(),
+                findProductsRequestDto.getFilterValue())
+                .stream()
+                .map(ServiceHelper::strip)
+                .collect(toList());
     }
 
     @PutMapping("/{id}")
     @RolesAllowed({MERCH})
-    public @ResponseBody
-    String updateProduct(
+    public ResponseEntity updateProduct(
             @PathVariable String id,
-            @Valid @RequestBody Product product,
-            HttpServletResponse response
+            @Valid @RequestBody Product product
     ) {
-        if (!id.equals(product.getId())) {
-            throw new CashRegisterException(
-                    BAD_REQUEST, quote("Product id does not match", id));
-        }
-        productService.update(product);
-        response.setStatus(NO_CONTENT.value());
-        return "";
+        productService.update(product.setId(id));
+        return new ResponseEntity((String)null, NO_CONTENT);
     }
 }

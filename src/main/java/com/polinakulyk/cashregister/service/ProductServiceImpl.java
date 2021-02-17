@@ -1,9 +1,9 @@
 package com.polinakulyk.cashregister.service;
 
-import com.polinakulyk.cashregister.controller.dto.ProductFilterKind;
 import com.polinakulyk.cashregister.db.entity.Product;
 import com.polinakulyk.cashregister.db.repository.ProductRepository;
 import com.polinakulyk.cashregister.exception.CashRegisterProductNotFoundException;
+import com.polinakulyk.cashregister.service.api.ProductFilterKind;
 import com.polinakulyk.cashregister.service.api.ProductService;
 import java.util.List;
 import java.util.function.Function;
@@ -97,8 +97,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     @Transactional
     public void update(Product product) {
-
-        // we omit upsertion, because creation of a new product would violate business logic
+        // we omit upsert, because the creation of a new product would violate business logic
         if (!productRepository.existsById(product.getId())) {
             throw new CashRegisterProductNotFoundException(product.getId());
         }

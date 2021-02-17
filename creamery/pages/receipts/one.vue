@@ -15,10 +15,8 @@
           <template v-slot:top>
             <v-toolbar flat>
               <v-toolbar-title
-                >{{ $t('receiptsOne.receipt') }} #{{
-                  receiptCode
-                }}</v-toolbar-title
-              >
+                >{{ $t('receiptsOne.receipt') }} #{{ receiptCode }}
+              </v-toolbar-title>
               <v-divider class="mx-4" inset vertical></v-divider>
               <v-spacer></v-spacer>
               <v-btn
@@ -246,12 +244,14 @@ export default {
     formatPrice(price, amountUnit) {
       // TODO localize units, handle exceptional cases
       return amountUnit === 'UNIT'
-        ? '' + (price / 100).toFixed(2) + ' /unit'
-        : '' + (price / 100).toFixed(2) + ' /kg'
+        ? parseFloat(price).toFixed(2) + ' /' + this.$t('unit.unit')
+        : parseFloat(price).toFixed(2) + ' /' + this.$t('unit.kilo')
     },
     formatAmount(amount, amountUnit) {
       // TODO localize units, handle exceptional cases
-      return amountUnit === 'UNIT' ? amount : (amount / 1000).toFixed(3)
+      return amountUnit === 'UNIT'
+        ? parseFloat(amount).toFixed(2)
+        : parseFloat(amount).toFixed(3)
     },
     formatDateTime(dateTimeStr) {
       if (!dateTimeStr) {
@@ -277,18 +277,15 @@ export default {
       }
       return year + '-' + month + '-' + day + ' ' + hour + ':' + minute
     },
-    calcCost(amount, amountUnit, price) {
-      // TODO localize units, handle exceptional cases
+    calcCost(amount, price) {
       // TODO JS big decimal
-      const cost =
-        amountUnit === 'UNIT' ? amount * price : (amount * price) / 1000
-      return (cost / 100).toFixed(2)
+      return (parseFloat(amount) * parseFloat(price)).toFixed(2)
     },
     applyReceipt(receipt) {
       this.createdTime = this.formatDateTime(receipt.createdTime)
       this.checkoutTime = this.formatDateTime(receipt.checkoutTime)
       this.status = receipt.status
-      this.sumTotal = '' + (receipt.sumTotal / 100).toFixed(2)
+      this.sumTotal = receipt.sumTotal.toFixed(2)
       this.tellerName = receipt.user.username
       this.tableItems = receipt.receiptItems.map((ri) => {
         return {
@@ -297,7 +294,7 @@ export default {
           name: ri.name,
           amount: this.formatAmount(ri.amount, ri.amountUnit),
           price: this.formatPrice(ri.price, ri.amountUnit),
-          cost: this.calcCost(ri.amount, ri.amountUnit, ri.price),
+          cost: this.calcCost(ri.amount, ri.price),
           actions: [],
         }
       })

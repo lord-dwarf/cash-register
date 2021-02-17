@@ -1,6 +1,6 @@
 package com.polinakulyk.cashregister.service;
 
-import com.polinakulyk.cashregister.controller.dto.ShiftStatusSummaryDto;
+import com.polinakulyk.cashregister.service.api.dto.ShiftStatusSummaryResponseDto;
 import com.polinakulyk.cashregister.db.dto.ShiftStatus;
 import com.polinakulyk.cashregister.db.entity.Cashbox;
 import com.polinakulyk.cashregister.db.entity.User;
@@ -69,7 +69,7 @@ public class CashboxServiceImpl implements CashboxService {
 
     @Override
     @Transactional
-    public ShiftStatusSummaryDto activateShift() {
+    public ShiftStatusSummaryResponseDto activateShift() {
         String userId = authHelper.getUserId();
         User user = userService.findExistingById(userId);
 
@@ -81,7 +81,7 @@ public class CashboxServiceImpl implements CashboxService {
 
     @Override
     @Transactional
-    public ShiftStatusSummaryDto deactivateShift() {
+    public ShiftStatusSummaryResponseDto deactivateShift() {
         String userId = authHelper.getUserId();
         User user = userService.findExistingById(userId);
 
@@ -98,13 +98,13 @@ public class CashboxServiceImpl implements CashboxService {
      */
     @Override
     @Transactional
-    public ShiftStatusSummaryDto getShiftStatusSummary() {
+    public ShiftStatusSummaryResponseDto getShiftStatusSummary() {
         String userId = authHelper.getUserId();
         User user = userService.findExistingById(userId);
 
         Cashbox cashbox = user.getCashbox();
         LocalDateTime shiftStatusTime = cashbox.getShiftStatusTime();
-        return new ShiftStatusSummaryDto()
+        return new ShiftStatusSummaryResponseDto()
                 .setShiftStatus(cashbox.getShiftStatus())
                 .setShiftStatusElapsedTime(calcElapsedTime(shiftStatusTime));
     }
@@ -129,13 +129,13 @@ public class CashboxServiceImpl implements CashboxService {
         );
     }
 
-    private ShiftStatusSummaryDto updateShiftStatus(Cashbox cashbox, ShiftStatus shiftStatus) {
+    private ShiftStatusSummaryResponseDto updateShiftStatus(Cashbox cashbox, ShiftStatus shiftStatus) {
         cashbox.setShiftStatus(shiftStatus);
         cashbox.setShiftStatusTime(now());
         cashbox = cashboxRepository.save(cashbox);
 
         LocalDateTime shiftStatusTime = cashbox.getShiftStatusTime();
-        return new ShiftStatusSummaryDto()
+        return new ShiftStatusSummaryResponseDto()
                 .setShiftStatus(cashbox.getShiftStatus())
                 .setShiftStatusElapsedTime(calcElapsedTime(shiftStatusTime));
     }

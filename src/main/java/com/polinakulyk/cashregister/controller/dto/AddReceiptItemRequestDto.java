@@ -1,26 +1,32 @@
 package com.polinakulyk.cashregister.controller.dto;
 
+import java.math.BigDecimal;
 import java.util.StringJoiner;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 
-public class AddReceiptItemDto {
+public class AddReceiptItemRequestDto {
 
+    @NotBlank(message = "Product id cannot be blank")
     private String productId;
-    private Integer receiptItemAmount;
+
+    @NotNull(message = "Receipt item amount cannot be null")
+    private BigDecimal receiptItemAmount;
 
     public String getProductId() {
         return productId;
     }
 
-    public AddReceiptItemDto setProductId(String productId) {
+    public AddReceiptItemRequestDto setProductId(String productId) {
         this.productId = productId;
         return this;
     }
 
-    public Integer getReceiptItemAmountAmount() {
+    public BigDecimal getReceiptItemAmountAmount() {
         return receiptItemAmount;
     }
 
-    public AddReceiptItemDto setReceiptItemAmount(Integer receiptItemAmount) {
+    public AddReceiptItemRequestDto setReceiptItemAmount(BigDecimal receiptItemAmount) {
         this.receiptItemAmount = receiptItemAmount;
         return this;
     }
@@ -30,7 +36,7 @@ public class AddReceiptItemDto {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        AddReceiptItemDto that = (AddReceiptItemDto) o;
+        AddReceiptItemRequestDto that = (AddReceiptItemRequestDto) o;
 
         if (!productId.equals(that.productId)) return false;
         return receiptItemAmount.equals(that.receiptItemAmount);
@@ -46,7 +52,7 @@ public class AddReceiptItemDto {
     @Override
     public String toString() {
         return new StringJoiner(
-                ", ", AddReceiptItemDto.class.getSimpleName() + "[", "]")
+                ", ", AddReceiptItemRequestDto.class.getSimpleName() + "[", "]")
                 .add("productId='" + productId + "'")
                 .add("receiptItemAmount=" + receiptItemAmount)
                 .toString();

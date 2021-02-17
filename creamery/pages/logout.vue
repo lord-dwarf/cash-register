@@ -11,7 +11,7 @@ export default {
   }),
   async created() {
     await this.$http
-      .$post('/auth/logout')
+      .$post('/auth/logout', {})
       .catch((_error) => {
         // nothing
         return Promise.resolve(null)

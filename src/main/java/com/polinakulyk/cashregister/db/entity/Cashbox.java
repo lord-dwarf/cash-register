@@ -7,8 +7,13 @@ import java.util.List;
 import java.util.StringJoiner;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+
+import static javax.persistence.FetchType.LAZY;
 
 @Entity
 public class Cashbox {
@@ -16,12 +21,17 @@ public class Cashbox {
     private String id;
 
     @Column(unique = true)
+    @NotBlank(message = "Name cannot be blank")
     private String name;
 
+    @NotNull(message = "Shift status cannot be null")
     private ShiftStatus shiftStatus;
+
+    @NotNull(message = "Shift status time cannot be null")
     private LocalDateTime shiftStatusTime;
 
-    @OneToMany(mappedBy = "cashbox")
+    @OneToMany(mappedBy = "cashbox", fetch = LAZY)
+    @NotNull(message = "Users cannot be null")
     private List<User> users = new ArrayList<>();
 
     public String getId() {

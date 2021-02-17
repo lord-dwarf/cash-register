@@ -1,15 +1,12 @@
 package com.polinakulyk.cashregister.exception;
 
-import com.polinakulyk.cashregister.exception.dto.ExceptionDto;
-import java.sql.SQLIntegrityConstraintViolationException;
-import java.util.Set;
+import com.polinakulyk.cashregister.exception.dto.ErrorDto;
 import javax.validation.ConstraintViolation;
 import javax.validation.ConstraintViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.lang.Nullable;
-import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -24,7 +21,7 @@ public class CashRegisterExceptionHandler extends ResponseEntityExceptionHandler
     protected ResponseEntity<Object> handleConstraintViolationException(
             ResponseStatusException e, WebRequest request) {
         String errorMessage = retrieveErrorMessageCause(e.getMessage());
-        ExceptionDto body = new ExceptionDto(errorMessage);
+        ErrorDto body = new ErrorDto(errorMessage);
         return handleExceptionInternal(e, body, new HttpHeaders(), e.getStatus(), request);
     }
 
@@ -33,7 +30,7 @@ public class CashRegisterExceptionHandler extends ResponseEntityExceptionHandler
             ConstraintViolationException e, WebRequest request) {
         String errorMessage = ((ConstraintViolation)(e.getConstraintViolations().toArray()[0]))
                 .getMessage();
-        ExceptionDto body = new ExceptionDto(errorMessage);
+        ErrorDto body = new ErrorDto(errorMessage);
         return handleExceptionInternal(e, body, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
 
@@ -45,7 +42,7 @@ public class CashRegisterExceptionHandler extends ResponseEntityExceptionHandler
             WebRequest request
     ) {
         String errorMessage = e.getAllErrors().get(0).toString();
-        ExceptionDto body = new ExceptionDto(errorMessage);
+        ErrorDto body = new ErrorDto(errorMessage);
         return handleExceptionInternal(e, body, new HttpHeaders(), HttpStatus.BAD_REQUEST, request);
     }
 
@@ -53,7 +50,7 @@ public class CashRegisterExceptionHandler extends ResponseEntityExceptionHandler
     protected ResponseEntity<Object> handleThrowable(
             Throwable t, WebRequest request) {
         String errorMessage = retrieveErrorMessageCause(t.getMessage());
-        ExceptionDto body = new ExceptionDto(errorMessage);
+        ErrorDto body = new ErrorDto(errorMessage);
         return new ResponseEntity<>(body, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
     }
 

@@ -1,4 +1,4 @@
-package com.polinakulyk.cashregister.controller.dto;
+package com.polinakulyk.cashregister.service.api.dto;
 
 import com.polinakulyk.cashregister.db.entity.User;
 import java.util.StringJoiner;

@@ -1,6 +1,5 @@
 package com.polinakulyk.cashregister.db.dto;
 
-import com.polinakulyk.cashregister.security.dto.UserRole;
 import java.util.Optional;
 
 public enum ShiftStatus {

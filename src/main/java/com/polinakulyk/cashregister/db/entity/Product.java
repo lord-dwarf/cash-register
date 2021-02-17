@@ -1,19 +1,25 @@
 package com.polinakulyk.cashregister.db.entity;
 
 import com.polinakulyk.cashregister.db.dto.ProductAmountUnit;
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.StringJoiner;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.OneToMany;
-import javax.validation.constraints.Max;
-import javax.validation.constraints.Min;
+import javax.validation.constraints.DecimalMax;
+import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import org.hibernate.annotations.GenericGenerator;
+
+import static com.polinakulyk.cashregister.util.CashRegisterUtil.AMOUNT_KILO_SCALE;
+import static com.polinakulyk.cashregister.util.CashRegisterUtil.MONEY_SCALE;
+import static com.polinakulyk.cashregister.util.CashRegisterUtil.PRECISION;
 
 @Entity
 public class Product {
@@ -32,23 +38,24 @@ public class Product {
     @NotBlank(message = "Name cannot be blank")
     private String name;
 
-    @NotBlank(message = "Name cannot be blank")
     private String details;
 
+    @Column(precision = PRECISION, scale = MONEY_SCALE)
     @NotNull(message = "Price cannot be null")
-    @Min(value = 1, message = "Price must be greater than 0")
-    @Max(value = 9999999, message = "Price must be less than 100k")
-    private Integer price;
+    @DecimalMin(value = "0.01", message = "Price must be greater than 0")
+    @DecimalMax(value = "99999.99", message = "Price must be less than 100k")
+    private BigDecimal price;
 
     @NotNull(message = "Amount unit cannot be null")
     private ProductAmountUnit amountUnit;
 
+    @Column(precision = PRECISION, scale = AMOUNT_KILO_SCALE)
     @NotNull(message = "Amount available cannot be null")
-    @Min(value = 0, message = "Amount available must be non-negative")
-    @Max(value = 9999999, message = "Amount available must be less than 10k")
-    private Integer amountAvailable;
+    @DecimalMin(value = "0.000", message = "Amount available must be positive")
+    @DecimalMax(value = "999.999", message = "Amount available  must be less than 1000")
+    private BigDecimal amountAvailable;
 
-    @OneToMany(mappedBy = "product")
+    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
     @NotNull(message = "Receipt items cannot be null")
     private Set<ReceiptItem> receiptItems = new HashSet<>();
 
@@ -97,11 +104,11 @@ public class Product {
         return this;
     }
 
-    public Integer getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
 
-    public Product setPrice(Integer price) {
+    public Product setPrice(BigDecimal price) {
         this.price = price;
         return this;
     }
@@ -115,11 +122,11 @@ public class Product {
         return this;
     }
 
-    public Integer getAmountAvailable() {
+    public BigDecimal getAmountAvailable() {
         return amountAvailable;
     }
 
-    public Product setAmountAvailable(Integer amountAvailable) {
+    public Product setAmountAvailable(BigDecimal amountAvailable) {
         this.amountAvailable = amountAvailable;
         return this;
     }

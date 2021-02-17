@@ -37,11 +37,13 @@
             v-model="amountAvailable"
             :readonly="mode === 'VIEW'"
           ></v-text-field>
-          <v-text-field
-            :label="$t('productsOne.unit')"
+          <v-select
             v-model="amountUnit"
+            :items="units"
+            item-text="name"
+            item-value="unit"
             :readonly="mode === 'VIEW'"
-          ></v-text-field>
+          ></v-select>
           <v-text-field
             :label="$t('productsOne.details')"
             v-model="details"
@@ -72,6 +74,20 @@
 <script>
 export default {
   computed: {
+    units: {
+      get() {
+        return [
+          {
+            name: this.$t('unit.unit'),
+            unit: 'UNIT',
+          },
+          {
+            name: this.$t('unit.kilo'),
+            unit: 'KILO',
+          },
+        ]
+      },
+    },
     userRole: {
       get() {
         return this.$store.state.localStorage.userRole
@@ -161,11 +177,11 @@ export default {
     }
 
     // recalculate Product fields
-    this.price = (this.price / 100).toFixed(2)
+    this.price = parseFloat(this.price).toFixed(2)
     this.amountAvailable =
       this.amountUnit === 'UNIT'
-        ? this.amountAvailable
-        : (this.amountAvailable / 1000).toFixed(3)
+        ? parseFloat(this.amountAvailable).toFixed(0)
+        : parseFloat(this.amountAvailable).toFixed(3)
 
     // set ProductsOne page initialized
     this.$store.commit('localStorage/setProductsOneInitialized')
@@ -185,11 +201,11 @@ export default {
             category: this.category,
             name: this.name,
             details: this.details,
-            price: Math.round(parseFloat(this.price) * 100),
+            price: parseFloat(this.price).toFixed(2),
             amountAvailable:
               this.amountUnit === 'UNIT'
-                ? parseInt(this.amountAvailable)
-                : Math.round(this.amountAvailable * 1000),
+                ? parseFloat(this.amountAvailable).toFixed(0)
+                : parseFloat(this.amountAvailable).toFixed(3),
             amountUnit: this.amountUnit,
           })
           .then(() => {
@@ -206,11 +222,11 @@ export default {
             category: this.category,
             name: this.name,
             details: this.details,
-            price: Math.round(parseFloat(this.price) * 100),
+            price: parseFloat(this.price).toFixed(2),
             amountAvailable:
               this.amountUnit === 'UNIT'
-                ? parseInt(this.amountAvailable)
-                : Math.round(this.amountAvailable * 1000),
+                ? parseFloat(this.amountAvailable).toFixed(0)
+                : parseFloat(this.amountAvailable).toFixed(3),
             amountUnit: this.amountUnit,
           })
           .catch((_error) => {

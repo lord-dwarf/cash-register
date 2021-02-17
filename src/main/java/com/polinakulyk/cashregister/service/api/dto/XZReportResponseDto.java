@@ -1,9 +1,11 @@
-package com.polinakulyk.cashregister.controller.dto;
+package com.polinakulyk.cashregister.service.api.dto;
 
+import com.polinakulyk.cashregister.service.api.ReportKind;
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.StringJoiner;
 
-public class XZReportDto {
+public class XZReportResponseDto {
     private String reportId;
     private ReportKind reportKind;
     private String cashboxName;
@@ -12,13 +14,13 @@ public class XZReportDto {
     private LocalDateTime createdTime;
     private String createdBy;
     private Integer numReceiptsCompleted;
-    private Integer sumTotal;
+    private BigDecimal sumTotal;
 
     public String getReportId() {
         return reportId;
     }
 
-    public XZReportDto setReportId(String reportId) {
+    public XZReportResponseDto setReportId(String reportId) {
         this.reportId = reportId;
         return this;
     }
@@ -27,7 +29,7 @@ public class XZReportDto {
         return reportKind;
     }
 
-    public XZReportDto setReportKind(ReportKind reportKind) {
+    public XZReportResponseDto setReportKind(ReportKind reportKind) {
         this.reportKind = reportKind;
         return this;
     }
@@ -36,7 +38,7 @@ public class XZReportDto {
         return cashboxName;
     }
 
-    public XZReportDto setCashboxName(String cashboxName) {
+    public XZReportResponseDto setCashboxName(String cashboxName) {
         this.cashboxName = cashboxName;
         return this;
     }
@@ -45,7 +47,7 @@ public class XZReportDto {
         return companyName;
     }
 
-    public XZReportDto setCompanyName(String companyName) {
+    public XZReportResponseDto setCompanyName(String companyName) {
         this.companyName = companyName;
         return this;
     }
@@ -54,7 +56,7 @@ public class XZReportDto {
         return shiftStartTime;
     }
 
-    public XZReportDto setShiftStartTime(LocalDateTime shiftStartTime) {
+    public XZReportResponseDto setShiftStartTime(LocalDateTime shiftStartTime) {
         this.shiftStartTime = shiftStartTime;
         return this;
     }
@@ -63,7 +65,7 @@ public class XZReportDto {
         return createdTime;
     }
 
-    public XZReportDto setCreatedTime(LocalDateTime createdTime) {
+    public XZReportResponseDto setCreatedTime(LocalDateTime createdTime) {
         this.createdTime = createdTime;
         return this;
     }
@@ -72,7 +74,7 @@ public class XZReportDto {
         return createdBy;
     }
 
-    public XZReportDto setCreatedBy(String createdBy) {
+    public XZReportResponseDto setCreatedBy(String createdBy) {
         this.createdBy = createdBy;
         return this;
     }
@@ -81,16 +83,16 @@ public class XZReportDto {
         return numReceiptsCompleted;
     }
 
-    public XZReportDto setNumReceiptsCompleted(Integer numReceiptsCompleted) {
+    public XZReportResponseDto setNumReceiptsCompleted(Integer numReceiptsCompleted) {
         this.numReceiptsCompleted = numReceiptsCompleted;
         return this;
     }
 
-    public Integer getSumTotal() {
+    public BigDecimal getSumTotal() {
         return sumTotal;
     }
 
-    public XZReportDto setSumTotal(Integer sumTotal) {
+    public XZReportResponseDto setSumTotal(BigDecimal sumTotal) {
         this.sumTotal = sumTotal;
         return this;
     }
@@ -100,7 +102,7 @@ public class XZReportDto {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        XZReportDto that = (XZReportDto) o;
+        XZReportResponseDto that = (XZReportResponseDto) o;
 
         if (!reportId.equals(that.reportId)) return false;
         if (!reportKind.equals(that.reportKind)) return false;
@@ -130,7 +132,7 @@ public class XZReportDto {
     @Override
     public String toString() {
         return new StringJoiner(
-                ", ", XZReportDto.class.getSimpleName() + "[", "]")
+                ", ", XZReportResponseDto.class.getSimpleName() + "[", "]")
                 .add("reportId='" + reportId + "'")
                 .add("reportKind='" + reportKind + "'")
                 .add("cashboxName='" + cashboxName + "'")

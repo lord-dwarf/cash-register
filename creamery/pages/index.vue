@@ -3,8 +3,8 @@
     <v-spacer></v-spacer>
     <v-img
       :src="getReceiptImageUrl()"
-      max-width="480"
-      max-height="350"
+      max-width="720"
+      max-height="525"
       class="mt-6"
     ></v-img>
     <v-spacer></v-spacer>
@@ -18,7 +18,7 @@ export default {
       return window.location.protocol + '//' + window.location.host
     },
     getReceiptImageUrl() {
-      return this.getStaticRootUrl() + '/product-guy.gif'
+      return this.getStaticRootUrl() + '/cash-register-bw.gif'
     },
   },
 }

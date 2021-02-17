@@ -10,9 +10,14 @@ import com.polinakulyk.cashregister.security.api.AuthHelper;
 import com.polinakulyk.cashregister.security.dto.UserDetailsDto;
 import com.polinakulyk.cashregister.security.dto.UserRole;
 import com.polinakulyk.cashregister.service.api.UserService;
+import com.polinakulyk.cashregister.service.api.dto.LoginResponseDto;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -38,6 +43,10 @@ public class UserServiceImpl implements UserService {
     private final AuthHelper authHelper;
     private final PasswordEncoder passwordEncoder;
 
+    // WORKAROUND dor cyclic dependency between CashRegisterWebSecurityConfig and UserService
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
     public UserServiceImpl(
             UserRepository userRepository,
             CashboxRepository cashboxRepository,
@@ -50,14 +59,40 @@ public class UserServiceImpl implements UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    @Override
+    public LoginResponseDto login(String login, String password) {
+        Authentication auth = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(login, password));
+
+        UserDetailsDto userDetails = (UserDetailsDto) auth.getPrincipal();
+
+        // clear principal password after we've authenticated
+        userDetails.setPassword("");
+
+        // save user details into Spring Security context for the duration of request
+        authHelper.setAuthentication(auth);
+
+        String userId = userDetails.getUserId();
+        UserRole userRole = authHelper.getUserRoleFromAuthRoles(auth.getAuthorities());
+        String jwt = authHelper.createJwt(userId, userRole);
+
+        return new LoginResponseDto()
+                .setJwt(jwt)
+                .setUser(new User()
+                        .setId(userId)
+                        .setUsername(userDetails.getUsername())
+                        .setRole(userRole)
+                        .setFullName(userDetails.getFullName()));
+    }
+
     /**
      * Find the existing user by id, otherwise throw {@link CashRegisterUserNotFoundException}.
      * <p>
      * Used when we already know that the user exists, and thus it is highly unlikely that
-     * the exception will be thrown. But if that happens, the exception will be specific to our
-     * use case and will provide the necessary HTTP code, instead of being a general exception
+     * the exception will be thrown. But if it happens, an exception specific to our
+     * use case will be thrown and provide the necessary HTTP code, (instead of being a general exception
      * {@link java.util.NoSuchElementException} that is thrown by {@link Optional#get()} and will
-     * result in HTTP 500.
+     * result in HTTP 500).
      *
      * @param userId
      * @return

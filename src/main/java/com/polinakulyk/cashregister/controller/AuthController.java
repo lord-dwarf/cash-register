@@ -1,15 +1,10 @@
 package com.polinakulyk.cashregister.controller;
 
 import com.polinakulyk.cashregister.controller.dto.LoginRequestDto;
-import com.polinakulyk.cashregister.controller.dto.LoginResponseDto;
-import com.polinakulyk.cashregister.db.entity.User;
-import com.polinakulyk.cashregister.security.api.AuthHelper;
-import com.polinakulyk.cashregister.security.dto.UserDetailsDto;
-import com.polinakulyk.cashregister.security.dto.UserRole;
-import javax.servlet.http.HttpServletResponse;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
+import com.polinakulyk.cashregister.service.api.UserService;
+import com.polinakulyk.cashregister.service.api.dto.LoginResponseDto;
+import java.util.Map;
+import javax.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,55 +12,25 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
-import static org.springframework.http.HttpStatus.NO_CONTENT;
-
 @Controller
 @RequestMapping("/api/auth")
-// TODO configure CORS
 @CrossOrigin
 public class AuthController {
+    private final UserService userService;
 
-    private final AuthenticationManager authenticationManager;
-    private final AuthHelper authHelper;
-
-    public AuthController(
-            AuthenticationManager authenticationManager, AuthHelper authHelper) {
-        this.authenticationManager = authenticationManager;
-        this.authHelper = authHelper;
+    public AuthController(UserService userService) {
+        this.userService = userService;
     }
 
     @PostMapping("/login")
     public @ResponseBody
-    LoginResponseDto loginUser(@RequestBody LoginRequestDto loginRequest) {
-
-        Authentication auth = authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        loginRequest.getLogin(), loginRequest.getPassword()));
-
-        UserDetailsDto userDetails = (UserDetailsDto) auth.getPrincipal();
-
-        // clear principal password after we've authenticated
-        userDetails.setPassword("");
-
-        // save user details into Spring Security context for the duration of request
-        authHelper.setAuthentication(auth);
-
-        String userId = userDetails.getUserId();
-        UserRole userRole = authHelper.getUserRoleFromAuthRoles(auth.getAuthorities());
-        String jwt = authHelper.createJwt(userId, userRole);
-
-        return new LoginResponseDto()
-                .setJwt(jwt)
-                .setUser(new User()
-                        .setId(userId)
-                        .setUsername(userDetails.getUsername())
-                        .setRole(userRole)
-                        .setFullName(userDetails.getFullName()));
+    LoginResponseDto loginUser(@Valid @RequestBody LoginRequestDto loginRequestDto) {
+        return userService.login(loginRequestDto.getLogin(), loginRequestDto.getPassword());
     }
 
     @PostMapping("/logout")
-    public @ResponseBody String logoutUser(HttpServletResponse response) {
-        response.setStatus(NO_CONTENT.value());
-        return "";
+    public @ResponseBody
+    Map logoutUser(@RequestBody Map emptyRequestBody) {
+        return Map.of(); // always succeed thanks to JWT
     }
 }

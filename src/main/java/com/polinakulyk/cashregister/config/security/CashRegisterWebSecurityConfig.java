@@ -3,6 +3,7 @@ package com.polinakulyk.cashregister.config.security;
 import com.polinakulyk.cashregister.security.api.AuthHelper;
 import com.polinakulyk.cashregister.security.filter.JwtAuthFilter;
 import com.polinakulyk.cashregister.service.api.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -25,14 +26,15 @@ public class CashRegisterWebSecurityConfig extends WebSecurityConfigurerAdapter 
 
     private final AuthHelper authHelper;
     private final PasswordEncoder passwordEncoder;
-    private final UserService userService;
+
+    // WORKAROUND dor cyclic dependency between CashRegisterWebSecurityConfig and UserService
+    @Autowired
+    private UserService userService;
 
     public CashRegisterWebSecurityConfig(
             AuthHelper authHelper,
-            PasswordEncoder passwordEncoder,
-            UserService userService
+            PasswordEncoder passwordEncoder
     ) {
-        this.userService = userService;
         this.passwordEncoder = passwordEncoder;
         this.authHelper = authHelper;
     }

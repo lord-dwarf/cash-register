@@ -13,6 +13,7 @@ import com.polinakulyk.cashregister.exception.CashRegisterReceiptNotFoundExcepti
 import com.polinakulyk.cashregister.service.api.ProductService;
 import com.polinakulyk.cashregister.service.api.ReceiptService;
 import com.polinakulyk.cashregister.service.api.UserService;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
@@ -24,10 +25,13 @@ import static com.polinakulyk.cashregister.db.dto.ReceiptStatus.CANCELED;
 import static com.polinakulyk.cashregister.db.dto.ReceiptStatus.COMPLETED;
 import static com.polinakulyk.cashregister.db.dto.ReceiptStatus.CREATED;
 import static com.polinakulyk.cashregister.db.dto.ShiftStatus.ACTIVE;
-import static com.polinakulyk.cashregister.service.ServiceHelper.calcCostByPriceAndUnit;
+import static com.polinakulyk.cashregister.service.ServiceHelper.calcCostByPriceAndAmount;
 import static com.polinakulyk.cashregister.service.ServiceHelper.isReceiptInActiveShift;
+import static com.polinakulyk.cashregister.util.CashRegisterUtil.ZERO_MONEY;
+import static com.polinakulyk.cashregister.util.CashRegisterUtil.add;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.now;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.quote;
+import static com.polinakulyk.cashregister.util.CashRegisterUtil.subtract;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 
@@ -65,13 +69,10 @@ public class ReceiptServiceImpl implements ReceiptService {
     @Transactional
     public List<Receipt> findAllByTellerId(String tellerId) {
 
-        // validate that user exists
-        userService.findExistingById(tellerId);
-
         // filter teller's receipts that belong to the active shift
         return stream(receiptRepository.findAll().spliterator(), false)
-                .filter(r -> tellerId.equals(r.getUser().getId()) && isReceiptInActiveShift(r)).
-                        collect(toList());
+                .filter(r -> tellerId.equals(r.getUser().getId()) && isReceiptInActiveShift(r))
+                .collect(toList());
     }
 
     /**
@@ -101,7 +102,9 @@ public class ReceiptServiceImpl implements ReceiptService {
         return receiptRepository.save(new Receipt()
                 .setStatus(CREATED)
                 .setCreatedTime(now())
-                .setUser(user));
+                .setUser(user)
+                .setSumTotal(ZERO_MONEY)
+        );
     }
 
     @Override
@@ -120,7 +123,7 @@ public class ReceiptServiceImpl implements ReceiptService {
             // decrease amount available for product
             Product receiptItemProduct = receiptItem.getProduct();
             receiptItemProduct.setAmountAvailable(
-                    receiptItemProduct.getAmountAvailable() - receiptItem.getAmount());
+                    subtract(receiptItemProduct.getAmountAvailable(), receiptItem.getAmount()));
         }
 
         // set status
@@ -146,7 +149,7 @@ public class ReceiptServiceImpl implements ReceiptService {
                 // increase amount available for product
                 Product receiptItemProduct = receiptItem.getProduct();
                 receiptItemProduct.setAmountAvailable(
-                        receiptItemProduct.getAmountAvailable() + receiptItem.getAmount());
+                        add(receiptItemProduct.getAmountAvailable(), receiptItem.getAmount()));
             }
         }
 
@@ -160,7 +163,7 @@ public class ReceiptServiceImpl implements ReceiptService {
     @Override
     @Transactional
     public Receipt addReceiptItem(
-            String receiptId, String receiptItemProductId, Integer receiptItemAmount) {
+            String receiptId, String receiptItemProductId, BigDecimal receiptItemAmount) {
         Receipt receipt = findExistingById(receiptId);
 
         validateShiftStatus(receipt);
@@ -179,7 +182,7 @@ public class ReceiptServiceImpl implements ReceiptService {
 
             // update existing receipt item
             receiptItem = existingReceiptItemOpt.get();
-            receiptItem.setAmount(receiptItem.getAmount() + receiptItemAmount);
+            receiptItem.setAmount(add(receiptItem.getAmount(), receiptItemAmount));
         } else {
 
             // create receipt item by copying some fields from product, then add to receipt
@@ -197,9 +200,9 @@ public class ReceiptServiceImpl implements ReceiptService {
         validateProductAmountNotExceeded(receiptItem);
 
         // calculate and increase receipt price total
-        int sumTotalIncrease = calcCostByPriceAndUnit(
-                receiptItem.getPrice(), receiptItemAmount, receiptItem.getAmountUnit());
-        receipt.setSumTotal(receipt.getSumTotal() + sumTotalIncrease);
+        BigDecimal sumTotalIncrease = calcCostByPriceAndAmount(
+                receiptItem.getPrice(), receiptItemAmount);
+        receipt.setSumTotal(add(receipt.getSumTotal(), sumTotalIncrease));
 
         // update receipt and associated receipt item
         return receiptRepository.save(receipt);
@@ -216,9 +219,9 @@ public class ReceiptServiceImpl implements ReceiptService {
         ReceiptItem receiptItem = findExistingReceiptItemInReceipt(receipt, receiptItemId);
 
         // decrease receipt price total
-        int sumTotalDecrease = calcCostByPriceAndUnit(
-                receiptItem.getPrice(), receiptItem.getAmount(), receiptItem.getAmountUnit());
-        receipt.setSumTotal(receipt.getSumTotal() - sumTotalDecrease);
+        BigDecimal sumTotalDecrease = calcCostByPriceAndAmount(
+                receiptItem.getPrice(), receiptItem.getAmount());
+        receipt.setSumTotal(subtract(receipt.getSumTotal(), sumTotalDecrease));
 
         receiptItemRepository.delete(receiptItem);
         return receiptRepository.save(receipt);
@@ -227,7 +230,7 @@ public class ReceiptServiceImpl implements ReceiptService {
     @Override
     @Transactional
     public Receipt updateReceiptItemAmount(
-            String receiptId, String receiptItemId, Integer newAmount) {
+            String receiptId, String receiptItemId, BigDecimal newAmount) {
         Receipt receipt = findExistingById(receiptId);
 
         validateShiftStatus(receipt);
@@ -236,8 +239,8 @@ public class ReceiptServiceImpl implements ReceiptService {
         ReceiptItem receiptItem = findExistingReceiptItemInReceipt(receipt, receiptItemId);
 
         // determine amount diff
-        int amountDiff = newAmount - receiptItem.getAmount();
-        if (amountDiff == 0) {
+        BigDecimal amountDiff = subtract(newAmount, receiptItem.getAmount());
+        if (amountDiff.compareTo(BigDecimal.ZERO) == 0) {
             return receipt;
         }
 
@@ -246,9 +249,9 @@ public class ReceiptServiceImpl implements ReceiptService {
         validateProductAmountNotExceeded(receiptItem);
 
         // change receipt price total
-        int priceTotalDiff = calcCostByPriceAndUnit(
-                receiptItem.getPrice(), amountDiff, receiptItem.getAmountUnit());
-        receipt.setSumTotal(receipt.getSumTotal() + priceTotalDiff);
+        BigDecimal priceTotalDiff = calcCostByPriceAndAmount(
+                receiptItem.getPrice(), amountDiff);
+        receipt.setSumTotal(add(receipt.getSumTotal(), priceTotalDiff));
 
         // save to receipt must propagate to receipt item via cascade
         return receiptRepository.save(receipt);
@@ -304,11 +307,11 @@ public class ReceiptServiceImpl implements ReceiptService {
     }
 
     private static void validateProductAmountNotExceeded(ReceiptItem receiptItem) {
-        int receiptItemAmount = receiptItem.getAmount();
-        int productAmountAvailable = receiptItem.getProduct().getAmountAvailable();
+        BigDecimal receiptItemAmount = receiptItem.getAmount();
+        BigDecimal productAmountAvailable = receiptItem.getProduct().getAmountAvailable();
 
         // validate that receipt item amount does not exceed the product amount available
-        if (receiptItemAmount > productAmountAvailable) {
+        if (receiptItemAmount.compareTo(productAmountAvailable) > 0) {
             throw new CashRegisterException(quote(
                     "Receipt item amount exceeds product amount available",
                     receiptItemAmount,

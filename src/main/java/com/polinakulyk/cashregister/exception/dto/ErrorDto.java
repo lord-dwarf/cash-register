@@ -2,11 +2,11 @@ package com.polinakulyk.cashregister.exception.dto;
 
 import java.util.StringJoiner;
 
-public class ExceptionDto {
+public class ErrorDto {
 
     private final String errorMessage;
 
-    public ExceptionDto(String errorMessage) {
+    public ErrorDto(String errorMessage) {
         this.errorMessage = errorMessage;
     }
 
@@ -19,7 +19,7 @@ public class ExceptionDto {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        ExceptionDto that = (ExceptionDto) o;
+        ErrorDto that = (ErrorDto) o;
 
         return errorMessage.equals(that.errorMessage);
     }
@@ -32,7 +32,7 @@ public class ExceptionDto {
     @Override
     public String toString() {
         return new StringJoiner(
-                ", ", ExceptionDto.class.getSimpleName() + "[", "]")
+                ", ", ErrorDto.class.getSimpleName() + "[", "]")
                 .add("errorMessage='" + errorMessage + "'")
                 .toString();
     }

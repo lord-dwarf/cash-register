@@ -170,7 +170,7 @@ export default {
               createdTime: this.formatDateTime(r.createdTime),
               checkoutTime: this.formatDateTime(r.checkoutTime),
               status: r.status,
-              sumTotal: '' + (r.sumTotal / 100).toFixed(2),
+              sumTotal: parseFloat(r.sumTotal).toFixed(2),
               tellerName: r.user.username,
               actions: [],
             }
