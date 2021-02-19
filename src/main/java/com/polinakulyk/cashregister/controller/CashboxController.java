@@ -15,9 +15,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import static com.polinakulyk.cashregister.security.dto.UserRole.Value.SR_TELLER;
 import static com.polinakulyk.cashregister.security.dto.UserRole.Value.TELLER;
 
+@CrossOrigin
 @Controller
 @RequestMapping("/api/cashbox")
-@CrossOrigin
 public class CashboxController {
     private final CashboxService cashboxService;
 
@@ -35,7 +35,7 @@ public class CashboxController {
     @GetMapping("/shift-status")
     @RolesAllowed({TELLER, SR_TELLER})
     public @ResponseBody
-    ShiftStatusSummaryResponseDto getShiftStatusAndElapsedTime() {
+    ShiftStatusSummaryResponseDto pollShiftStatusAndElapsedTime() {
         return cashboxService.getShiftStatusSummary();
     }
 }

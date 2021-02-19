@@ -12,8 +12,10 @@ import com.polinakulyk.cashregister.security.dto.UserRole;
 import com.polinakulyk.cashregister.service.api.UserService;
 import com.polinakulyk.cashregister.service.api.dto.LoginResponseDto;
 import java.util.Optional;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.helpers.Util;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -27,6 +29,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.quote;
+import static java.lang.String.format;
 
 /**
  * User service.
@@ -34,10 +37,9 @@ import static com.polinakulyk.cashregister.util.CashRegisterUtil.quote;
  * User service implements {@link UserDetailsService} because that is the requirement
  * of Spring Security authentication manager.
  */
+@Slf4j
 @Service
 public class UserServiceImpl implements UserService {
-    private static final Logger LOG = LoggerFactory.getLogger(UserServiceImpl.class);
-
     private final UserRepository userRepository;
     private final CashboxRepository cashboxRepository;
     private final AuthHelper authHelper;
@@ -61,6 +63,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public LoginResponseDto login(String login, String password) {
+        log.debug("BEGIN Login of user '{}'", login);
+
         Authentication auth = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(login, password));
 
@@ -76,13 +80,16 @@ public class UserServiceImpl implements UserService {
         UserRole userRole = authHelper.getUserRoleFromAuthRoles(auth.getAuthorities());
         String jwt = authHelper.createJwt(userId, userRole);
 
-        return new LoginResponseDto()
+        var loginResponseDto = new LoginResponseDto()
                 .setJwt(jwt)
                 .setUser(new User()
                         .setId(userId)
                         .setUsername(userDetails.getUsername())
                         .setRole(userRole)
                         .setFullName(userDetails.getFullName()));
+
+        log.info("DONE Login of user '{}' with role '{}'", login, userRole);
+        return loginResponseDto;
     }
 
     /**
@@ -100,8 +107,11 @@ public class UserServiceImpl implements UserService {
     @Override
     @Transactional
     public User findExistingById(String userId) {
-        return userRepository.findById(userId).orElseThrow(() ->
+        var user = userRepository.findById(userId).orElseThrow(() ->
                 new CashRegisterUserNotFoundException(userId));
+
+        log.debug("DONE Find existing user: '{}'", userId);
+        return user;
     }
 
     /**
@@ -118,12 +128,15 @@ public class UserServiceImpl implements UserService {
         User user = userRepository.findByUsername(username).orElseThrow(() ->
                 new UsernameNotFoundException(quote("User not found", username)));
 
-        return new UserDetailsDto()
+        var userDetailsDto = new UserDetailsDto()
                 .setUserId(user.getId())
                 .setUsername(user.getUsername())
                 .setPassword(user.getPassword())
                 .setGrantedAuthorities(authHelper.getAuthRolesFromUserRole(user.getRole()))
                 .setFullName(user.getFullName());
+
+        log.debug("DONE Load user by username: '{}', user: '{}'", username, user.getId());
+        return userDetailsDto;
     }
 
 

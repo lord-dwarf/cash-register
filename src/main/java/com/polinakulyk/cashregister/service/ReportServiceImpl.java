@@ -1,7 +1,5 @@
 package com.polinakulyk.cashregister.service;
 
-import com.polinakulyk.cashregister.service.api.ReportKind;
-import com.polinakulyk.cashregister.service.api.dto.XZReportResponseDto;
 import com.polinakulyk.cashregister.db.entity.Cashbox;
 import com.polinakulyk.cashregister.db.entity.Receipt;
 import com.polinakulyk.cashregister.db.entity.User;
@@ -11,12 +9,13 @@ import com.polinakulyk.cashregister.service.api.CashboxService;
 import com.polinakulyk.cashregister.service.api.ReceiptService;
 import com.polinakulyk.cashregister.service.api.ReportService;
 import com.polinakulyk.cashregister.service.api.UserService;
+import com.polinakulyk.cashregister.service.api.dto.ReportKind;
+import com.polinakulyk.cashregister.service.api.dto.XZReportResponseDto;
 import com.polinakulyk.cashregister.util.CashRegisterUtil;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,15 +27,13 @@ import static com.polinakulyk.cashregister.util.CashRegisterUtil.add;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.now;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.quote;
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.StreamSupport.stream;
 
 /**
  * Report service.
  */
+@Slf4j
 @Service
 public class ReportServiceImpl implements ReportService {
-    private static final Logger LOG = LoggerFactory.getLogger(ReportServiceImpl.class);
-
     private final ReceiptService receiptService;
     private final AuthHelper authHelper;
     private final UserService userService;
@@ -58,13 +55,15 @@ public class ReportServiceImpl implements ReportService {
     @Transactional
     public XZReportResponseDto createXZReport(ReportKind reportKind) {
         String userId = authHelper.getUserId();
-        User user = userService.findExistingById(userId);
+        log.debug("BEGIN Create XZ report by user: '{}', of report kind: '{}'", userId, reportKind);
 
+        User user = userService.findExistingById(userId);
         Cashbox cashbox = user.getCashbox();
         LocalDateTime shiftStartTime = cashbox.getShiftStatusTime();
         LocalDateTime reportCreatedTime = now();
         List<Receipt> receiptsCompleted =
-                stream(receiptService.findAll().spliterator(), false)
+                receiptService.findAll()
+                        .stream()
                         .filter(ServiceHelper::isReceiptInActiveShift)
                         .filter(ReportServiceImpl::validateReceiptStatusForXZReport)
                         .filter(r -> COMPLETED == r.getStatus())
@@ -79,7 +78,7 @@ public class ReportServiceImpl implements ReportService {
             cashboxService.deactivateShift();
         }
 
-        return new XZReportResponseDto()
+        var xzReportResponseDto = new XZReportResponseDto()
                 .setReportId(calcXZReportId(reportCreatedTime))
                 .setReportKind(reportKind)
                 .setCashboxName(cashbox.getName())
@@ -88,6 +87,10 @@ public class ReportServiceImpl implements ReportService {
                 .setCreatedBy(user.getFullName())
                 .setNumReceiptsCompleted(receiptsCompleted.size())
                 .setSumTotal(sum);
+
+        log.info("DONE Create XZ report by user: '{}', of report kind: '{}', sum total: '{}'",
+                userId, reportKind, sum);
+        return xzReportResponseDto;
     }
 
     private static boolean validateReceiptStatusForXZReport(Receipt receipt) {

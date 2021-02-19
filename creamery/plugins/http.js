@@ -32,8 +32,11 @@ export default function (context, _inject) {
     ) {
       errorMessageToShow = error.response.data.errorMessage
       isLogError = false
-    } else if (error.response && error.response.data) {
-      errorMessageToShow = error.response.data
+      if (errorMessageToShow === 'Internal Server Error') {
+        errorMessageToShow = '$errorMessages.serverError'
+      } else if (errorMessageToShow === 'Bad Request') {
+        errorMessageToShow = '$errorMessages.clientError'
+      }
     } else if (error.statusCode >= 400 && error.statusCode < 500) {
       errorMessageToShow = '$errorMessages.clientError'
     } else if (error.statusCode >= 500 && error.statusCode < 600) {

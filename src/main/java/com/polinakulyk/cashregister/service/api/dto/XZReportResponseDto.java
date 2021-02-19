@@ -1,6 +1,5 @@
 package com.polinakulyk.cashregister.service.api.dto;
 
-import com.polinakulyk.cashregister.service.api.ReportKind;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.StringJoiner;

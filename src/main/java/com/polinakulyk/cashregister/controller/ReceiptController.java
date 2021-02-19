@@ -27,9 +27,9 @@ import static com.polinakulyk.cashregister.service.ServiceHelper.strip;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 
+@CrossOrigin
 @Controller
 @RequestMapping("/api/receipts")
-@CrossOrigin
 public class ReceiptController {
     private final ReceiptService receiptService;
     private final AuthHelper authHelper;
@@ -42,8 +42,9 @@ public class ReceiptController {
     @GetMapping
     @RolesAllowed({SR_TELLER})
     public @ResponseBody
-    Iterable<Receipt> listReceipts() {
-        return stream(receiptService.findAll().spliterator(), false)
+    List<Receipt> listReceipts() {
+        return receiptService.findAll()
+                .stream()
                 .map(ServiceHelper::strip)
                 .collect(toList());
     }

@@ -4,15 +4,21 @@ import com.polinakulyk.cashregister.db.dto.ProductAmountUnit;
 import com.polinakulyk.cashregister.db.entity.Product;
 import com.polinakulyk.cashregister.db.entity.Receipt;
 import com.polinakulyk.cashregister.db.entity.User;
+import com.polinakulyk.cashregister.security.api.AuthHelper;
+import com.polinakulyk.cashregister.security.dto.UserDetailsDto;
 import com.polinakulyk.cashregister.service.api.CashboxService;
 import com.polinakulyk.cashregister.service.api.ProductService;
 import com.polinakulyk.cashregister.service.api.ReceiptService;
 import com.polinakulyk.cashregister.service.api.UserService;
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.context.event.EventListener;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Component;
 
 import static com.polinakulyk.cashregister.db.dto.ProductAmountUnit.KILO;
@@ -23,6 +29,7 @@ import static com.polinakulyk.cashregister.util.CashRegisterUtil.bigDecimalAmoun
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.bigDecimalMoney;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.quote;
 
+@Slf4j
 @Component
 public class InitDbAutorun {
 
@@ -32,6 +39,7 @@ public class InitDbAutorun {
     private final UserService userService;
     private final ProductService productService;
     private final ReceiptService receiptService;
+    private final AuthHelper authHelper;
 
     @Value("${cashregister.initdb.cashbox.id}")
     private String cashboxId;
@@ -82,29 +90,36 @@ public class InitDbAutorun {
             CashboxService cashboxService,
             UserService userService,
             ProductService productService,
-            ReceiptService receiptService
+            ReceiptService receiptService,
+            AuthHelper authHelper
     ) {
         this.cashboxService = cashboxService;
         this.userService = userService;
         this.productService = productService;
         this.receiptService = receiptService;
+        this.authHelper = authHelper;
     }
 
     @EventListener
     public void onApplicationEvent(ContextRefreshedEvent event) {
         if (isContextInitializedOnce.compareAndSet(false, true)) {
-            createCashboxes();
-            createUsers();
-            createProducts();
-            createReceipts();
+                log.debug("BEGIN CashRegister autorun");
+                createCashboxes();
+                createUsers();
+                createProducts(merchId);
+                createReceipts();
+                log.info("DONE CashRegister autorun");
         }
     }
 
     private void createCashboxes() {
         cashboxService.createWithId(cashboxId, cashboxName, ACTIVE);
+        log.info("DONE Cash boxes created by autorun");
     }
 
-    private void createProducts() {
+    private void createProducts(String merchUserId) {
+        setupAuthenticationContext(merchUserId);
+
         productService.create(new Product()
                 .setCode("NL-2017-1")
                 .setCategory("parmesan")
@@ -222,6 +237,9 @@ public class InitDbAutorun {
                 .setAmountAvailable(bigDecimalAmount("4.001", KILO))
                 .setAmountUnit(KILO)
         );
+
+        cleanAuthenticationContext();
+        log.info("DONE Products created by autorun");
     }
 
     private void createUsers() {
@@ -234,9 +252,6 @@ public class InitDbAutorun {
                 fromString(tellerRole).get(),
                 tellerFullName
         );
-        User user = userService.findExistingById(tellerId);
-        user.getCashbox();
-
         userService.createWithId(
                 teller2Id,
                 cashboxId,
@@ -261,18 +276,24 @@ public class InitDbAutorun {
                 fromString(merchRole).get(),
                 merchFullName
         );
+        log.info("DONE Users created by autorun");
     }
 
     private void createReceipts() {
-        createReceipts(tellerId);
-        createReceipts(teller2Id);
-        createReceipts(srTellerId);
+        var products = productService.findAll();
+
+        createReceipts(tellerId, products);
+        createReceipts(teller2Id, products);
+        createReceipts(srTellerId, products);
+
+        log.info("DONE Receipts created by autorun");
     }
 
-    private void createReceipts(String userId) {
+    private void createReceipts(String userId, List<Product> products) {
+        setupAuthenticationContext(userId);
 
         // COMPLETED receipts
-        for (Product p : productService.findAll()) {
+        for (Product p : products) {
             Receipt r = receiptService.createReceipt(userId);
             BigDecimal amt = generateReceiptItemAmount(p.getAmountUnit());
             receiptService.addReceiptItem(r.getId(), p.getId(), amt);
@@ -280,7 +301,7 @@ public class InitDbAutorun {
         }
 
         // CANCELED receipts
-        for (Product p : productService.findAll()) {
+        for (Product p : products) {
             Receipt r = receiptService.createReceipt(userId);
             BigDecimal amt = generateReceiptItemAmount(p.getAmountUnit());
             receiptService.addReceiptItem(r.getId(), p.getId(), amt);
@@ -289,9 +310,11 @@ public class InitDbAutorun {
 
         // x1 CREATED receipt
         Receipt r = receiptService.createReceipt(userId);
-        Product p = productService.findAll().iterator().next();
+        Product p = products.get(0);
         BigDecimal amt = generateReceiptItemAmount(p.getAmountUnit());
         receiptService.addReceiptItem(r.getId(), p.getId(), amt);
+
+        cleanAuthenticationContext();
     }
 
     private BigDecimal generateReceiptItemAmount(ProductAmountUnit amountUnit) {
@@ -301,5 +324,20 @@ public class InitDbAutorun {
             default: throw new UnsupportedOperationException(quote(
                     "Product amount unit not supported", amountUnit));
         }
+    }
+
+    /*
+     * Put Authentication object into Spring Security context,
+     * for AuthHelper to be able to get user id from context in autorun.
+     * User id from context will be used by service layer.
+     */
+    private void setupAuthenticationContext(String userId) {
+        Authentication auth = new UsernamePasswordAuthenticationToken(
+                new UserDetailsDto().setUserId(userId), "");
+        authHelper.setAuthentication(auth);
+    }
+
+    private void cleanAuthenticationContext() {
+        authHelper.setAuthentication(null);
     }
 }

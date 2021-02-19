@@ -15,6 +15,7 @@ import java.util.Base64;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,6 +30,7 @@ import org.springframework.stereotype.Component;
 
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.from;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.now;
+import static java.util.function.Predicate.not;
 
 @Component
 public class AuthHelperImpl implements AuthHelper {
@@ -90,7 +92,7 @@ public class AuthHelperImpl implements AuthHelper {
         if (jwt != null && jwt.startsWith(JWT_BEARER_PREFIX)) {
             jwt = jwt.substring(JWT_BEARER_PREFIX.length());
         }
-        return Optional.ofNullable(jwt != null && !jwt.isEmpty() ? jwt : null);
+        return Optional.ofNullable(jwt).filter(not(String::isEmpty));
     }
 
     @Override

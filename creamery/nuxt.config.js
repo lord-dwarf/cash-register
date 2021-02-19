@@ -27,8 +27,6 @@ export default {
   plugins: [
     '~/plugins/http',
     '~/plugins/vue-cookies',
-    // must run after vue-cookies plugin
-    '~/plugins/lang',
   ],
 
   // Auto import components: https://go.nuxtjs.dev/config-components

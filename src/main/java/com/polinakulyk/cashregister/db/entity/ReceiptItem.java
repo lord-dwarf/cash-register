@@ -23,8 +23,6 @@ import static javax.persistence.FetchType.LAZY;
 @Entity
 public class ReceiptItem {
     @Id
-    @GeneratedValue(generator = "UUID")
-    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
     private String id;
 
     @ManyToOne(fetch = LAZY)

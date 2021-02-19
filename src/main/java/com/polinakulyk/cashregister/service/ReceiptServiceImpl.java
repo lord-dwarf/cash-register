@@ -10,14 +10,18 @@ import com.polinakulyk.cashregister.db.repository.ReceiptRepository;
 import com.polinakulyk.cashregister.exception.CashRegisterException;
 import com.polinakulyk.cashregister.exception.CashRegisterReceiptItemNotFoundException;
 import com.polinakulyk.cashregister.exception.CashRegisterReceiptNotFoundException;
+import com.polinakulyk.cashregister.security.api.AuthHelper;
 import com.polinakulyk.cashregister.service.api.ProductService;
 import com.polinakulyk.cashregister.service.api.ReceiptService;
 import com.polinakulyk.cashregister.service.api.UserService;
+import com.polinakulyk.cashregister.util.CashRegisterUtil;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.helpers.Util;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,6 +33,7 @@ import static com.polinakulyk.cashregister.service.ServiceHelper.calcCostByPrice
 import static com.polinakulyk.cashregister.service.ServiceHelper.isReceiptInActiveShift;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.ZERO_MONEY;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.add;
+import static com.polinakulyk.cashregister.util.CashRegisterUtil.generateUuid;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.now;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.quote;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.subtract;
@@ -38,31 +43,37 @@ import static java.util.stream.StreamSupport.stream;
 /**
  * Receipt service, which also includes receipt items logic.
  */
+@Slf4j
 @Service
 public class ReceiptServiceImpl implements ReceiptService {
-    private static final Logger LOG = LoggerFactory.getLogger(ReceiptServiceImpl.class);
-
     private final ReceiptRepository receiptRepository;
     private final ReceiptItemRepository receiptItemRepository;
     private final ProductService productService;
     private final UserService userService;
+    private final AuthHelper authHelper;
 
     public ReceiptServiceImpl(
             ReceiptRepository receiptRepository,
             ReceiptItemRepository receiptItemRepository,
             ProductService productService,
-            UserService userService
+            UserService userService,
+            AuthHelper authHelper
     ) {
         this.receiptRepository = receiptRepository;
         this.receiptItemRepository = receiptItemRepository;
         this.productService = productService;
         this.userService = userService;
+        this.authHelper = authHelper;
     }
 
     @Override
     @Transactional
-    public Iterable<Receipt> findAll() {
-        return receiptRepository.findAll();
+    public List<Receipt> findAll() {
+        var receipts = stream(receiptRepository.findAll().spliterator(), false)
+                .collect(toList());
+
+        log.debug("DONE Find receipts: {}", receipts.size());
+        return receipts;
     }
 
     @Override
@@ -70,9 +81,12 @@ public class ReceiptServiceImpl implements ReceiptService {
     public List<Receipt> findAllByTellerId(String tellerId) {
 
         // filter teller's receipts that belong to the active shift
-        return stream(receiptRepository.findAll().spliterator(), false)
+        var receipts = stream(receiptRepository.findAll().spliterator(), false)
                 .filter(r -> tellerId.equals(r.getUser().getId()) && isReceiptInActiveShift(r))
                 .collect(toList());
+
+        log.debug("DONE Find receipts by teller: '{}', size: {}", tellerId, receipts.size());
+        return receipts;
     }
 
     /**
@@ -88,28 +102,38 @@ public class ReceiptServiceImpl implements ReceiptService {
     @Override
     @Transactional
     public Receipt findExistingById(String receiptId) {
-        return receiptRepository.findById(receiptId).orElseThrow(() ->
+        var receipt = receiptRepository.findById(receiptId).orElseThrow(() ->
                 new CashRegisterReceiptNotFoundException(receiptId));
+
+        log.debug("DONE Find existing receipt: '{}'", receiptId);
+        return receipt;
     }
 
     @Override
     @Transactional
     public Receipt createReceipt(String userId) {
+        log.debug("BEGIN Create receipt by user: '{}'", userId);
         User user = userService.findExistingById(userId);
 
         validateIsUserShiftActive(user);
 
-        return receiptRepository.save(new Receipt()
+        var receipt = receiptRepository.save(new Receipt()
                 .setStatus(CREATED)
                 .setCreatedTime(now())
                 .setUser(user)
                 .setSumTotal(ZERO_MONEY)
         );
+
+        log.info("DONE Create receipt by user: '{}', receipt: '{}'", userId, receipt.getId());
+        return receipt;
     }
 
     @Override
     @Transactional
     public Receipt completeReceipt(String receiptId) {
+        var userId = authHelper.getUserId();
+        log.debug("BEGIN Complete receipt by user: '{}', receipt: '{}'", userId, receiptId);
+
         Receipt receipt = findExistingById(receiptId);
 
         validateShiftStatus(receipt);
@@ -130,12 +154,18 @@ public class ReceiptServiceImpl implements ReceiptService {
         receipt.setStatus(COMPLETED);
         receipt.setCheckoutTime(now());
 
-        return receiptRepository.save(receipt);
+        receipt = receiptRepository.save(receipt);
+
+        log.info("DONE Complete receipt by user: '{}', receipt: '{}'", userId, receiptId);
+        return receipt;
     }
 
     @Override
     @Transactional
     public Receipt cancelReceipt(String receiptId) {
+        var userId = authHelper.getUserId();
+        log.debug("BEGIN Cancel receipt by user: '{}', receipt: '{}'", userId, receiptId);
+
         Receipt receipt = findExistingById(receiptId);
 
         validateShiftStatus(receipt);
@@ -157,6 +187,7 @@ public class ReceiptServiceImpl implements ReceiptService {
         receipt.setStatus(CANCELED);
         receipt.setCheckoutTime(now());
 
+        log.info("DONE Cancel receipt by user: '{}', receipt: '{}'", userId, receiptId);
         return receiptRepository.save(receipt);
     }
 
@@ -164,6 +195,10 @@ public class ReceiptServiceImpl implements ReceiptService {
     @Transactional
     public Receipt addReceiptItem(
             String receiptId, String receiptItemProductId, BigDecimal receiptItemAmount) {
+        var userId = authHelper.getUserId();
+        log.debug("BEGIN Add receipt item by user: '{}', in receipt: '{}', for product: '{}'",
+                userId, receiptId, receiptItemProductId);
+
         Receipt receipt = findExistingById(receiptId);
 
         validateShiftStatus(receipt);
@@ -177,7 +212,7 @@ public class ReceiptServiceImpl implements ReceiptService {
                 .filter(ri -> product.getId().equals(ri.getProduct().getId()))
                 .findFirst();
 
-        ReceiptItem receiptItem = null;
+        ReceiptItem receiptItem;
         if (existingReceiptItemOpt.isPresent()) {
 
             // update existing receipt item
@@ -187,6 +222,7 @@ public class ReceiptServiceImpl implements ReceiptService {
 
             // create receipt item by copying some fields from product, then add to receipt
             receiptItem = new ReceiptItem()
+                    .setId(generateUuid())
                     .setReceipt(receipt)
                     .setProduct(product)
                     .setName(product.getName())
@@ -205,12 +241,20 @@ public class ReceiptServiceImpl implements ReceiptService {
         receipt.setSumTotal(add(receipt.getSumTotal(), sumTotalIncrease));
 
         // update receipt and associated receipt item
-        return receiptRepository.save(receipt);
+        receipt = receiptRepository.save(receipt);
+
+        log.info("DONE Add receipt item by user: '{}', in receipt: '{}', receipt item: '{}'",
+                userId, receiptId, receiptItem.getId());
+        return receipt;
     }
 
     @Override
     @Transactional
     public Receipt cancelReceiptItem(String receiptId, String receiptItemId) {
+        var userId = authHelper.getUserId();
+        log.debug("BEGIN Cancel receipt item by user: '{}', in receipt: '{}', receipt item: '{}'",
+                userId, receiptId, receiptItemId);
+
         Receipt receipt = findExistingById(receiptId);
 
         validateShiftStatus(receipt);
@@ -224,13 +268,22 @@ public class ReceiptServiceImpl implements ReceiptService {
         receipt.setSumTotal(subtract(receipt.getSumTotal(), sumTotalDecrease));
 
         receiptItemRepository.delete(receiptItem);
-        return receiptRepository.save(receipt);
+        receipt = receiptRepository.save(receipt);
+
+        log.info("DONE Cancel receipt item by user: '{}', in receipt: '{}', receipt item: '{}'",
+                userId, receiptId, receiptItemId);
+        return receipt;
     }
 
     @Override
     @Transactional
     public Receipt updateReceiptItemAmount(
             String receiptId, String receiptItemId, BigDecimal newAmount) {
+        var userId = authHelper.getUserId();
+        log.debug("BEGIN Update receipt item amount by user: '{}', "
+                        + "in receipt: '{}', receipt item: '{}', new amount: '{}'",
+                userId, receiptId, receiptItemId, newAmount);
+
         Receipt receipt = findExistingById(receiptId);
 
         validateShiftStatus(receipt);
@@ -241,6 +294,10 @@ public class ReceiptServiceImpl implements ReceiptService {
         // determine amount diff
         BigDecimal amountDiff = subtract(newAmount, receiptItem.getAmount());
         if (amountDiff.compareTo(BigDecimal.ZERO) == 0) {
+
+            log.info("DONE Update receipt item amount (no amount change) by user: '{}', "
+                            + "in receipt: '{}', receipt item: '{}', new amount: '{}'",
+                    userId, receiptId, receiptItemId, newAmount);
             return receipt;
         }
 
@@ -254,7 +311,12 @@ public class ReceiptServiceImpl implements ReceiptService {
         receipt.setSumTotal(add(receipt.getSumTotal(), priceTotalDiff));
 
         // save to receipt must propagate to receipt item via cascade
-        return receiptRepository.save(receipt);
+        receipt = receiptRepository.save(receipt);
+
+        log.info("DONE Update receipt item amount by user: '{}', "
+                        + "in receipt: '{}', receipt item: '{}', new amount: '{}'",
+                userId, receiptId, receiptItemId, receiptItem.getAmount());
+        return receipt;
     }
 
     private ReceiptItem findExistingReceiptItemInReceipt(Receipt receipt, String receiptItemId) {

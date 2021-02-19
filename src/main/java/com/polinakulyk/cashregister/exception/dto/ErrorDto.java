@@ -1,12 +1,13 @@
 package com.polinakulyk.cashregister.exception.dto;
 
 import java.util.StringJoiner;
+import org.springframework.lang.NonNull;
 
 public class ErrorDto {
 
     private final String errorMessage;
 
-    public ErrorDto(String errorMessage) {
+    public ErrorDto(@NonNull String errorMessage) {
         this.errorMessage = errorMessage;
     }
 

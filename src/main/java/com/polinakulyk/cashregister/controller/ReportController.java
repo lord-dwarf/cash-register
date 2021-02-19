@@ -1,8 +1,8 @@
 package com.polinakulyk.cashregister.controller;
 
-import com.polinakulyk.cashregister.service.api.ReportKind;
-import com.polinakulyk.cashregister.service.api.dto.XZReportResponseDto;
 import com.polinakulyk.cashregister.service.api.ReportService;
+import com.polinakulyk.cashregister.service.api.dto.ReportKind;
+import com.polinakulyk.cashregister.service.api.dto.XZReportResponseDto;
 import javax.annotation.security.RolesAllowed;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -12,9 +12,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import static com.polinakulyk.cashregister.security.dto.UserRole.Value.SR_TELLER;
 
+@CrossOrigin
 @Controller
 @RequestMapping("/api/reports")
-@CrossOrigin
 public class ReportController {
     private final ReportService reportService;
 

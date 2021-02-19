@@ -1,6 +1,5 @@
 package com.polinakulyk.cashregister.service;
 
-import com.polinakulyk.cashregister.service.api.dto.ShiftStatusSummaryResponseDto;
 import com.polinakulyk.cashregister.db.dto.ShiftStatus;
 import com.polinakulyk.cashregister.db.entity.Cashbox;
 import com.polinakulyk.cashregister.db.entity.User;
@@ -9,10 +8,10 @@ import com.polinakulyk.cashregister.exception.CashRegisterException;
 import com.polinakulyk.cashregister.security.api.AuthHelper;
 import com.polinakulyk.cashregister.service.api.CashboxService;
 import com.polinakulyk.cashregister.service.api.UserService;
+import com.polinakulyk.cashregister.service.api.dto.ShiftStatusSummaryResponseDto;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,6 +19,7 @@ import static com.polinakulyk.cashregister.db.dto.ShiftStatus.ACTIVE;
 import static com.polinakulyk.cashregister.db.dto.ShiftStatus.INACTIVE;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.now;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.quote;
+import static java.lang.String.format;
 
 /**
  * Cashbox service.
@@ -27,10 +27,9 @@ import static com.polinakulyk.cashregister.util.CashRegisterUtil.quote;
  * The existence of {@link Cashbox} entity allows us to keep track of a current shift status.
  * Currently, application uses a single cash box, but can be extended to use multiple cash boxes.
  */
+@Slf4j
 @Service
 public class CashboxServiceImpl implements CashboxService {
-    private static final Logger LOG = LoggerFactory.getLogger(CashboxServiceImpl.class);
-
     private final CashboxRepository cashboxRepository;
     private final UserService userService;
     private final AuthHelper authHelper;
@@ -71,24 +70,38 @@ public class CashboxServiceImpl implements CashboxService {
     @Transactional
     public ShiftStatusSummaryResponseDto activateShift() {
         String userId = authHelper.getUserId();
+        log.debug("BEGIN Activate shift by user: '{}'", userId);
+
         User user = userService.findExistingById(userId);
 
         Cashbox cashbox = user.getCashbox();
         validateShiftStatusTransitionToActive(cashbox);
 
-        return updateShiftStatus(cashbox, ACTIVE);
+        var shiftStatusSummaryResponseDto =
+                updateShiftStatus(cashbox, ACTIVE);
+
+        log.info("DONE Activate shift by user: '{}', for cash box: '{}'",
+                userId, cashbox.getId());
+        return shiftStatusSummaryResponseDto;
     }
 
     @Override
     @Transactional
     public ShiftStatusSummaryResponseDto deactivateShift() {
         String userId = authHelper.getUserId();
+        log.debug("BEGIN Deactivate shift by user: '{}'", userId);
+
         User user = userService.findExistingById(userId);
 
         Cashbox cashbox = user.getCashbox();
         validateShiftStatusTransitionToInactive(cashbox);
 
-        return updateShiftStatus(cashbox, INACTIVE);
+        var shiftStatusSummaryResponseDto =
+                updateShiftStatus(cashbox, INACTIVE);
+
+        log.info("DONE Deactivate shift by user: '{}', for cash box: '{}'",
+                userId, cashbox.getId());
+        return shiftStatusSummaryResponseDto;
     }
 
     /**
@@ -104,9 +117,14 @@ public class CashboxServiceImpl implements CashboxService {
 
         Cashbox cashbox = user.getCashbox();
         LocalDateTime shiftStatusTime = cashbox.getShiftStatusTime();
-        return new ShiftStatusSummaryResponseDto()
-                .setShiftStatus(cashbox.getShiftStatus())
-                .setShiftStatusElapsedTime(calcElapsedTime(shiftStatusTime));
+        var shiftStatusSummaryResponseDto =
+                new ShiftStatusSummaryResponseDto()
+                        .setShiftStatus(cashbox.getShiftStatus())
+                        .setShiftStatusElapsedTime(calcElapsedTime(shiftStatusTime));
+
+        log.debug("DONE Poll shift status for cash box: '{}', shift status: '{}'",
+                cashbox.getId(), shiftStatusSummaryResponseDto.toString());
+        return shiftStatusSummaryResponseDto;
     }
 
     /*
@@ -120,7 +138,7 @@ public class CashboxServiceImpl implements CashboxService {
         seconds %= 3600;
         long minutes = seconds / 60;
         seconds %= 60;
-        return String.format(
+        return format(
                 "%s%02d:%02d:%02d",
                 days != 0 ? days + ":" : "",
                 hours,

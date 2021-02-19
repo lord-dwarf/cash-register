@@ -59,7 +59,7 @@ public class CashRegisterWebSecurityConfig extends WebSecurityConfigurerAdapter 
                 // app is stateless thanks to JWT
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .authorizeRequests()
-                .antMatchers("/api/auth/**").permitAll()
+                .antMatchers("/api/auth/login").permitAll()
                 .anyRequest().authenticated();
 
         http.addFilterBefore(

@@ -5,7 +5,7 @@ import java.math.BigDecimal;
 import java.util.List;
 
 public interface ReceiptService {
-    Iterable<Receipt> findAll();
+    List<Receipt> findAll();
 
     List<Receipt> findAllByTellerId(String tellerId);
 

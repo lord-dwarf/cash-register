@@ -29,9 +29,9 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 
+@CrossOrigin
 @Controller
 @RequestMapping("/api/products")
-@CrossOrigin
 public class ProductController {
     private final ProductService productService;
 
@@ -43,7 +43,8 @@ public class ProductController {
     @RolesAllowed({MERCH, TELLER, SR_TELLER})
     public @ResponseBody
     Iterable<Product> listProducts() {
-        return stream(productService.findAll().spliterator(), false)
+        return productService.findAll()
+                .stream()
                 .map(ServiceHelper::strip)
                 .collect(toList());
     }
