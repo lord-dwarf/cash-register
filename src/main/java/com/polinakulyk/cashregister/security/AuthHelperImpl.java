@@ -4,6 +4,7 @@ import com.polinakulyk.cashregister.security.api.AuthHelper;
 import com.polinakulyk.cashregister.security.dto.JwtDto;
 import com.polinakulyk.cashregister.security.dto.UserDetailsDto;
 import com.polinakulyk.cashregister.security.dto.UserRole;
+import com.polinakulyk.cashregister.util.CashRegisterUtil;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
@@ -30,6 +31,7 @@ import org.springframework.stereotype.Component;
 
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.from;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.now;
+import static com.polinakulyk.cashregister.util.CashRegisterUtil.toBase64;
 import static java.util.function.Predicate.not;
 
 @Component
@@ -40,20 +42,24 @@ public class AuthHelperImpl implements AuthHelper {
     private static final String JWT_BEARER_PREFIX = "Bearer ";
     private static final String SPRING_ROLE_PREFIX = "ROLE_";
 
-    @Value("${cashregister.jwt.secret}")
+    @Value("${cashregister.auth.jwt.secret}")
     private String jwtSecret;
 
-    @Value("${cashregister.jwt.expire_sec}")
+    @Value("${cashregister.auth.jwt.expire_sec}")
     private int jwtExpirationSeconds;
+
+    @Value("${cashregister.auth.salt}")
+    private String authSalt;
 
     @PostConstruct
     public void init() {
-        jwtSecret = Base64.getEncoder().encodeToString(jwtSecret.getBytes(StandardCharsets.UTF_8));
+        jwtSecret = toBase64(jwtSecret);
+        authSalt = toBase64(authSalt);
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+        return new CashRegisterPasswordEncoder(authSalt);
     }
 
     /**

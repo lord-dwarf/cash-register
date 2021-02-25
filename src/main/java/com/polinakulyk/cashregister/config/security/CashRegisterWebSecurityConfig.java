@@ -27,7 +27,7 @@ public class CashRegisterWebSecurityConfig extends WebSecurityConfigurerAdapter 
     private final AuthHelper authHelper;
     private final PasswordEncoder passwordEncoder;
 
-    // WORKAROUND dor cyclic dependency between CashRegisterWebSecurityConfig and UserService
+    // WORKAROUND for cyclic dependency between CashRegisterWebSecurityConfig and UserService
     @Autowired
     private UserService userService;
 

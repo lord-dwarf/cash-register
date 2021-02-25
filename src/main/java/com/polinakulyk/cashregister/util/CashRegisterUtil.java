@@ -8,8 +8,11 @@ import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.util.Base64;
 import java.util.Date;
 import java.util.UUID;
+
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 /**
  * Application wide static utility class.
@@ -92,12 +95,11 @@ public class CashRegisterUtil {
     }
 
     /**
-     *
      * A shorthand for creating {@link BigDecimal} for a money value,
      * based on a given fixed point string number.
      * The resulting {@link BigDecimal} will have default precision and rounding mode,
      * and a scale which is appropriate for money,
-     * 
+     *
      * @param fixedPointValue
      * @return
      */
@@ -118,10 +120,13 @@ public class CashRegisterUtil {
     public static BigDecimal bigDecimalAmount(
             String fixedPointValue, ProductAmountUnit amountUnit) {
         switch (amountUnit) {
-            case UNIT: return new BigDecimal(fixedPointValue, MC).setScale(AMOUNT_UNIT_SCALE, RM);
-            case KILO: return new BigDecimal(fixedPointValue, MC).setScale(AMOUNT_KILO_SCALE, RM);
-            default: throw new UnsupportedOperationException(quote(
-                    "Product amount unit not supported", amountUnit));
+            case UNIT:
+                return new BigDecimal(fixedPointValue, MC).setScale(AMOUNT_UNIT_SCALE, RM);
+            case KILO:
+                return new BigDecimal(fixedPointValue, MC).setScale(AMOUNT_KILO_SCALE, RM);
+            default:
+                throw new UnsupportedOperationException(quote(
+                        "Product amount unit not supported", amountUnit));
         }
     }
 
@@ -131,5 +136,13 @@ public class CashRegisterUtil {
 
     public static BigDecimal subtract(BigDecimal a, BigDecimal b) {
         return a.subtract(b, MC);
+    }
+
+    public static String toBase64(byte[] bytes) {
+        return Base64.getEncoder().encodeToString(bytes);
+    }
+
+    public static String toBase64(String s) {
+        return Base64.getEncoder().encodeToString(s.getBytes(UTF_8));
     }
 }
