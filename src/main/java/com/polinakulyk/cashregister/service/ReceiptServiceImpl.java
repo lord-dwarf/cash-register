@@ -187,8 +187,10 @@ public class ReceiptServiceImpl implements ReceiptService {
         receipt.setStatus(CANCELED);
         receipt.setCheckoutTime(now());
 
+        receipt = receiptRepository.save(receipt);
+
         log.info("DONE Cancel receipt by user: '{}', receipt: '{}'", userId, receiptId);
-        return receiptRepository.save(receipt);
+        return receipt;
     }
 
     @Override
