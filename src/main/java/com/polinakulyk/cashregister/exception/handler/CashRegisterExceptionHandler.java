@@ -144,6 +144,6 @@ public class CashRegisterExceptionHandler extends ResponseEntityExceptionHandler
                 .filter(Objects::nonNull)
                 .findFirst()
                 .map(err -> err.getDefaultMessage())
-                .orElseGet(() -> BAD_REQUEST.getReasonPhrase());
+                .orElseGet(BAD_REQUEST::getReasonPhrase);
     }
 }

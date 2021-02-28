@@ -139,10 +139,10 @@ public class CashRegisterUtil {
     }
 
     public static String toBase64(byte[] bytes) {
-        return Base64.getEncoder().encodeToString(bytes);
+        return Base64.getUrlEncoder().encodeToString(bytes);
     }
 
     public static String toBase64(String s) {
-        return Base64.getEncoder().encodeToString(s.getBytes(UTF_8));
+        return Base64.getUrlEncoder().encodeToString(s.getBytes(UTF_8));
     }
 }
