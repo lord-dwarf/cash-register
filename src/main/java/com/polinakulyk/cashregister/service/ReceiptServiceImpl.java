@@ -109,6 +109,12 @@ public class ReceiptServiceImpl implements ReceiptService {
         return receipt;
     }
 
+    /**
+     * Creates a new receipt.
+     *
+     * @param userId
+     * @return
+     */
     @Override
     @Transactional
     public Receipt createReceipt(String userId) {
@@ -128,6 +134,14 @@ public class ReceiptServiceImpl implements ReceiptService {
         return receipt;
     }
 
+    /**
+     * Completes a given receipt.
+     *
+     * Important: at this point amount of products available may change depending on receipt items.
+     *
+     * @param receiptId
+     * @return
+     */
     @Override
     @Transactional
     public Receipt completeReceipt(String receiptId) {
@@ -160,6 +174,14 @@ public class ReceiptServiceImpl implements ReceiptService {
         return receipt;
     }
 
+    /**
+     * Cancels a given receipt.
+     *
+     * Important: at this point amount of products available may change depending on receipt items.
+     *
+     * @param receiptId
+     * @return
+     */
     @Override
     @Transactional
     public Receipt cancelReceipt(String receiptId) {
@@ -193,6 +215,14 @@ public class ReceiptServiceImpl implements ReceiptService {
         return receipt;
     }
 
+    /**
+     * Add receipt item to a given receipt, based on item product details.
+     *
+     * @param receiptId
+     * @param receiptItemProductId
+     * @param receiptItemAmount
+     * @return
+     */
     @Override
     @Transactional
     public Receipt addReceiptItem(

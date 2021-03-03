@@ -66,6 +66,11 @@ public class CashboxServiceImpl implements CashboxService {
                 .setShiftStatusTime(now()));
     }
 
+    /**
+     * Update {@link Cashbox} shift status to {@link ShiftStatus#ACTIVE}.
+     *
+     * @return
+     */
     @Override
     @Transactional
     public ShiftStatusSummaryResponseDto activateShift() {
@@ -85,6 +90,11 @@ public class CashboxServiceImpl implements CashboxService {
         return shiftStatusSummaryResponseDto;
     }
 
+    /**
+     * Update {@link Cashbox} shift status to {@link ShiftStatus#INACTIVE}.
+     *
+     * @return
+     */
     @Override
     @Transactional
     public ShiftStatusSummaryResponseDto deactivateShift() {

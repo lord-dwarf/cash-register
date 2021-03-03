@@ -61,6 +61,13 @@ public class UserServiceImpl implements UserService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    /**
+     * Authenticates user based on the given credentials: username and password.
+     *
+     * @param login
+     * @param password
+     * @return
+     */
     @Override
     public LoginResponseDto login(String login, String password) {
         log.debug("BEGIN Login of user '{}'", login);

@@ -29,7 +29,8 @@ import static com.polinakulyk.cashregister.util.CashRegisterUtil.quote;
 import static java.util.stream.Collectors.toList;
 
 /**
- * Report service.
+ * Report service that generates {@link ReportKind#X} and {@link ReportKind#Z} reports
+ * for a {@link Cashbox}.
  */
 @Slf4j
 @Service
@@ -51,6 +52,12 @@ public class ReportServiceImpl implements ReportService {
         this.cashboxService = cashboxService;
     }
 
+    /**
+     * Creates a specific report depending on a given {@link ReportKind}.
+     *
+     * @param reportKind
+     * @return
+     */
     @Override
     @Transactional
     public XZReportResponseDto createXZReport(ReportKind reportKind) {

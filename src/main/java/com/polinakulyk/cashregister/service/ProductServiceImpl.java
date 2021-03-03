@@ -28,6 +28,7 @@ import static java.util.stream.StreamSupport.stream;
 @Slf4j
 @Service
 public class ProductServiceImpl implements ProductService {
+
     private static final int FOUND_PRODUCTS_LIMIT = 5;
 
     private final ProductRepository productRepository;
