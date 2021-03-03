@@ -4,6 +4,7 @@ import com.polinakulyk.cashregister.controller.dto.LoginRequestDto;
 import com.polinakulyk.cashregister.security.api.AuthHelper;
 import com.polinakulyk.cashregister.service.api.UserService;
 import com.polinakulyk.cashregister.service.api.dto.LoginResponseDto;
+
 import java.util.Map;
 import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;

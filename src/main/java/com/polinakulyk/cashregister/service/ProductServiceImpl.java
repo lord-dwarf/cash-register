@@ -6,6 +6,7 @@ import com.polinakulyk.cashregister.exception.CashRegisterProductNotFoundExcepti
 import com.polinakulyk.cashregister.security.api.AuthHelper;
 import com.polinakulyk.cashregister.service.api.dto.ProductFilterKind;
 import com.polinakulyk.cashregister.service.api.ProductService;
+
 import java.util.List;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.quote;
+
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 

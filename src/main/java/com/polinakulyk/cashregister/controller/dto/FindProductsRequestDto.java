@@ -1,6 +1,7 @@
 package com.polinakulyk.cashregister.controller.dto;
 
 import com.polinakulyk.cashregister.service.api.dto.ProductFilterKind;
+
 import java.util.StringJoiner;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;

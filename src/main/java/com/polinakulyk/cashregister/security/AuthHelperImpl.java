@@ -5,6 +5,7 @@ import com.polinakulyk.cashregister.security.dto.JwtDto;
 import com.polinakulyk.cashregister.security.dto.UserDetailsDto;
 import com.polinakulyk.cashregister.security.dto.UserRole;
 import com.polinakulyk.cashregister.util.CashRegisterUtil;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import io.jsonwebtoken.Jwts;
@@ -32,6 +33,7 @@ import org.springframework.stereotype.Component;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.from;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.now;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.toBase64;
+
 import static java.util.function.Predicate.not;
 
 @Component

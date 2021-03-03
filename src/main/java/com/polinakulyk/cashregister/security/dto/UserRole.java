@@ -9,7 +9,7 @@ public enum UserRole {
 
     /**
      * Finds the existing enum UserRole value by a given string.
-     *
+     * <p>
      * Case-insensitive.
      *
      * @param userRoleStr
@@ -26,7 +26,7 @@ public enum UserRole {
 
     /**
      * Class with String constants for user roles.
-     *
+     * <p>
      * The purpose is using it in @RolesAllowed annotations (constant String is required).
      */
     public static class Value {

@@ -12,6 +12,7 @@ import com.polinakulyk.cashregister.service.api.UserService;
 import com.polinakulyk.cashregister.service.api.dto.ReportKind;
 import com.polinakulyk.cashregister.service.api.dto.XZReportResponseDto;
 import com.polinakulyk.cashregister.util.CashRegisterUtil;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,6 +27,7 @@ import static com.polinakulyk.cashregister.service.ServiceHelper.calcXZReportId;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.add;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.now;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.quote;
+
 import static java.util.stream.Collectors.toList;
 
 /**

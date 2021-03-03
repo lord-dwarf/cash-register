@@ -9,6 +9,7 @@ import com.polinakulyk.cashregister.security.api.AuthHelper;
 import com.polinakulyk.cashregister.service.api.CashboxService;
 import com.polinakulyk.cashregister.service.api.UserService;
 import com.polinakulyk.cashregister.service.api.dto.ShiftStatusSummaryResponseDto;
+
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import lombok.extern.slf4j.Slf4j;
@@ -19,6 +20,7 @@ import static com.polinakulyk.cashregister.db.dto.ShiftStatus.ACTIVE;
 import static com.polinakulyk.cashregister.db.dto.ShiftStatus.INACTIVE;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.now;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.quote;
+
 import static java.lang.String.format;
 
 /**

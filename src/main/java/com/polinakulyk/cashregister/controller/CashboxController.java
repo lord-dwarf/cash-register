@@ -1,7 +1,8 @@
 package com.polinakulyk.cashregister.controller;
 
-import com.polinakulyk.cashregister.service.api.dto.ShiftStatusSummaryResponseDto;
 import com.polinakulyk.cashregister.service.api.CashboxService;
+import com.polinakulyk.cashregister.service.api.dto.ShiftStatusSummaryResponseDto;
+
 import java.util.Map;
 import javax.annotation.security.RolesAllowed;
 import org.springframework.stereotype.Controller;

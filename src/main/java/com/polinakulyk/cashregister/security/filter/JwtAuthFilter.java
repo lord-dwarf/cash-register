@@ -5,6 +5,7 @@ import com.polinakulyk.cashregister.security.api.AuthHelper;
 import com.polinakulyk.cashregister.security.dto.JwtDto;
 import com.polinakulyk.cashregister.security.dto.UserDetailsDto;
 import com.polinakulyk.cashregister.service.api.UserService;
+
 import java.io.IOException;
 import java.util.Optional;
 import javax.servlet.FilterChain;

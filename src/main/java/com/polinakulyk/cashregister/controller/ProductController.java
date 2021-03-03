@@ -4,12 +4,10 @@ import com.polinakulyk.cashregister.controller.dto.FindProductsRequestDto;
 import com.polinakulyk.cashregister.db.entity.Product;
 import com.polinakulyk.cashregister.service.ServiceHelper;
 import com.polinakulyk.cashregister.service.api.ProductService;
+
 import java.util.List;
-import java.util.stream.Collectors;
 import javax.annotation.security.RolesAllowed;
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -25,8 +23,8 @@ import static com.polinakulyk.cashregister.security.dto.UserRole.Value.MERCH;
 import static com.polinakulyk.cashregister.security.dto.UserRole.Value.SR_TELLER;
 import static com.polinakulyk.cashregister.security.dto.UserRole.Value.TELLER;
 import static com.polinakulyk.cashregister.service.ServiceHelper.strip;
+
 import static java.util.stream.Collectors.toList;
-import static java.util.stream.StreamSupport.stream;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 
 @CrossOrigin

@@ -1,6 +1,7 @@
 package com.polinakulyk.cashregister.db.entity;
 
 import com.polinakulyk.cashregister.db.dto.ReceiptStatus;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;

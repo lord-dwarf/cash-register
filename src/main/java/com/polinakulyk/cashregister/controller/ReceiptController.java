@@ -6,6 +6,7 @@ import com.polinakulyk.cashregister.db.entity.Receipt;
 import com.polinakulyk.cashregister.security.api.AuthHelper;
 import com.polinakulyk.cashregister.service.ServiceHelper;
 import com.polinakulyk.cashregister.service.api.ReceiptService;
+
 import java.util.List;
 import java.util.Map;
 import javax.annotation.security.RolesAllowed;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import static com.polinakulyk.cashregister.security.dto.UserRole.Value.SR_TELLER;
 import static com.polinakulyk.cashregister.security.dto.UserRole.Value.TELLER;
 import static com.polinakulyk.cashregister.service.ServiceHelper.strip;
+
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 
@@ -120,5 +122,4 @@ public class ReceiptController {
         return strip(receiptService.updateReceiptItemAmount(
                 receiptId, receiptItemId, updateReceiptItemRequestDto.getAmount()));
     }
-
 }

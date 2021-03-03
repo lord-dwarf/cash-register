@@ -1,6 +1,7 @@
 package com.polinakulyk.cashregister.service.api;
 
 import com.polinakulyk.cashregister.db.entity.Receipt;
+
 import java.math.BigDecimal;
 import java.util.List;
 

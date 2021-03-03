@@ -3,6 +3,7 @@ package com.polinakulyk.cashregister.config.security;
 import com.polinakulyk.cashregister.security.api.AuthHelper;
 import com.polinakulyk.cashregister.security.filter.JwtAuthFilter;
 import com.polinakulyk.cashregister.service.api.UserService;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

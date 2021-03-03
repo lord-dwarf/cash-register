@@ -1,11 +1,11 @@
 package com.polinakulyk.cashregister.db.entity;
 
 import com.polinakulyk.cashregister.db.dto.ProductAmountUnit;
+
 import java.math.BigDecimal;
 import java.util.StringJoiner;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
 import javax.persistence.ManyToOne;
 import javax.persistence.PreRemove;
@@ -13,11 +13,11 @@ import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-import org.hibernate.annotations.GenericGenerator;
 
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.AMOUNT_KILO_SCALE;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.MONEY_SCALE;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.PRECISION;
+
 import static javax.persistence.FetchType.LAZY;
 
 @Entity

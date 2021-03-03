@@ -15,6 +15,7 @@ import com.polinakulyk.cashregister.service.api.ProductService;
 import com.polinakulyk.cashregister.service.api.ReceiptService;
 import com.polinakulyk.cashregister.service.api.UserService;
 import com.polinakulyk.cashregister.util.CashRegisterUtil;
+
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
@@ -37,6 +38,7 @@ import static com.polinakulyk.cashregister.util.CashRegisterUtil.generateUuid;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.now;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.quote;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.subtract;
+
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 
@@ -133,7 +135,7 @@ public class ReceiptServiceImpl implements ReceiptService {
 
     /**
      * Completes a given receipt.
-     *
+     * <p>
      * Important: at this point amount of products available may change depending on receipt items.
      *
      * @param receiptId
@@ -173,7 +175,7 @@ public class ReceiptServiceImpl implements ReceiptService {
 
     /**
      * Cancels a given receipt.
-     *
+     * <p>
      * Important: at this point amount of products available may change depending on receipt items.
      *
      * @param receiptId
@@ -310,7 +312,7 @@ public class ReceiptServiceImpl implements ReceiptService {
             String receiptId, String receiptItemId, BigDecimal newAmount) {
         var userId = authHelper.getUserId();
         log.debug("BEGIN Update receipt item amount by user: '{}', "
-                        + "in receipt: '{}', receipt item: '{}', new amount: '{}'",
+                  + "in receipt: '{}', receipt item: '{}', new amount: '{}'",
                 userId, receiptId, receiptItemId, newAmount);
 
         Receipt receipt = findExistingById(receiptId);
@@ -325,7 +327,7 @@ public class ReceiptServiceImpl implements ReceiptService {
         if (amountDiff.compareTo(BigDecimal.ZERO) == 0) {
 
             log.info("DONE Update receipt item amount (no amount change) by user: '{}', "
-                            + "in receipt: '{}', receipt item: '{}', new amount: '{}'",
+                     + "in receipt: '{}', receipt item: '{}', new amount: '{}'",
                     userId, receiptId, receiptItemId, newAmount);
             return receipt;
         }
@@ -343,7 +345,7 @@ public class ReceiptServiceImpl implements ReceiptService {
         receipt = receiptRepository.save(receipt);
 
         log.info("DONE Update receipt item amount by user: '{}', "
-                        + "in receipt: '{}', receipt item: '{}', new amount: '{}'",
+                 + "in receipt: '{}', receipt item: '{}', new amount: '{}'",
                 userId, receiptId, receiptItemId, receiptItem.getAmount());
         return receipt;
     }

@@ -1,6 +1,7 @@
 package com.polinakulyk.cashregister.service.api.dto;
 
 import com.polinakulyk.cashregister.db.dto.ShiftStatus;
+
 import java.util.StringJoiner;
 
 public class ShiftStatusSummaryResponseDto {

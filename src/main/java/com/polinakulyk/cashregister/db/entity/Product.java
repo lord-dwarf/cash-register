@@ -1,6 +1,7 @@
 package com.polinakulyk.cashregister.db.entity;
 
 import com.polinakulyk.cashregister.db.dto.ProductAmountUnit;
+
 import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;

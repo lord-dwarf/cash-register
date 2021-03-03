@@ -2,6 +2,7 @@ package com.polinakulyk.cashregister.security.api;
 
 import com.polinakulyk.cashregister.security.dto.JwtDto;
 import com.polinakulyk.cashregister.security.dto.UserRole;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;

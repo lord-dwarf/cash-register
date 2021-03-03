@@ -3,6 +3,7 @@ package com.polinakulyk.cashregister.service.api;
 import com.polinakulyk.cashregister.db.entity.User;
 import com.polinakulyk.cashregister.security.dto.UserRole;
 import com.polinakulyk.cashregister.service.api.dto.LoginResponseDto;
+
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

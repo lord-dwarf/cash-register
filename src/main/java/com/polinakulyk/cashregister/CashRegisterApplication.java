@@ -13,5 +13,4 @@ public class CashRegisterApplication {
                 String.join(", ", args));
         SpringApplication.run(CashRegisterApplication.class, args);
     }
-
 }

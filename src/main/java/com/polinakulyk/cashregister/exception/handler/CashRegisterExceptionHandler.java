@@ -2,6 +2,7 @@ package com.polinakulyk.cashregister.exception.handler;
 
 import com.polinakulyk.cashregister.exception.CashRegisterException;
 import com.polinakulyk.cashregister.exception.dto.ErrorDto;
+
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -119,7 +120,7 @@ public class CashRegisterExceptionHandler extends ResponseEntityExceptionHandler
         var errorBody = ofNullable(body)
                 .map((b) -> {
                     if (b instanceof ErrorDto) {
-                        return (ErrorDto)b;
+                        return (ErrorDto) b;
                     }
                     // wrap ErrorDto around given error body
                     return new ErrorDto(b.toString());
@@ -130,7 +131,7 @@ public class CashRegisterExceptionHandler extends ResponseEntityExceptionHandler
                     return new ErrorDto(errorMessage);
                 });
         var errorMessage = errorBody.getErrorMessage();
-        var response = new ResponseEntity<>((Object)errorBody, headers, status);
+        var response = new ResponseEntity<>((Object) errorBody, headers, status);
 
         log.error(errorMessage, e);
         return response;

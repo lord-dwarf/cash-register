@@ -5,6 +5,7 @@ import com.polinakulyk.cashregister.db.entity.Product;
 import com.polinakulyk.cashregister.db.entity.Receipt;
 import com.polinakulyk.cashregister.db.entity.ReceiptItem;
 import com.polinakulyk.cashregister.db.entity.User;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -69,7 +70,7 @@ public class ServiceHelper {
 
         return ACTIVE == cashbox.getShiftStatus() && (
                 receiptCreatedTime.isAfter(shiftStartTime)
-                        || receiptCreatedTime.isEqual(shiftStartTime));
+                || receiptCreatedTime.isEqual(shiftStartTime));
     }
 
     // TODO consider replacing all strip() methods usage, with explicit LAZY loading of related entities

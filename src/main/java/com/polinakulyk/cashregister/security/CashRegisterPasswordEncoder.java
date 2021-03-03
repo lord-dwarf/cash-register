@@ -1,6 +1,7 @@
 package com.polinakulyk.cashregister.security;
 
 import com.polinakulyk.cashregister.exception.CashRegisterException;
+
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.security.spec.KeySpec;
@@ -10,6 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.quote;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.toBase64;
+
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 public class CashRegisterPasswordEncoder implements PasswordEncoder {
