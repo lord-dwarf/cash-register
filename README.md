@@ -8,14 +8,14 @@
 ## The nuxt-app is now running on http://localhost:3000:
 ![Header Image](/src/main/resources/static//frontend.png?raw=true)
 
+## Guest can see localized home page:
+![Header Image](/src/main/resources/static//guest_home.png?raw=true)
+
 ## Merchandiser can view paginated list of products:
 ![Header Image](/src/main/resources/static//merch_products.png?raw=true)
 
 ## Merchandiser can add a new product or change the existing one:
 ![Header Image](/src/main/resources/static//merch_products_one.png?raw=true)
-
-## Guest can see localized home page:
-![Header Image](/src/main/resources/static//guest_home.png?raw=true)
 
 ## Senior teller can view paginated list of receipts in the active shift:
 ![Header Image](/src/main/resources/static//sr_teller_receipts.png?raw=true)
