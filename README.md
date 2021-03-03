@@ -21,7 +21,7 @@
 ![Header Image](/src/main/resources/static//sr_teller_receipts.png?raw=true)
 
 ## Either teller or senior teller can create, complete, edit or cancel receipts:
-![Header Image](/src/main/resources/static/doc/teller_receipts_edit.png?raw=true)
+![Header Image](/src/main/resources/static/teller_receipts_edit.png?raw=true)
 
 ## Teller is allowed to create and complete a receipt, but not to cancel it:
 ![Header Image](/src/main/resources/static//teller_receipts_complete.png?raw=true)
