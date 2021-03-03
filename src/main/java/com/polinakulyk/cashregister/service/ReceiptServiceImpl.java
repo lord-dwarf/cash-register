@@ -67,7 +67,6 @@ public class ReceiptServiceImpl implements ReceiptService {
     }
 
     @Override
-    @Transactional
     public List<Receipt> findAll() {
         var receipts = stream(receiptRepository.findAll().spliterator(), false)
                 .collect(toList());
@@ -77,7 +76,6 @@ public class ReceiptServiceImpl implements ReceiptService {
     }
 
     @Override
-    @Transactional
     public List<Receipt> findAllByTellerId(String tellerId) {
 
         // filter teller's receipts that belong to the active shift
@@ -100,7 +98,6 @@ public class ReceiptServiceImpl implements ReceiptService {
      * @return
      */
     @Override
-    @Transactional
     public Receipt findExistingById(String receiptId) {
         var receipt = receiptRepository.findById(receiptId).orElseThrow(() ->
                 new CashRegisterReceiptNotFoundException(receiptId));

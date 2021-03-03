@@ -120,7 +120,6 @@ public class CashboxServiceImpl implements CashboxService {
      * @return
      */
     @Override
-    @Transactional
     public ShiftStatusSummaryResponseDto getShiftStatusSummary() {
         String userId = authHelper.getUserId();
         User user = userService.findExistingById(userId);

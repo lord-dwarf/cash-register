@@ -2,7 +2,6 @@ package com.polinakulyk.cashregister.service;
 
 import com.polinakulyk.cashregister.db.entity.Product;
 import com.polinakulyk.cashregister.db.repository.ProductRepository;
-import com.polinakulyk.cashregister.exception.CashRegisterException;
 import com.polinakulyk.cashregister.exception.CashRegisterProductNotFoundException;
 import com.polinakulyk.cashregister.security.api.AuthHelper;
 import com.polinakulyk.cashregister.service.api.dto.ProductFilterKind;
@@ -11,14 +10,10 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.helpers.Util;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.quote;
-import static java.lang.String.format;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.StreamSupport.stream;
 
@@ -53,7 +48,6 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    @Transactional
     public List<Product> findAll() {
         var products = stream(productRepository.findAll().spliterator(), false)
                 .collect(toList());
@@ -73,7 +67,6 @@ public class ProductServiceImpl implements ProductService {
      * @return
      */
     @Override
-    @Transactional
     public Product findExistingById(String productId) {
         var product = productRepository.findById(productId).orElseThrow(() ->
                 new CashRegisterProductNotFoundException(productId));
@@ -91,7 +84,6 @@ public class ProductServiceImpl implements ProductService {
      * @return
      */
     @Override
-    @Transactional
     public List<Product> findByFilter(ProductFilterKind filterKind, String filterValue) {
         Pattern filterPattern = Pattern.compile(filterValue + ".*", Pattern.CASE_INSENSITIVE);
         Function<Product, String> fun;
