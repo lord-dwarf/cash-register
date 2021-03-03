@@ -29,7 +29,7 @@
 ## Senior teller can generate 'X' and 'Z' reports: 
 ![Header Image](/src/main/resources/static//sr_teller_reports.png?raw=true)
 
-## Report Z toggled shift status to 'inactive'
+## Report Z toggled shift status to 'inactive':
 ![Header Image](/src/main/resources/static/shift_deactivated.png?raw=true)
 
 ## Receipts modifications in the inactive shift are forbidden:
