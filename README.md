@@ -1,45 +1,40 @@
-# Cash Register Application
-![Header Image](doc/cashregister.png)
-# Contents
-[Purpose](#purpose)<br>
-[Functionality](#functionality)<br>
-[Technologies](#technologies)<br>
-[Author](#author)
+# Cash register
+## Task description:
+![Header Image](doc/task_description.png)
 
-TODO strip strips
-TODO replace boiler plate code with lombok
-TODO add rules for text fields on UI
+## DB structure:
+![Header Image](doc/db_view.png)
 
-///////////////////////////
+## The nuxt-app is now running on http://localhost:3000:
+![Header Image](doc/frontend.png)
 
-    public void putJwtIntoResponse(String jwt, HttpServletRequest request, HttpServletResponse response) {
-        Cookie jwtCookie = new Cookie(JWT_AUTH_COOKIE_NAME, jwt);
-        jwtCookie.setMaxAge(jwtExpirationSeconds);
-        jwtCookie.setPath(request.getContextPath());
-        response.addCookie(jwtCookie);
-    }
+## Merchandiser can view paginated list of products:
+![Header Image](doc/merch_products.png)
 
-    public Optional<String> getJwtFromRequest(HttpServletRequest req) {
-        Cookie[] cookies = req.getCookies();
-        if (null == cookies) {
-            return Optional.empty();
-        }
-        return Arrays.stream(cookies)
-                .filter((cookie) -> JWT_AUTH_COOKIE_NAME.equals(cookie.getName()))
-                .map(Cookie::getValue)
-                .filter(Objects::nonNull)
-                .findFirst();
-    }
+## Merchandiser can add a new product or change the existing one:
+![Header Image](doc/merch_products_one.png)
 
-    public JwtDto parseJwt(String jwt) {
-        Jws<Claims> jwtParsed = Jwts.parser().setSigningKey(jwtSecret).parseClaimsJws(jwt);
-        var body = jwtParsed.getBody();
-        return new JwtDto()
-                .setUserId(body.getSubject())
-                .setRole(body.get(JWT_CLAIM_ROLE, List.class).get(0).toString())
-                .setIssuedAt(CashRegisterUtil.toLocalDateTime(body.getIssuedAt()))
-                .setExpireAt(CashRegisterUtil.toLocalDateTime(body.getExpiration()));
-    }
+## Guest can see localized home page:
+![Header Image](doc/guest_home.png)
 
-# <a name="purpose"></a>Purpose
-A cash register or till is a mechanical or electronic device for registering and calculating transactions at a point of sale. It is usually attached to a drawer for storing cash and other valuables. A modern cash register is usually attached to a printer that can print out receipts for record-keeping purposes.
+## Senior teller can view paginated list of receipts in the active shift:
+![Header Image](doc/sr_teller_receipts.png)
+
+## Either teller or senior teller can create, complete, edit or cancel receipts:
+![Header Image](doc/teller_receipts_edit.png)
+
+## Teller is allowed to create and complete a receipt, but not to cancel it:
+![Header Image](doc/teller_receipts_complete.png)
+
+## Senior teller can generate 'X' and 'Z' reports: 
+![Header Image](doc/sr_teller_reports.png)
+
+## Report Z toggled shift status to 'inactive'
+![Header Image](doc/shift_deactivated.png)
+
+## Receipts modifications in the inactive shift are forbidden:
+![Header Image](doc/teller_receipts_active_shift.png)
+![Header Image](doc/teller_inactive_shift.png)
+
+## That's it for now. Thank you for your time :) 
+![Header Image](doc/end.jpg)
