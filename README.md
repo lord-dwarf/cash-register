@@ -1,6 +1,6 @@
 # Cash register
 ## Task description:
-![task image](/Users/polinakulyk/workspace/cashregister/src/main/resources/static/task_description.png?raw=true)
+![task image](/src/main/resources/static/task_description.png?raw=true)
 
 ## DB structure:
 ![Header Image](doc/db_view.png)
