@@ -5,7 +5,7 @@
 ## DB structure:
 ![Header Image](/src/main/resources/static//db_view.png?raw=true)
 
-## Test coverage:
+## Tests coverage:
 ![Header Image](/src/main/resources/static//test_coverage.png?raw=true)
 
 ## The nuxt-app is now running on http://localhost:3000:
