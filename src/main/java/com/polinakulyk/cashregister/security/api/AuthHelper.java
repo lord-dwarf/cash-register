@@ -11,6 +11,11 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 
 public interface AuthHelper {
+
+    String JWT_AUTH_HEADER = "Authorization";
+
+    String JWT_BEARER_PREFIX = "Bearer ";
+
     String createJwt(String userId, UserRole role);
 
     boolean validateJwt(String jwt);

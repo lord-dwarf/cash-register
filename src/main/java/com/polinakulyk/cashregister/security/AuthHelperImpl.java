@@ -40,8 +40,6 @@ import static java.util.function.Predicate.not;
 public class AuthHelperImpl implements AuthHelper {
 
     private static final String JWT_CLAIM_ROLE = "role";
-    private static final String JWT_AUTH_HEADER = "Authorization";
-    private static final String JWT_BEARER_PREFIX = "Bearer ";
     private static final String SPRING_ROLE_PREFIX = "ROLE_";
 
     @Value("${cashregister.auth.jwt.secret}")

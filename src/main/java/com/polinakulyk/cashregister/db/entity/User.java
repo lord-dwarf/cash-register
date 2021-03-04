@@ -2,7 +2,9 @@ package com.polinakulyk.cashregister.db.entity;
 
 import com.polinakulyk.cashregister.security.dto.UserRole;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.StringJoiner;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -36,7 +38,7 @@ public class User {
 
     @OneToMany(mappedBy = "user", fetch = LAZY)
     @NotNull(message = "Receipts cannot be null")
-    private List<Receipt> receipts = new ArrayList<>();
+    private Set<Receipt> receipts = new HashSet<>();
 
     @ManyToOne
     @NotNull(message = "Cash box cannot be null")
@@ -87,11 +89,11 @@ public class User {
         return this;
     }
 
-    public List<Receipt> getReceipts() {
+    public Set<Receipt> getReceipts() {
         return receipts;
     }
 
-    public User setReceipts(List<Receipt> receipts) {
+    public User setReceipts(Set<Receipt> receipts) {
         this.receipts = receipts;
         return this;
     }

@@ -312,7 +312,7 @@ export default {
     },
     async cancelReceipt() {
       await this.$http
-        .$patch('/receipts' + '/' + this.receiptId + '/cancel')
+        .$patch('/receipts' + '/' + this.receiptId + '/cancel', {})
         .then(this.applyReceipt)
         .catch((_error) => {
           // nothing

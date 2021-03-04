@@ -29,7 +29,7 @@ public class CashboxController {
     @PatchMapping("/activate-shift")
     @RolesAllowed({TELLER, SR_TELLER})
     public @ResponseBody
-    ShiftStatusSummaryResponseDto activateShift(@RequestBody Map emptyRequestBody) {
+    ShiftStatusSummaryResponseDto activateShift(@RequestBody Map<?, ?> emptyRequestBody) {
         return cashboxService.activateShift();
     }
 

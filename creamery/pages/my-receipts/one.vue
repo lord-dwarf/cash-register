@@ -534,7 +534,7 @@ export default {
     },
     async completeReceipt() {
       await this.$http
-        .$patch('/receipts' + '/' + this.receiptId + '/complete')
+        .$patch('/receipts' + '/' + this.receiptId + '/complete', {})
         .then(this.setReceiptDataIntoPage)
         .catch((_error) => {
           // nothing
@@ -543,7 +543,7 @@ export default {
     },
     async cancelReceipt() {
       await this.$http
-        .$patch('/receipts' + '/' + this.receiptId + '/cancel')
+        .$patch('/receipts' + '/' + this.receiptId + '/cancel', {})
         .then(this.setReceiptDataIntoPage)
         .catch((_error) => {
           // nothing

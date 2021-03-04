@@ -65,7 +65,7 @@ public class ReceiptController {
     @PostMapping
     @RolesAllowed({TELLER, SR_TELLER})
     public @ResponseBody
-    Receipt createReceipt(@RequestBody Map emptyRequestBody) {
+    Receipt createReceipt(@RequestBody Map<?, ?> emptyRequestBody) {
         return strip(receiptService.createReceipt(authHelper.getUserId()));
     }
 
@@ -79,14 +79,14 @@ public class ReceiptController {
     @PatchMapping("/{id}/complete")
     @RolesAllowed({TELLER, SR_TELLER})
     public @ResponseBody
-    Receipt completeReceipt(@PathVariable String id) {
+    Receipt completeReceipt(@PathVariable String id, @RequestBody Map<?, ?> emptyRequestBody) {
         return strip(receiptService.completeReceipt(id));
     }
 
     @PatchMapping("/{id}/cancel")
     @RolesAllowed({SR_TELLER})
     public @ResponseBody
-    Receipt cancelReceipt(@PathVariable String id) {
+    Receipt cancelReceipt(@PathVariable String id, @RequestBody Map<?, ?> emptyRequestBody) {
         return strip(receiptService.cancelReceipt(id));
     }
 

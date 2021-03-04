@@ -4,7 +4,9 @@ import com.polinakulyk.cashregister.db.dto.ShiftStatus;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.StringJoiner;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -32,7 +34,7 @@ public class Cashbox {
 
     @OneToMany(mappedBy = "cashbox", fetch = LAZY)
     @NotNull(message = "Users cannot be null")
-    private List<User> users = new ArrayList<>();
+    private Set<User> users = new HashSet<>();
 
     public String getId() {
         return id;
@@ -70,11 +72,11 @@ public class Cashbox {
         return this;
     }
 
-    public List<User> getUsers() {
+    public Set<User> getUsers() {
         return users;
     }
 
-    public Cashbox setUsers(List<User> users) {
+    public Cashbox setUsers(Set<User> users) {
         this.users = users;
         return this;
     }

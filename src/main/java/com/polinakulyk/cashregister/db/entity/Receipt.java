@@ -5,7 +5,9 @@ import com.polinakulyk.cashregister.db.dto.ReceiptStatus;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.StringJoiner;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
@@ -45,7 +47,7 @@ public class Receipt {
 
     @OneToMany(mappedBy = "receipt", cascade = CascadeType.ALL)
     @NotNull(message = "Receipt items cannot be null")
-    private List<ReceiptItem> receiptItems = new ArrayList<>();
+    private Set<ReceiptItem> receiptItems = new HashSet<>();
 
     @ManyToOne
     @NotNull(message = "User cannot be null")
@@ -96,11 +98,11 @@ public class Receipt {
         return this;
     }
 
-    public List<ReceiptItem> getReceiptItems() {
+    public Set<ReceiptItem> getReceiptItems() {
         return receiptItems;
     }
 
-    public Receipt setReceiptItems(List<ReceiptItem> items) {
+    public Receipt setReceiptItems(Set<ReceiptItem> items) {
         this.receiptItems = items;
         return this;
     }

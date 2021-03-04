@@ -118,7 +118,7 @@ public class CashRegisterExceptionHandler extends ResponseEntityExceptionHandler
             WebRequest request
     ) {
         var errorBody = ofNullable(body)
-                .map((b) -> {
+                .map(b -> {
                     if (b instanceof ErrorDto) {
                         return (ErrorDto) b;
                     }
