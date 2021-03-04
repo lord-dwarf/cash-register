@@ -73,7 +73,6 @@ public class ServiceHelper {
                 || receiptCreatedTime.isEqual(shiftStartTime));
     }
 
-    // TODO consider replacing all strip() methods usage, with explicit LAZY loading of related entities
     public static Product strip(Product product) {
         return product.setReceiptItems(null);
     }
@@ -98,6 +97,8 @@ public class ServiceHelper {
                 .setCashbox(strip(user.getCashbox()));
     }
 
+    // TODO consider replacing all strip() methods usage, with explicit
+    //  LAZY loading of related entities or usage of mappers
     public static Cashbox strip(Cashbox cashbox) {
         return cashbox.setUsers(null);
     }
