@@ -14,9 +14,6 @@ import com.polinakulyk.cashregister.service.api.dto.LoginResponseDto;
 
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.helpers.Util;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -30,8 +27,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.quote;
-
-import static java.lang.String.format;
 
 /**
  * User service.

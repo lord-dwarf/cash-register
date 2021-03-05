@@ -77,11 +77,11 @@ public class ProductController {
 
     @PutMapping("/{id}")
     @RolesAllowed({MERCH})
-    public ResponseEntity updateProduct(
+    public ResponseEntity<String> updateProduct(
             @PathVariable String id,
             @Valid @RequestBody Product product
     ) {
         productService.update(product.setId(id));
-        return new ResponseEntity((String)null, NO_CONTENT);
+        return new ResponseEntity<>((String)null, NO_CONTENT);
     }
 }

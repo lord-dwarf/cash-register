@@ -5,6 +5,7 @@ import com.polinakulyk.cashregister.exception.dto.ErrorDto;
 
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -39,7 +40,7 @@ public class CashRegisterExceptionHandler extends ResponseEntityExceptionHandler
      * @return
      */
     @ExceptionHandler({CashRegisterException.class})
-    protected ResponseEntity<Object> handleCashRegisterException(
+    public ResponseEntity<Object> handleCashRegisterException(
             CashRegisterException e, WebRequest request) {
         String errorMessage = e.getMessage();
         ErrorDto body = new ErrorDto(errorMessage);
@@ -63,7 +64,7 @@ public class CashRegisterExceptionHandler extends ResponseEntityExceptionHandler
      * @return
      */
     @Override
-    protected ResponseEntity<Object> handleMethodArgumentNotValid(
+    public ResponseEntity<Object> handleMethodArgumentNotValid(
             MethodArgumentNotValidException e,
             HttpHeaders headers,
             HttpStatus status,
@@ -85,14 +86,15 @@ public class CashRegisterExceptionHandler extends ResponseEntityExceptionHandler
      * @return
      */
     @ExceptionHandler({DataIntegrityViolationException.class})
-    protected ResponseEntity<Object> handleConstraintViolationException(
+    public ResponseEntity<Object> handleConstraintViolationException(
             DataIntegrityViolationException e, WebRequest request) {
         ErrorDto body = new ErrorDto("Entity already exists");
         return handleExceptionInternal(e, body, new HttpHeaders(), BAD_REQUEST, request);
     }
 
     @ExceptionHandler({AuthenticationException.class})
-    public ResponseEntity<Object> handleAuthenticationException(AuthenticationException e, WebRequest request) {
+    public ResponseEntity<Object>
+    handleAuthenticationException(AuthenticationException e, WebRequest request) {
         return handleExceptionInternal(e, null, new HttpHeaders(), UNAUTHORIZED, request);
     }
 
@@ -110,7 +112,7 @@ public class CashRegisterExceptionHandler extends ResponseEntityExceptionHandler
     }
 
     @Override
-    protected ResponseEntity<Object> handleExceptionInternal(
+    public ResponseEntity<Object> handleExceptionInternal(
             Exception e,
             @Nullable Object body,
             HttpHeaders headers,
@@ -144,7 +146,7 @@ public class CashRegisterExceptionHandler extends ResponseEntityExceptionHandler
         return e.getAllErrors().stream()
                 .filter(Objects::nonNull)
                 .findFirst()
-                .map(err -> err.getDefaultMessage())
+                .map(DefaultMessageSourceResolvable::getDefaultMessage)
                 .orElseGet(BAD_REQUEST::getReasonPhrase);
     }
 }

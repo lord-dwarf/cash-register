@@ -98,7 +98,8 @@ public class AuthHelperImpl implements AuthHelper {
         if (jwt != null && jwt.startsWith(JWT_BEARER_PREFIX)) {
             jwt = jwt.substring(JWT_BEARER_PREFIX.length());
         }
-        return Optional.ofNullable(jwt).filter(not(String::isEmpty));
+        // ensure jwt not only exists but also is non blank
+        return Optional.ofNullable(jwt).filter(not(String::isBlank));
     }
 
     @Override
