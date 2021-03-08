@@ -4,9 +4,7 @@ import com.polinakulyk.cashregister.db.dto.ReceiptStatus;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
 import java.util.StringJoiner;
 import javax.persistence.CascadeType;

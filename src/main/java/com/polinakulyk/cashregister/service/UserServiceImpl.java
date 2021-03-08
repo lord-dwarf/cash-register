@@ -66,6 +66,7 @@ public class UserServiceImpl implements UserService {
      * @return
      */
     @Override
+    @Transactional
     public LoginResponseDto login(String login, String password) {
         log.debug("BEGIN Login of user '{}'", login);
 
@@ -109,6 +110,7 @@ public class UserServiceImpl implements UserService {
      * @return
      */
     @Override
+    @Transactional
     public User findExistingById(String userId) {
         var user = userRepository.findById(userId).orElseThrow(() ->
                 new CashRegisterUserNotFoundException(userId));
@@ -126,6 +128,7 @@ public class UserServiceImpl implements UserService {
      * @throws UsernameNotFoundException when user not found
      */
     @Override
+    @Transactional
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(username).orElseThrow(() ->
                 new UsernameNotFoundException(quote("User not found", username)));

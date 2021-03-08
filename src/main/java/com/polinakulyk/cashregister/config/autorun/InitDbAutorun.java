@@ -3,13 +3,13 @@ package com.polinakulyk.cashregister.config.autorun;
 import com.polinakulyk.cashregister.db.dto.ProductAmountUnit;
 import com.polinakulyk.cashregister.db.entity.Product;
 import com.polinakulyk.cashregister.db.entity.Receipt;
-import com.polinakulyk.cashregister.db.entity.User;
 import com.polinakulyk.cashregister.security.api.AuthHelper;
 import com.polinakulyk.cashregister.security.dto.UserDetailsDto;
 import com.polinakulyk.cashregister.service.api.CashboxService;
 import com.polinakulyk.cashregister.service.api.ProductService;
 import com.polinakulyk.cashregister.service.api.ReceiptService;
 import com.polinakulyk.cashregister.service.api.UserService;
+
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -103,12 +103,12 @@ public class InitDbAutorun {
     @EventListener
     public void onApplicationEvent(ContextRefreshedEvent event) {
         if (isContextInitializedOnce.compareAndSet(false, true)) {
-                log.debug("BEGIN CashRegister autorun");
-                createCashboxes();
-                createUsers();
-                createProducts(merchId);
-                createReceipts();
-                log.info("DONE CashRegister autorun");
+            log.debug("BEGIN CashRegister autorun");
+            createCashboxes();
+            createUsers();
+            createProducts(merchId);
+            createReceipts();
+            log.info("DONE CashRegister autorun");
         }
     }
 
@@ -319,10 +319,13 @@ public class InitDbAutorun {
 
     private BigDecimal generateReceiptItemAmount(ProductAmountUnit amountUnit) {
         switch (amountUnit) {
-            case UNIT: return bigDecimalAmount("50", UNIT);
-            case KILO: return bigDecimalAmount("0.150", KILO);
-            default: throw new UnsupportedOperationException(quote(
-                    "Product amount unit not supported", amountUnit));
+            case UNIT:
+                return bigDecimalAmount("50", UNIT);
+            case KILO:
+                return bigDecimalAmount("0.150", KILO);
+            default:
+                throw new UnsupportedOperationException(quote(
+                        "Product amount unit not supported", amountUnit));
         }
     }
 

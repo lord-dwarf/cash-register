@@ -3,19 +3,12 @@ package com.polinakulyk.cashregister.db.entity;
 import com.polinakulyk.cashregister.db.dto.ShiftStatus;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import java.util.StringJoiner;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
-
-import static javax.persistence.FetchType.LAZY;
 
 @Entity
 public class Cashbox {
@@ -31,10 +24,6 @@ public class Cashbox {
 
     @NotNull(message = "Shift status time cannot be null")
     private LocalDateTime shiftStatusTime;
-
-    @OneToMany(mappedBy = "cashbox", fetch = LAZY)
-    @NotNull(message = "Users cannot be null")
-    private Set<User> users = new HashSet<>();
 
     public String getId() {
         return id;
@@ -72,15 +61,6 @@ public class Cashbox {
         return this;
     }
 
-    public Set<User> getUsers() {
-        return users;
-    }
-
-    public Cashbox setUsers(Set<User> users) {
-        this.users = users;
-        return this;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -104,7 +84,6 @@ public class Cashbox {
                 .add("name='" + name + "'")
                 .add("shiftStatus='" + shiftStatus + "'")
                 .add("shiftStatusTime='" + shiftStatusTime + "'")
-                .add("users=" + users)
                 .toString();
     }
 }

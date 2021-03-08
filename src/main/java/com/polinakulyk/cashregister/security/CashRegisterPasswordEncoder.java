@@ -22,6 +22,13 @@ public class CashRegisterPasswordEncoder implements PasswordEncoder {
         this.passwordSalt = passwordSalt;
     }
 
+    /**
+     * Gets standard Java KDF encoder for password encoding, with a reasonably secure complexity
+     * of execution (iteration count params), and encodes password + salt.
+     *
+     * @param rawPassword
+     * @return
+     */
     @Override
     public String encode(CharSequence rawPassword) {
         KeySpec spec = new PBEKeySpec(
@@ -38,6 +45,13 @@ public class CashRegisterPasswordEncoder implements PasswordEncoder {
 
     }
 
+    /**
+     * Determines whether the given password matches a KDF-encoded password.
+     *
+     * @param rawPassword
+     * @param encodedPassword
+     * @return
+     */
     @Override
     public boolean matches(CharSequence rawPassword, String encodedPassword) {
         return rawPassword != null && encode(rawPassword).equals(encodedPassword);

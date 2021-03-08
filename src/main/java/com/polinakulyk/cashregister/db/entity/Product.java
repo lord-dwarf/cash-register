@@ -3,15 +3,11 @@ package com.polinakulyk.cashregister.db.entity;
 import com.polinakulyk.cashregister.db.dto.ProductAmountUnit;
 
 import java.math.BigDecimal;
-import java.util.HashSet;
-import java.util.Set;
 import java.util.StringJoiner;
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.OneToMany;
 import javax.validation.constraints.DecimalMax;
 import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotBlank;
@@ -52,13 +48,9 @@ public class Product {
 
     @Column(precision = PRECISION, scale = AMOUNT_KILO_SCALE)
     @NotNull(message = "Amount available cannot be null")
-    @DecimalMin(value = "0.000", message = "Amount available must be positive")
+    @DecimalMin(value = "0.000", message = "Amount available must be >= 0")
     @DecimalMax(value = "999.999", message = "Amount available  must be less than 1000")
     private BigDecimal amountAvailable;
-
-    @OneToMany(mappedBy = "product", fetch = FetchType.LAZY)
-    @NotNull(message = "Receipt items cannot be null")
-    private Set<ReceiptItem> receiptItems = new HashSet<>();
 
     public String getId() {
         return id;
@@ -132,15 +124,6 @@ public class Product {
         return this;
     }
 
-    public Set<ReceiptItem> getReceiptItems() {
-        return receiptItems;
-    }
-
-    public Product setReceiptItems(Set<ReceiptItem> items) {
-        this.receiptItems = items;
-        return this;
-    }
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -168,7 +151,6 @@ public class Product {
                 .add("price=" + price)
                 .add("amountUnit=" + amountUnit)
                 .add("amountAvailable=" + amountAvailable)
-                .add("receiptItems=" + receiptItems)
                 .toString();
     }
 }

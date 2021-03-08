@@ -14,15 +14,12 @@ import com.polinakulyk.cashregister.security.api.AuthHelper;
 import com.polinakulyk.cashregister.service.api.ProductService;
 import com.polinakulyk.cashregister.service.api.ReceiptService;
 import com.polinakulyk.cashregister.service.api.UserService;
-import com.polinakulyk.cashregister.util.CashRegisterUtil;
 
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.helpers.Util;
+import org.hibernate.Hibernate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -69,21 +66,25 @@ public class ReceiptServiceImpl implements ReceiptService {
     }
 
     @Override
+    @Transactional
     public List<Receipt> findAll() {
-        var receipts = stream(receiptRepository.findAll().spliterator(), false)
-                .collect(toList());
+        var receipts =
+                stream(receiptRepository.findAll().spliterator(), false)
+                        .collect(toList());
 
         log.debug("DONE Find receipts: {}", receipts.size());
         return receipts;
     }
 
     @Override
+    @Transactional
     public List<Receipt> findAllByTellerId(String tellerId) {
 
         // filter teller's receipts that belong to the active shift
-        var receipts = stream(receiptRepository.findAll().spliterator(), false)
-                .filter(r -> tellerId.equals(r.getUser().getId()) && isReceiptInActiveShift(r))
-                .collect(toList());
+        var receipts =
+                stream(receiptRepository.findAll().spliterator(), false)
+                        .filter(r -> tellerId.equals(r.getUser().getId()) && isReceiptInActiveShift(r))
+                        .collect(toList());
 
         log.debug("DONE Find receipts by teller: '{}', size: {}", tellerId, receipts.size());
         return receipts;
@@ -100,9 +101,13 @@ public class ReceiptServiceImpl implements ReceiptService {
      * @return
      */
     @Override
+    @Transactional
     public Receipt findExistingById(String receiptId) {
         var receipt = receiptRepository.findById(receiptId).orElseThrow(() ->
                 new CashRegisterReceiptNotFoundException(receiptId));
+
+        // force loading receipt items eagerly
+        Hibernate.initialize(receipt.getReceiptItems());
 
         log.debug("DONE Find existing receipt: '{}'", receiptId);
         return receipt;
@@ -250,7 +255,6 @@ public class ReceiptServiceImpl implements ReceiptService {
             receiptItem = existingReceiptItemOpt.get();
             receiptItem.setAmount(add(receiptItem.getAmount(), receiptItemAmount));
         } else {
-
             // create receipt item by copying some fields from product, then add to receipt
             receiptItem = new ReceiptItem()
                     .setId(generateUuid())

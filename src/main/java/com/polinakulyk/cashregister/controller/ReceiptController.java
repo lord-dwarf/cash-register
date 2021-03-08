@@ -2,10 +2,9 @@ package com.polinakulyk.cashregister.controller;
 
 import com.polinakulyk.cashregister.controller.dto.AddReceiptItemRequestDto;
 import com.polinakulyk.cashregister.controller.dto.UpdateReceiptItemRequestDto;
-import com.polinakulyk.cashregister.db.entity.Receipt;
+import com.polinakulyk.cashregister.manager.api.ReceiptManager;
 import com.polinakulyk.cashregister.security.api.AuthHelper;
-import com.polinakulyk.cashregister.service.ServiceHelper;
-import com.polinakulyk.cashregister.service.api.ReceiptService;
+import com.polinakulyk.cashregister.service.api.dto.ReceiptDto;
 
 import java.util.List;
 import java.util.Map;
@@ -24,102 +23,91 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import static com.polinakulyk.cashregister.security.dto.UserRole.Value.SR_TELLER;
 import static com.polinakulyk.cashregister.security.dto.UserRole.Value.TELLER;
-import static com.polinakulyk.cashregister.service.ServiceHelper.strip;
-
-import static java.util.stream.Collectors.toList;
-import static java.util.stream.StreamSupport.stream;
 
 @CrossOrigin
 @Controller
 @RequestMapping("/api/receipts")
 public class ReceiptController {
-    private final ReceiptService receiptService;
+    private final ReceiptManager receiptManager;
     private final AuthHelper authHelper;
 
-    public ReceiptController(ReceiptService receiptService, AuthHelper authHelper) {
-        this.receiptService = receiptService;
+    public ReceiptController(ReceiptManager receiptManager, AuthHelper authHelper) {
+        this.receiptManager = receiptManager;
         this.authHelper = authHelper;
     }
 
     @GetMapping
     @RolesAllowed({SR_TELLER})
     public @ResponseBody
-    List<Receipt> listReceipts() {
-        return receiptService.findAll()
-                .stream()
-                .map(ServiceHelper::strip)
-                .collect(toList());
+    List<ReceiptDto> listReceipts() {
+        return receiptManager.findAll();
     }
 
     @GetMapping("/by-teller")
     @RolesAllowed({TELLER, SR_TELLER})
     public @ResponseBody
-    List<Receipt> listReceiptsByTeller() {
-        return stream(
-                receiptService.findAllByTellerId(authHelper.getUserId()).spliterator(),
-                false)
-                .map(ServiceHelper::strip)
-                .collect(toList());
+    List<ReceiptDto> listReceiptsByTeller() {
+        return receiptManager.findAllByTellerId(authHelper.getUserId());
     }
 
     @PostMapping
     @RolesAllowed({TELLER, SR_TELLER})
     public @ResponseBody
-    Receipt createReceipt(@RequestBody Map<?, ?> emptyRequestBody) {
-        return strip(receiptService.createReceipt(authHelper.getUserId()));
+    ReceiptDto createReceipt(@RequestBody Map<?, ?> emptyRequestBody) {
+        return receiptManager.createReceipt(authHelper.getUserId());
     }
 
     @GetMapping("/{id}")
     @RolesAllowed({TELLER, SR_TELLER})
     public @ResponseBody
-    Receipt getReceipt(@PathVariable String id) {
-        return strip(receiptService.findExistingById(id));
+    ReceiptDto getReceipt(@PathVariable String id) {
+        return receiptManager.findExistingById(id);
     }
 
     @PatchMapping("/{id}/complete")
     @RolesAllowed({TELLER, SR_TELLER})
     public @ResponseBody
-    Receipt completeReceipt(@PathVariable String id, @RequestBody Map<?, ?> emptyRequestBody) {
-        return strip(receiptService.completeReceipt(id));
+    ReceiptDto completeReceipt(@PathVariable String id, @RequestBody Map<?, ?> emptyRequestBody) {
+        return receiptManager.completeReceipt(id);
     }
 
     @PatchMapping("/{id}/cancel")
     @RolesAllowed({SR_TELLER})
     public @ResponseBody
-    Receipt cancelReceipt(@PathVariable String id, @RequestBody Map<?, ?> emptyRequestBody) {
-        return strip(receiptService.cancelReceipt(id));
+    ReceiptDto cancelReceipt(@PathVariable String id, @RequestBody Map<?, ?> emptyRequestBody) {
+        return receiptManager.cancelReceipt(id);
     }
 
     @PostMapping("/{receiptId}/items")
     @RolesAllowed({TELLER, SR_TELLER})
     public @ResponseBody
-    Receipt addReceiptItem(
+    ReceiptDto addReceiptItem(
             @PathVariable String receiptId,
             @Valid @RequestBody AddReceiptItemRequestDto addReceiptItemRequestDto
     ) {
-        return strip(receiptService.addReceiptItem(
+        return receiptManager.addReceiptItem(
                 receiptId,
                 addReceiptItemRequestDto.getProductId(),
-                addReceiptItemRequestDto.getReceiptItemAmountAmount()));
+                addReceiptItemRequestDto.getReceiptItemAmountAmount());
     }
 
     @DeleteMapping("/{receiptId}/items/{receiptItemId}")
     @RolesAllowed({SR_TELLER})
     public @ResponseBody
-    Receipt cancelReceiptItem(
+    ReceiptDto cancelReceiptItem(
             @PathVariable String receiptId, @PathVariable String receiptItemId) {
-        return strip(receiptService.cancelReceiptItem(receiptId, receiptItemId));
+        return receiptManager.cancelReceiptItem(receiptId, receiptItemId);
     }
 
     @PatchMapping("/{receiptId}/items/{receiptItemId}")
     @RolesAllowed({TELLER, SR_TELLER})
     public @ResponseBody
-    Receipt updateReceiptItem(
+    ReceiptDto updateReceiptItem(
             @PathVariable String receiptId,
             @PathVariable String receiptItemId,
             @Valid @RequestBody UpdateReceiptItemRequestDto updateReceiptItemRequestDto
     ) {
-        return strip(receiptService.updateReceiptItemAmount(
-                receiptId, receiptItemId, updateReceiptItemRequestDto.getAmount()));
+        return receiptManager.updateReceiptItemAmount(
+                receiptId, receiptItemId, updateReceiptItemRequestDto.getAmount());
     }
 }

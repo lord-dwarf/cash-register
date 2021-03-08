@@ -138,10 +138,22 @@ public class CashRegisterUtil {
         return a.subtract(b, MC);
     }
 
+    /**
+     * Converts given bytes array to a Base64 string, URL-safe.
+     *
+     * @param bytes
+     * @return
+     */
     public static String toBase64(byte[] bytes) {
         return Base64.getUrlEncoder().encodeToString(bytes);
     }
 
+    /**
+     * Converts given string to a Base64 string, URL-safe.
+     *
+     * @param s
+     * @return
+     */
     public static String toBase64(String s) {
         return Base64.getUrlEncoder().encodeToString(s.getBytes(UTF_8));
     }

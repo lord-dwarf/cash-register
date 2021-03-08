@@ -1,9 +1,8 @@
 package com.polinakulyk.cashregister.controller;
 
 import com.polinakulyk.cashregister.controller.dto.FindProductsRequestDto;
-import com.polinakulyk.cashregister.db.entity.Product;
-import com.polinakulyk.cashregister.service.ServiceHelper;
-import com.polinakulyk.cashregister.service.api.ProductService;
+import com.polinakulyk.cashregister.manager.api.ProductManager;
+import com.polinakulyk.cashregister.service.api.dto.ProductDto;
 
 import java.util.List;
 import javax.annotation.security.RolesAllowed;
@@ -22,66 +21,58 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import static com.polinakulyk.cashregister.security.dto.UserRole.Value.MERCH;
 import static com.polinakulyk.cashregister.security.dto.UserRole.Value.SR_TELLER;
 import static com.polinakulyk.cashregister.security.dto.UserRole.Value.TELLER;
-import static com.polinakulyk.cashregister.service.ServiceHelper.strip;
 
-import static java.util.stream.Collectors.toList;
 import static org.springframework.http.HttpStatus.NO_CONTENT;
 
 @CrossOrigin
 @Controller
 @RequestMapping("/api/products")
 public class ProductController {
-    private final ProductService productService;
+    private final ProductManager productManager;
 
-    public ProductController(ProductService productService) {
-        this.productService = productService;
+    public ProductController(ProductManager productManager) {
+        this.productManager = productManager;
     }
 
     @GetMapping
     @RolesAllowed({MERCH, TELLER, SR_TELLER})
     public @ResponseBody
-    Iterable<Product> listProducts() {
-        return productService.findAll()
-                .stream()
-                .map(ServiceHelper::strip)
-                .collect(toList());
+    List<ProductDto> listProducts() {
+        return productManager.findAll();
     }
 
     @PostMapping
     @RolesAllowed({MERCH})
     public @ResponseBody
-    Product createProduct(@Valid @RequestBody Product product) {
-        return productService.create(product);
+    ProductDto createProduct(@RequestBody ProductDto productDto) {
+        return productManager.create(productDto);
     }
 
     @GetMapping("/{id}")
     @RolesAllowed({MERCH, TELLER, SR_TELLER})
     public @ResponseBody
-    Product getProduct(@PathVariable String id) {
-        return strip(productService.findExistingById(id));
+    ProductDto getProduct(@PathVariable String id) {
+        return productManager.findExistingById(id);
     }
 
     @PostMapping("/find")
     @RolesAllowed({MERCH, TELLER, SR_TELLER})
     public @ResponseBody
-    List<Product> findProducts(
+    List<ProductDto> findProducts(
             @Valid @RequestBody FindProductsRequestDto findProductsRequestDto
     ) {
-        return productService.findByFilter(
+        return productManager.findByFilter(
                 findProductsRequestDto.getFilterKind(),
-                findProductsRequestDto.getFilterValue())
-                .stream()
-                .map(ServiceHelper::strip)
-                .collect(toList());
+                findProductsRequestDto.getFilterValue());
     }
 
     @PutMapping("/{id}")
     @RolesAllowed({MERCH})
     public ResponseEntity<String> updateProduct(
             @PathVariable String id,
-            @Valid @RequestBody Product product
+            @RequestBody ProductDto productDto
     ) {
-        productService.update(product.setId(id));
-        return new ResponseEntity<>((String)null, NO_CONTENT);
+        productManager.update(productDto.setId(id));
+        return new ResponseEntity<>((String) null, NO_CONTENT);
     }
 }

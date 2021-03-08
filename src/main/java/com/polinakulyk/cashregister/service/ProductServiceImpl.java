@@ -4,15 +4,17 @@ import com.polinakulyk.cashregister.db.entity.Product;
 import com.polinakulyk.cashregister.db.repository.ProductRepository;
 import com.polinakulyk.cashregister.exception.CashRegisterProductNotFoundException;
 import com.polinakulyk.cashregister.security.api.AuthHelper;
-import com.polinakulyk.cashregister.service.api.dto.ProductFilterKind;
 import com.polinakulyk.cashregister.service.api.ProductService;
+import com.polinakulyk.cashregister.service.api.dto.ProductFilterKind;
 
 import java.util.List;
 import java.util.function.Function;
 import java.util.regex.Pattern;
+import javax.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.validation.annotation.Validated;
 
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.quote;
 
@@ -23,6 +25,7 @@ import static java.util.stream.StreamSupport.stream;
  * Product service.
  */
 @Slf4j
+@Validated
 @Service
 public class ProductServiceImpl implements ProductService {
 
@@ -38,7 +41,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    public Product create(Product product) {
+    public Product create(@Valid Product product) {
         var userId = authHelper.getUserId();
         log.debug("BEGIN Create product by user: '{}'", userId);
 
@@ -50,9 +53,11 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
+    @Transactional
     public List<Product> findAll() {
-        var products = stream(productRepository.findAll().spliterator(), false)
-                .collect(toList());
+        var products =
+                stream(productRepository.findAll().spliterator(), false)
+                        .collect(toList());
 
         log.debug("DONE Find products: {}", products.size());
         return products;
@@ -69,11 +74,12 @@ public class ProductServiceImpl implements ProductService {
      * @return
      */
     @Override
+    @Transactional
     public Product findExistingById(String productId) {
         var product = productRepository.findById(productId).orElseThrow(() ->
                 new CashRegisterProductNotFoundException(productId));
 
-        log.debug("DONE Find product: '{}'", productId);
+        log.debug("DONE Find product: '{}'", product.getId());
         return product;
     }
 
@@ -86,6 +92,7 @@ public class ProductServiceImpl implements ProductService {
      * @return
      */
     @Override
+    @Transactional
     public List<Product> findByFilter(ProductFilterKind filterKind, String filterValue) {
         Pattern filterPattern = Pattern.compile(filterValue + ".*", Pattern.CASE_INSENSITIVE);
         Function<Product, String> fun;
@@ -103,10 +110,11 @@ public class ProductServiceImpl implements ProductService {
                         "Product filter kind not supported", filterKind));
         }
         var getProductFieldFun = fun;
-        var filteredProducts = stream(productRepository.findAll().spliterator(), false)
-                .filter(p -> filterPattern.matcher(getProductFieldFun.apply(p)).matches())
-                .limit(FOUND_PRODUCTS_LIMIT)
-                .collect(toList());
+        var filteredProducts =
+                stream(productRepository.findAll().spliterator(), false)
+                        .filter(p -> filterPattern.matcher(getProductFieldFun.apply(p)).matches())
+                        .limit(FOUND_PRODUCTS_LIMIT)
+                        .collect(toList());
 
         log.debug("DONE Filter products: {}", filteredProducts.size());
         return filteredProducts;
@@ -114,7 +122,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     @Transactional
-    public void update(Product product) {
+    public void update(@Valid Product product) {
         var userId = authHelper.getUserId();
         log.debug("BEGIN Update product by user: '{}', product: '{}'",
                 userId, product.getId());

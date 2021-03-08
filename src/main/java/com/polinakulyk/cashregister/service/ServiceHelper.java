@@ -1,21 +1,17 @@
 package com.polinakulyk.cashregister.service;
 
 import com.polinakulyk.cashregister.db.entity.Cashbox;
-import com.polinakulyk.cashregister.db.entity.Product;
 import com.polinakulyk.cashregister.db.entity.Receipt;
-import com.polinakulyk.cashregister.db.entity.ReceiptItem;
-import com.polinakulyk.cashregister.db.entity.User;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
 import static com.polinakulyk.cashregister.db.dto.ShiftStatus.ACTIVE;
-import static com.polinakulyk.cashregister.util.CashRegisterUtil.*;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.MC;
+import static com.polinakulyk.cashregister.util.CashRegisterUtil.MONEY_SCALE;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.RM;
 import static com.polinakulyk.cashregister.util.CashRegisterUtil.now;
-import static com.polinakulyk.cashregister.util.CashRegisterUtil.quote;
 
 /**
  * Helper for service layer logic.
@@ -71,35 +67,5 @@ public class ServiceHelper {
         return ACTIVE == cashbox.getShiftStatus() && (
                 receiptCreatedTime.isAfter(shiftStartTime)
                 || receiptCreatedTime.isEqual(shiftStartTime));
-    }
-
-    public static Product strip(Product product) {
-        return product.setReceiptItems(null);
-    }
-
-    public static Receipt strip(Receipt receipt) {
-        for (ReceiptItem receiptItem : receipt.getReceiptItems()) {
-            strip(receiptItem);
-        }
-        strip(receipt.getUser());
-        return receipt;
-    }
-
-    public static ReceiptItem strip(ReceiptItem receiptItem) {
-        receiptItem.setReceipt(null);
-        strip(receiptItem.getProduct());
-        return receiptItem;
-    }
-
-    public static User strip(User user) {
-        return user
-                .setReceipts(null)
-                .setCashbox(strip(user.getCashbox()));
-    }
-
-    // TODO consider replacing all strip() methods usage, with explicit
-    //  LAZY loading of related entities or usage of mappers
-    public static Cashbox strip(Cashbox cashbox) {
-        return cashbox.setUsers(null);
     }
 }

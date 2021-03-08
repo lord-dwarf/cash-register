@@ -4,9 +4,10 @@ import com.polinakulyk.cashregister.db.entity.Product;
 import com.polinakulyk.cashregister.service.api.dto.ProductFilterKind;
 
 import java.util.List;
+import javax.validation.Valid;
 
 public interface ProductService {
-    Product create(Product product);
+    Product create(@Valid Product product);
 
     List<Product> findAll();
 
@@ -14,5 +15,5 @@ public interface ProductService {
 
     List<Product> findByFilter(ProductFilterKind filterKind, String filterValue);
 
-    void update(Product product);
+    void update(@Valid Product product);
 }

@@ -36,10 +36,6 @@ public class User {
     @NotBlank(message = "Full name cannot be blank")
     private String fullName;
 
-    @OneToMany(mappedBy = "user", fetch = LAZY)
-    @NotNull(message = "Receipts cannot be null")
-    private Set<Receipt> receipts = new HashSet<>();
-
     @ManyToOne
     @NotNull(message = "Cash box cannot be null")
     private Cashbox cashbox;
@@ -89,15 +85,6 @@ public class User {
         return this;
     }
 
-    public Set<Receipt> getReceipts() {
-        return receipts;
-    }
-
-    public User setReceipts(Set<Receipt> receipts) {
-        this.receipts = receipts;
-        return this;
-    }
-
     public Cashbox getCashbox() {
         return cashbox;
     }
@@ -130,7 +117,6 @@ public class User {
                 .add("password='" + password + "'")
                 .add("role='" + role + "'")
                 .add("fullName='" + fullName + "'")
-                .add("receipts=" + receipts)
                 .add("cashbox.id=" + (cashbox != null ? cashbox.getId() : null))
                 .toString();
     }

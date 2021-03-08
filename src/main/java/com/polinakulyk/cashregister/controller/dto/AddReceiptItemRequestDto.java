@@ -2,6 +2,8 @@ package com.polinakulyk.cashregister.controller.dto;
 
 import java.math.BigDecimal;
 import java.util.StringJoiner;
+import javax.validation.constraints.DecimalMax;
+import javax.validation.constraints.DecimalMin;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
@@ -11,6 +13,8 @@ public class AddReceiptItemRequestDto {
     private String productId;
 
     @NotNull(message = "Receipt item amount cannot be null")
+    @DecimalMin(value = "0.001", message = "Amount must be greater than 0")
+    @DecimalMax(value = "999.999", message = "Amount must be less than 1000")
     private BigDecimal receiptItemAmount;
 
     public String getProductId() {

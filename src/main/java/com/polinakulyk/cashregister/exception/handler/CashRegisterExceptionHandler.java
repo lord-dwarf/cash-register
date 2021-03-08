@@ -4,6 +4,8 @@ import com.polinakulyk.cashregister.exception.CashRegisterException;
 import com.polinakulyk.cashregister.exception.dto.ErrorDto;
 
 import java.util.Objects;
+import javax.validation.ConstraintViolation;
+import javax.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -49,7 +51,7 @@ public class CashRegisterExceptionHandler extends ResponseEntityExceptionHandler
 
     /**
      * Exception handler for {@link MethodArgumentNotValidException},
-     * which is thrown as a result of Spring validating via @Valid.
+     * which is thrown as a result of Spring validating via @Valid at controller layer.
      * <p>
      * The exception contains at least one error object with interpolated error message.
      * The result is response entity with an appropriate HTTP code provided by
@@ -73,6 +75,29 @@ public class CashRegisterExceptionHandler extends ResponseEntityExceptionHandler
         String errorMessage = getValidationErrorMessage(e);
         ErrorDto body = new ErrorDto(errorMessage);
         return handleExceptionInternal(e, body, headers, status, request);
+    }
+
+    /**
+     * Exception handler for {@link ConstraintViolationException},
+     * which is thrown as a result of Spring validating via @Valid at service layer.
+     * <p>
+     * The exception contains at least one constraint violation object error message.
+     * The result is response entity with an appropriate HTTP code (an HTTP 400),
+     * and a response body that contains error message set to the very first
+     * constraint violation error message, or to a "Bad Request" as a fallback.
+     *
+     * @param e
+     * @param request
+     * @return
+     */
+    @ExceptionHandler({ConstraintViolationException.class})
+    public ResponseEntity<Object> handleConstraintViolationException(
+            ConstraintViolationException e,
+            WebRequest request
+    ) {
+        String errorMessage = getValidationErrorMessage(e);
+        ErrorDto body = new ErrorDto(errorMessage);
+        return handleExceptionInternal(e, body, new HttpHeaders(), BAD_REQUEST, request);
     }
 
     /**
@@ -139,14 +164,25 @@ public class CashRegisterExceptionHandler extends ResponseEntityExceptionHandler
         return response;
     }
 
-    /*
-     * Get a null-safe error message from the validation exception.
+    /**
+     * Get a null-safe error message from the {@link BindException}.
      */
     private String getValidationErrorMessage(BindException e) {
         return e.getAllErrors().stream()
                 .filter(Objects::nonNull)
                 .findFirst()
                 .map(DefaultMessageSourceResolvable::getDefaultMessage)
+                .orElseGet(BAD_REQUEST::getReasonPhrase);
+    }
+
+    /**
+     * Get a null-safe error message from the {@link ConstraintViolationException}.
+     */
+    private String getValidationErrorMessage(ConstraintViolationException e) {
+        return e.getConstraintViolations().stream()
+                .filter(Objects::nonNull)
+                .findFirst()
+                .map(ConstraintViolation::getMessage)
                 .orElseGet(BAD_REQUEST::getReasonPhrase);
     }
 }
